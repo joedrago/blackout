@@ -1,0 +1,8 @@
+<project name="Blackout" default="help">
+    <target name="-pre-compile">
+        <exec executable="npm">
+            <arg value="run"/>
+            <arg value="build"/>
+        </exec>
+    </target>
+</project>

@@ -1,0 +1,13 @@
+{
+  "name": "Blackout",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+      "build": "cake build"
+  },
+  "dependencies": {
+    "coffee-script": "*",
+    "browserify": "*",
+    "coffeeify": "*"
+  }
+}
