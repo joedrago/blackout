@@ -20,6 +20,8 @@ class BlackoutApp implements NativeApp
 public class BlackoutActivity extends Activity
 {
     private static final String TAG = "Blackout";
+    private BlackoutApp app_;
+    private Script script_;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -28,29 +30,57 @@ public class BlackoutActivity extends Activity
         setContentView(R.layout.main);
         immerse();
 
-        BlackoutApp game = new BlackoutApp();
-        Script script = new Script();
-        script.startup(game);
+        String state = "";
+        if(savedInstanceState != null)
+        {
+            state = savedInstanceState.getString("state");
+        }
+
+        app_ = new BlackoutApp();
+        script_ = new Script();
+        script_.startup(app_);
+
+        Log.d(TAG, "about to call load with: "+state);
+        script_.load(state);
+    }
+
+    @Override
+    protected void onPause()
+    {
+        Log.d(TAG, "onPause (native)");
+
+        super.onPause();
     }
 
     @Override
     protected void onResume()
     {
-        Log.d(TAG, "Resuming");
+        Log.d(TAG, "onResume (native)");
 
         super.onResume();
         immerse();
     }
 
+    protected void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        super.onSaveInstanceState(savedInstanceState);
+
+        Log.d(TAG, "onSaveInstanceState (native)");
+
+        String state = script_.save();
+        Log.d(TAG, "recording saved state: " + state);
+        savedInstanceState.putString("state", state);
+    }
+
     void immerse()
     {
         this.getWindow().getDecorView().setSystemUiVisibility(
-                      View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.INVISIBLE);
+              View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            | View.SYSTEM_UI_FLAG_FULLSCREEN
+            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            | View.INVISIBLE);
     }
 }
