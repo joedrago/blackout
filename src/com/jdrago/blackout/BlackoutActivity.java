@@ -7,13 +7,13 @@ import android.view.View;
 
 import com.jdrago.blackout.bridge.*;
 
-class BlackoutGame implements NativeApp
+class BlackoutApp implements NativeApp
 {
-    private static final String TAG = "BlackoutGame";
+    private static final String TAG = "Blackout";
 
     public void log(String s)
     {
-        Log.v(TAG, "BlackoutGame: " + s);
+        Log.v(TAG, s);
     }
 }
 
@@ -21,7 +21,6 @@ public class BlackoutActivity extends Activity
 {
     private static final String TAG = "Blackout";
 
-    /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -29,7 +28,7 @@ public class BlackoutActivity extends Activity
         setContentView(R.layout.main);
         immerse();
 
-        BlackoutGame game = new BlackoutGame();
+        BlackoutApp game = new BlackoutApp();
         Script script = new Script();
         script.startup(game);
     }
@@ -37,7 +36,7 @@ public class BlackoutActivity extends Activity
     @Override
     protected void onResume()
     {
-        Log.d(TAG, "Resuming the App");
+        Log.d(TAG, "Resuming");
 
         super.onResume();
         immerse();
