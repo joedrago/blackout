@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 
 import com.jdrago.blackout.bridge.*;
+import com.jdrago.blackout.BlackoutView;
 
 class BlackoutApp implements NativeApp
 {
@@ -20,6 +21,7 @@ class BlackoutApp implements NativeApp
 public class BlackoutActivity extends Activity
 {
     private static final String TAG = "Blackout";
+    private BlackoutView view_;
     private BlackoutApp app_;
     private Script script_;
 
@@ -27,14 +29,13 @@ public class BlackoutActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+        view_ = new BlackoutView(getApplication());
+        setContentView(view_);
         immerse();
 
         String state = "";
         if(savedInstanceState != null)
-        {
             state = savedInstanceState.getString("state");
-        }
 
         app_ = new BlackoutApp();
         script_ = new Script();
