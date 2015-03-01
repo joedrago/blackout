@@ -29,17 +29,17 @@ public class BlackoutActivity extends Activity
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        view_ = new BlackoutView(getApplication());
+
+        app_ = new BlackoutApp();
+        script_ = new Script();
+        script_.startup(app_);
+        view_ = new BlackoutView(getApplication(), script_);
         setContentView(view_);
         immerse();
 
         String state = "";
         if(savedInstanceState != null)
             state = savedInstanceState.getString("state");
-
-        app_ = new BlackoutApp();
-        script_ = new Script();
-        script_.startup(app_);
 
         Log.d(TAG, "about to call load with: "+state);
         script_.load(state);

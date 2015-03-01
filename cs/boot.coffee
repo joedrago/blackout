@@ -30,3 +30,12 @@ save = ->
   log("save")
   state_.count++
   return JSON.stringify(state_)
+
+touchDown = (x, y) ->
+  log("touchDown (#{x}, #{y})")
+
+touchMove = (x, y) ->
+  log("touchMove (#{x}, #{y})")
+
+touchUp = (x, y) ->
+  log("touchUp (#{x}, #{y})")
