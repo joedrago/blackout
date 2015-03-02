@@ -10,33 +10,37 @@ bridgeSrcPath = 'src/com/jdrago/blackout/bridge'
 gameSrcPath = 'game'
 webSrcPath = 'web'
 
-shell = (cmds, cb) ->
+shell = (exitOnFailure, cmds, cb) ->
   cmd = cmds.split(/\n/).join(' && ')
   util.log cmd
   exec cmd, (err, stdout, stderr) ->
     util.log trimStdout if trimStdout = stdout.trim()
     if err
       console.error stderr.trim()
-      process.exit(1)
+      if exitOnFailure
+        process.exit(1)
     cb() if cb?
 
 getCoffeeScriptCmdline = (dir) ->
   sources = ''
   names = []
+  externals = ''
   for filename in fs.readdirSync(dir)
     if matches = filename.match(/(\S+).coffee/)
       continue if matches[1] == 'boot'
       names.push matches[1]
       sources += "-r ./#{dir}/#{filename}:#{matches[1]} "
+      externals += "-x #{matches[1]} "
   return {
     sources: sources
     names: names.join(', ')
+    externals: externals
   }
 
 buildGameBundle = (cb) ->
   cmdline = getCoffeeScriptCmdline(gameSrcPath)
   util.log "Bundling (game): #{cmdline.names}"
-  shell """
+  shell true, """
     mkdir -p #{outputClassDir}
     browserify -o #{outputClassDir}/Script.js -t coffeeify #{cmdline.sources}
     coffee -bcp ./#{gameSrcPath}/boot.coffee >> #{outputClassDir}/Script.js
@@ -46,19 +50,20 @@ buildGameBundle = (cb) ->
     cb() if cb?
 
 buildWebBundle = (cb) ->
-  buildGameBundle ->
-    cmdline = getCoffeeScriptCmdline(webSrcPath)
-    util.log "Bundling (web): #{cmdline.names}"
-    shell """
-      browserify -o #{outputClassDir}/web.js -t coffeeify #{cmdline.sources}
-    """, ->
-      cb() if cb?
+  gameCmdline = getCoffeeScriptCmdline(gameSrcPath)
+  webCmdline = getCoffeeScriptCmdline(webSrcPath)
+  util.log "Bundling (web): #{webCmdline.names}"
+  shell false, """
+    browserify -o #{outputClassDir}/web.js #{gameCmdline.externals} -t coffeeify #{webCmdline.sources}
+  """, ->
+    cb() if cb?
 
 task 'build', 'build JS bundle', (options) ->
   buildGameBundle()
 
 task 'web', 'build web version', (options) ->
-  buildWebBundle()
+  buildGameBundle ->
+    buildWebBundle()
 
 option '-p', '--port [PORT]', 'Dev server port'
 
@@ -76,7 +81,10 @@ task 'server', 'run web server', (options) ->
 
     httpServer.listen options.port
 
-    watch [gameSrcPath, webSrcPath], (filename) ->
+    watch gameSrcPath, (filename) ->
+      util.log "Source code #{filename} changed, regenerating bundle..."
+      buildGameBundle()
+
+    watch webSrcPath, (filename) ->
       util.log "Source code #{filename} changed, regenerating bundle..."
       buildWebBundle()
-

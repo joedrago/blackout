@@ -8,12 +8,14 @@ CARD_RENDER_SCALE = 0.35 # card height coefficient from the screen's height
 
 class Game
   constructor: (@native, @width, @height) ->
+    @native.log("Game constructed: #{@width}x#{@height}")
     @cardHeight = Math.floor(@height * CARD_RENDER_SCALE)
     @cardWidth  = Math.floor(@cardHeight * CARD_IMAGE_W / CARD_IMAGE_H)
 
     @x = @width / 2
     @y = @height / 2
     @which = 0
+    @dragging = false
 
   load: (data) ->
     @native.log "load: #{data}"
@@ -23,9 +25,14 @@ class Game
     return "{}"
 
   touchDown: (@x, @y) ->
+    @dragging = true
     @which = (@which + 1) % 52
-  touchMove: (@x, @y) ->
+  touchMove: (x, y) ->
+    if @dragging
+      @x = x
+      @y = y
   touchUp: (@x, @y) ->
+    @dragging = false
 
   renderCard: (v, x, y) ->
     rank = Math.floor(v % 13)
