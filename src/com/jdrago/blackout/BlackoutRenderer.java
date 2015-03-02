@@ -1,5 +1,7 @@
 package com.jdrago.blackout;
 
+import com.jdrago.blackout.bridge.*;
+
 import android.content.Context;
 import android.util.Log;
 
@@ -8,11 +10,15 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class BlackoutRenderer extends QuadRenderer
 {
-    public BlackoutRenderer(Context context)
+    private Script script_;
+
+    public BlackoutRenderer(Context context, Script script)
     {
         super(context);
 
-        textures_ = new HashMap<String, Integer>();
+        script_ = script;
+        textures_ = new HashMap<String, Texture>();
+        Log.d(TAG, "created textures_");
     }
 
     public void loadTextures()
@@ -20,25 +26,18 @@ public class BlackoutRenderer extends QuadRenderer
         textures_.put("cards", loadPNG(R.raw.cards));
     }
 
-    public void update()
+    public void blit(String textureName, int srcX, int srcY, int srcW, int srcH, int dstX, int dstY, int dstW, int dstH, float rot, float anchorX, float anchorY)
     {
+        blit(textures_.get(textureName), srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY);
     }
 
     public void onDrawFrame(GL10 glUnused)
     {
-        update();
-
-        renderBegin(1.0f, 0.1f, 0.1f);
-
-        // lots of renderQuad calls
-
+        renderBegin(0.0f, 0.0f, 0.0f);
+        script_.update();
         renderEnd();
     }
 
-    public void touchDown(int x, int y)
-    {
-    }
-
     private static String TAG = "Blackout";
-    private HashMap<String, Integer> textures_;
+    private HashMap<String, Texture> textures_;
 }

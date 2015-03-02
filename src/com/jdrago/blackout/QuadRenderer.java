@@ -20,16 +20,23 @@ import java.nio.IntBuffer;
 
 class QuadRenderer implements GLSurfaceView.Renderer
 {
+    public class Texture
+    {
+        int id;
+        int width;
+        int height;
+    };
+
+    // to be implemented by a derived class
+    public void loadTextures() {}
+    public void onDrawFrame(GL10 glUnused) {}
+
     public QuadRenderer(Context context)
     {
         context_ = context;
-        whiteVerts_ = ByteBuffer.allocateDirect(whiteVertData_.length * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        whiteVerts_.put(whiteVertData_).position(0);
-        digitVerts_ = ByteBuffer.allocateDirect(digitVertData_.length * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        digitVerts_.put(digitVertData_).position(0);
-        quadIndices_ = ByteBuffer.allocateDirect(quadIndicesData_.length * INT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asIntBuffer();
-        quadIndices_.put(quadIndicesData_).position(0);
-        digitBuffer_ = new int[16];
+        verts_ = ByteBuffer.allocateDirect(20 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        indices_ = ByteBuffer.allocateDirect(quadIndicesData_.length * INT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asIntBuffer();
+        indices_.put(quadIndicesData_).position(0);
     }
 
     public void renderBegin(float r, float g, float b)
@@ -44,160 +51,50 @@ class QuadRenderer implements GLSurfaceView.Renderer
     {
     }
 
-    public void onDrawFrame(GL10 glUnused)
-    {
-    }
-
-    public enum QuadRenderType
-    {
-        QRT_BOX,
-        QRT_INT,
-        QRT_FLOAT
-    };
-
-    class Quad
-    {
-        public Quad()
-        {
-            type = QuadRenderType.QRT_BOX;
-            v = 0;
-            x = 0;
-            y = 0;
-            w = 1;
-            h = 1;
-            r = 1;
-            g = 1;
-            b = 1;
-        }
-
-        public Quad(QuadRenderType atype, float av, int ax, int ay, int aw, int ah, float ar, float ag, float ab, float aa)
-        {
-            type = atype;
-            v = av;
-            x = ax;
-            y = ay;
-            w = aw;
-            h = ah;
-            r = ar;
-            g = ag;
-            b = ab;
-            a = aa;
-        }
-
-        QuadRenderType type;
-        float v;
-        int x;
-        int y;
-        int w;
-        int h;
-        float r;
-        float g;
-        float b;
-        float a;
-    }
-
-    public void renderQuad(Quad q)
+    public void blit(Texture texture, int srcX, int srcY, int srcW, int srcH, int dstX, int dstY, int dstW, int dstH, float rot, float anchorX, float anchorY)
     {
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
-        int x = q.x;
-        int digitCount = 0;
-        int textureID = whiteID_;
-        FloatBuffer verts = whiteVerts_;
-        if(q.type == QuadRenderType.QRT_BOX)
-        {
-            digitBuffer_[0] = 0;
-            digitCount = 1;
-        }
-        else
-        {
-            textureID = digitID_;
-            verts = digitVerts_;
+        float uvL = (float)srcX / (float)texture.width;
+        float uvT = (float)srcY / (float)texture.height;
+        float uvR = (float)(srcX + srcW) / (float)texture.width;
+        float uvB = (float)(srcY + srcH) / (float)texture.height;
 
-            if(q.w == 0)
-            {
-                q.w = (int)(q.h * (DIGIT_W / DIGIT_H));
-            }
+        float[] vertData = {
+            // X, Y, Z, U, V
+            0, 0, 0, uvL, uvT,
+            1, 0, 0, uvR, uvT,
+            1, 1, 0, uvR, uvB,
+            0, 1, 0, uvL, uvB};
+        verts_.position(0);
+        verts_.put(vertData);
 
-            float tempf = q.v;
-            if(q.type == QuadRenderType.QRT_FLOAT)
-            {
-                tempf *= 1000.0f;
-            }
-            int v = (int)tempf;
-            do
-            {
-                int t = v % 10;
-                v = (v - t) / 10;
-                digitBuffer_[digitCount++] = t;
-                if((q.type == QuadRenderType.QRT_FLOAT) && (digitCount == 3))
-                {
-                    digitBuffer_[digitCount++] = 10;
-                }
-            }
-            while(v > 0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture.id);
+        verts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+        GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
+        checkGlError("glVertexAttribPointer maPosition");
+        verts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+        GLES20.glEnableVertexAttribArray(posHandle_);
+        checkGlError("glEnableVertexAttribArray posHandle");
+        GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
+        checkGlError("glVertexAttribPointer texHandle");
+        GLES20.glEnableVertexAttribArray(texHandle_);
+        checkGlError("glEnableVertexAttribArray texHandle");
 
-            if((q.type == QuadRenderType.QRT_FLOAT) && (digitCount == 4))
-            {
-                digitBuffer_[digitCount++] = 0; // leading zero
-            }
+        Matrix.setIdentityM(modelMatrix_, 0);
+        Matrix.translateM(modelMatrix_, 0, dstX, dstY, 0);
+        Matrix.scaleM(modelMatrix_, 0, dstW, dstH, 0);
+        Matrix.multiplyMM(viewProjMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
+        Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, viewProjMatrix_, 0);
 
-            // WORST HACK EVER
-            if(q.type == QuadRenderType.QRT_FLOAT)
-            {
-                x -= digitCount * q.w; // right align
-            }
-            else
-            {
-                x -= (digitCount * q.w) / 2; // center align
-            }
-        }
-
-        for(int i = 0; i < digitCount; i++)
-        {
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureID);
-            verts.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
-            GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts);
-            checkGlError("glVertexAttribPointer maPosition");
-            verts.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
-            GLES20.glEnableVertexAttribArray(posHandle_);
-            checkGlError("glEnableVertexAttribArray posHandle");
-            GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts);
-            checkGlError("glVertexAttribPointer texHandle");
-            GLES20.glEnableVertexAttribArray(texHandle_);
-            checkGlError("glEnableVertexAttribArray texHandle");
-
-            Matrix.setIdentityM(modelMatrix_, 0);
-            Matrix.translateM(modelMatrix_, 0, x, q.y, 0);
-            Matrix.scaleM(modelMatrix_, 0, q.w, q.h, 0);
-            Matrix.multiplyMM(viewProjMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
-            Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, viewProjMatrix_, 0);
-
-            GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
-            GLES20.glUniform4f(vertColorHandle_, q.r, q.g, q.b, q.a);
-            GLES20.glUniform2f(uvOffsetHandle_, digitBuffer_[(digitCount - i) - 1] * DIGIT_UV_W, 0.0f);
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, quadIndices_);
-            checkGlError("glDrawArrays");
-
-            x += q.w;
-        }
-    }
-
-    public void renderQuad(int x, int y, int w, int h, float r, float g, float b, float a)
-    {
-        renderQuad(new Quad(QuadRenderType.QRT_BOX, 0, x, y, w, h, r, g, b, a));
-    }
-
-    public void renderInt(int v, int x, int y, int w, int h, float r, float g, float b, float a)
-    {
-        renderQuad(new Quad(QuadRenderType.QRT_INT, v, x, y, w, h, r, g, b, a));
-    }
-
-    public void renderFloat(float v, int x, int y, int w, int h, float r, float g, float b, float a)
-    {
-        renderQuad(new Quad(QuadRenderType.QRT_FLOAT, v, x, y, w, h, r, g, b, a));
+        GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
+        // GLES20.glUniform4f(vertColorHandle_, q.r, q.g, q.b, q.a);
+        GLES20.glUniform4f(vertColorHandle_, 1,1,1,1);
+        // GLES20.glUniform2f(uvOffsetHandle_, digitBuffer_[(digitCount - i) - 1] * DIGIT_UV_W, 0.0f);
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, indices_);
+        checkGlError("glDrawArrays");
     }
 
     public void onSurfaceChanged(GL10 glUnused, int width, int height)
@@ -205,12 +102,12 @@ class QuadRenderer implements GLSurfaceView.Renderer
         width_ = width;
         height_ = height;
 
+        float density = context_.getResources().getDisplayMetrics().density;
+        Log.d(TAG, "onSurfaceChanged("+width_+", "+height_+", "+density+")");
+
         // Ignore the passed-in GL10 interface, and use the GLES20
         // class's static methods instead.
         GLES20.glViewport(0, 0, width, height);
-
-//        float ratio = (float) width / height;
-//        Matrix.frustumM(projMatrix_, 0, -ratio, ratio, -1, 1, 3, 7);
 
         float left = 0.0f;
         float right = width;
@@ -221,7 +118,7 @@ class QuadRenderer implements GLSurfaceView.Renderer
         Matrix.orthoM(projMatrix_, 0, left, right, bottom, top, near, far);
     }
 
-    public int loadPNG(int res)
+    public Texture loadPNG(int res)
     {
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
@@ -252,12 +149,13 @@ class QuadRenderer implements GLSurfaceView.Renderer
         }
 
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-        bitmap.recycle();
-        return id;
-    }
 
-    public void loadTextures()
-    {
+        Texture texture = new Texture();
+        texture.id = id;
+        texture.width = bitmap.getWidth();
+        texture.height = bitmap.getHeight();
+        bitmap.recycle();
+        return texture;
     }
 
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
@@ -295,20 +193,6 @@ class QuadRenderer implements GLSurfaceView.Renderer
         {
             throw new RuntimeException("Could not get attrib location for vertColorHandle");
         }
-
-        uvOffsetHandle_ = GLES20.glGetUniformLocation(shaderProgram_, "u_uvOffset");
-        checkGlError("glGetUniformLocation uvOffset");
-        if (uvOffsetHandle_ == -1)
-        {
-            throw new RuntimeException("Could not get attrib location for uvOffset");
-        }
-
-        /*
-         * Create our texture. This has to be done each time the
-         * surface is created.
-         */
-        whiteID_ = loadPNG(R.raw.white);
-        digitID_ = loadPNG(R.raw.digits);
 
         loadTextures();
 
@@ -399,41 +283,20 @@ class QuadRenderer implements GLSurfaceView.Renderer
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
     private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
 
-    private final float[] whiteVertData_ = {
-            // X, Y, Z, U, V
-            0, 0, 0, 0, 0,
-            1, 0, 0, 1, 0,
-            1, 1, 0, 1, 1,
-            0, 1, 0, 0, 1};
-    private FloatBuffer whiteVerts_;
-
-    private static final float DIGIT_W = 38.0f;
-    private static final float DIGIT_H = 47.0f;
-    private static final float DIGIT_UV_W = DIGIT_W / 512.0f;
-    private static final float DIGIT_UV_H = DIGIT_H / 512.0f;
-
-    // Digit UVs are for a DIGIT_UV_W x DIGIT_UV_H rect
-    private final float[] digitVertData_ = {
-            // X, Y, Z, U, V
-            0, 0, 0, 0,          0,
-            1, 0, 0, DIGIT_UV_W, 0,
-            1, 1, 0, DIGIT_UV_W, DIGIT_UV_H,
-            0, 1, 0, 0,          DIGIT_UV_H};
-    private FloatBuffer digitVerts_;
+    private FloatBuffer verts_;
 
     private final int[] quadIndicesData_ = {0, 1, 2, 2, 3, 0};
-    private IntBuffer quadIndices_;
+    private IntBuffer indices_;
 
     private final String vertShader_ =
             "uniform mat4 uMVPMatrix;\n" +
                     "attribute vec4 aPosition;\n" +
                     "attribute vec2 aTextureCoord;\n" +
                     "uniform vec4 u_color;\n" +
-                    "uniform vec2 u_uvOffset;\n" +
                     "varying vec2 vTextureCoord;\n" +
                     "void main() {\n" +
                     "  gl_Position = uMVPMatrix * aPosition;\n" +
-                    "  vTextureCoord = aTextureCoord + u_uvOffset;\n" +
+                    "  vTextureCoord = aTextureCoord;\n" +
                     "}\n";
 
     private final String fragShader_ =
@@ -452,18 +315,13 @@ class QuadRenderer implements GLSurfaceView.Renderer
     private float[] viewMatrix_ = new float[16];
 
     private int shaderProgram_;
-    private int whiteID_;
-    private int digitID_;
     private int viewProjMatrixHandle_;
     private int posHandle_;
     private int texHandle_;
     private int vertColorHandle_;
-    private int uvOffsetHandle_;
 
     private int width_;
     private int height_;
-
-    private int[] digitBuffer_;
 
     private Context context_;
     private static String TAG = "QuadRenderer";

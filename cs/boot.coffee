@@ -1,41 +1,33 @@
-SomeClass = require 'SomeClass'
+Game = require 'Game'
 
-app_ = null
-state_ =
-  count: 0
+game_ = null
 
-log = (s) ->
-  if app_ != null
-    app_.log(s)
-
-startup = (app) ->
-  app_ = app
-  log("startup")
-
-  derp = new SomeClass
+startup = (app, width, height) ->
+  game_ = new Game(app, width, height)
+  return
 
 shutdown = ->
-  log("shutdown")
+  return
 
 update = ->
-  log("update")
+  game_.update()
+  return
 
 load = (data) ->
-  log("load: #{data}")
-  if data.length > 0
-    state_ = JSON.parse(data)
-  log("load: state is now #{JSON.stringify(state_)}")
+  game_.load(data)
+  return
 
 save = ->
-  log("save")
-  state_.count++
-  return JSON.stringify(state_)
+  return game_.save()
 
 touchDown = (x, y) ->
-  log("touchDown (#{x}, #{y})")
+  game_.touchDown(x, y)
+  return
 
 touchMove = (x, y) ->
-  log("touchMove (#{x}, #{y})")
+  game_.touchMove(x, y)
+  return
 
 touchUp = (x, y) ->
-  log("touchUp (#{x}, #{y})")
+  game_.touchUp(x, y)
+  return

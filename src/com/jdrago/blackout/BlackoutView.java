@@ -12,15 +12,12 @@ import javax.microedition.khronos.opengles.GL10;
 
 class BlackoutView extends GLSurfaceView
 {
-    public BlackoutRenderer renderer_;
-
-    public BlackoutView(Context context, Script script)
+    public BlackoutView(Context context, BlackoutRenderer renderer, Script script)
     {
         super(context);
         setEGLContextClientVersion(2);
         script_ = script;
-        renderer_ = new BlackoutRenderer(context);
-        setRenderer(renderer_);
+        setRenderer(renderer);
     }
 
     public boolean onTouchEvent(MotionEvent event)
