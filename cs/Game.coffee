@@ -4,11 +4,11 @@ CARD_IMAGE_OFF_X = 4
 CARD_IMAGE_OFF_Y = 4
 CARD_IMAGE_ADV_X = CARD_IMAGE_W
 CARD_IMAGE_ADV_Y = CARD_IMAGE_H
-CARD_RENDER_SCALE = 4 # 1/x of the screen's height
+CARD_RENDER_SCALE = 0.35 # card height coefficient from the screen's height
 
 class Game
   constructor: (@native, @width, @height) ->
-    @cardHeight = Math.floor(@height / CARD_RENDER_SCALE)
+    @cardHeight = Math.floor(@height * CARD_RENDER_SCALE)
     @cardWidth  = Math.floor(@cardHeight * CARD_IMAGE_W / CARD_IMAGE_H)
 
     @x = @width / 2
