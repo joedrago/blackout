@@ -3,11 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-      "build": "cake build"
+      "build": "cake build",
+      "web": "cake web",
+      "server": "cake server"
   },
   "dependencies": {
     "coffee-script": "*",
     "browserify": "*",
-    "coffeeify": "*"
+    "coffeeify": "*",
+    "node-static": "*",
+    "node-watch": "*"
   }
 }
