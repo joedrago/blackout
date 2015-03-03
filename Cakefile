@@ -78,23 +78,24 @@ task 'web', 'build web version', (options) ->
 option '-p', '--port [PORT]', 'Dev server port'
 
 task 'server', 'run web server', (options) ->
-  buildWebBundle ->
-    options.port ?= 9000
-    util.log "Starting server at http://localhost:#{options.port}/"
+  buildGameBundle ->
+    buildWebBundle ->
+      options.port ?= 9000
+      util.log "Starting server at http://localhost:#{options.port}/"
 
-    nodeStatic = require 'node-static'
-    file = new nodeStatic.Server '.'
-    httpServer = http.createServer (request, response) ->
-      request.addListener 'end', ->
-        file.serve(request, response);
-      .resume()
+      nodeStatic = require 'node-static'
+      file = new nodeStatic.Server '.'
+      httpServer = http.createServer (request, response) ->
+        request.addListener 'end', ->
+          file.serve(request, response);
+        .resume()
 
-    httpServer.listen options.port
+      httpServer.listen options.port
 
-    watch gameSrcPath, (filename) ->
-      util.log "Source code #{filename} changed, regenerating bundle..."
-      buildGameBundle()
+      watch gameSrcPath, (filename) ->
+        util.log "Source code #{filename} changed, regenerating bundle..."
+        buildGameBundle()
 
-    watch webSrcPath, (filename) ->
-      util.log "Source code #{filename} changed, regenerating bundle..."
-      buildWebBundle()
+      watch webSrcPath, (filename) ->
+        util.log "Source code #{filename} changed, regenerating bundle..."
+        buildWebBundle()
