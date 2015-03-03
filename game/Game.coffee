@@ -40,7 +40,7 @@ class Game
     @native.blit "cards",
       CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank), CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit), CARD_IMAGE_W, CARD_IMAGE_H,
       x, y, @cardWidth, @cardHeight,
-      0.6, 0.1, 0.1
+      30, 0.5, 0.5
 
   update: ->
     @renderCard @which, @x, @y

@@ -33,7 +33,7 @@ class NativeApp
   blit: (textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY) ->
     @context.save()
     @context.translate dstX, dstY
-    @context.rotate rot
+    @context.rotate(rot * 3.141592 / 180.0)
     anchorOffsetX = -1 * anchorX * dstW
     anchorOffsetY = -1 * anchorY * dstH
     @context.translate anchorOffsetX, anchorOffsetY

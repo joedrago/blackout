@@ -83,8 +83,12 @@ class QuadRenderer implements GLSurfaceView.Renderer
         GLES20.glEnableVertexAttribArray(texHandle_);
         checkGlError("glEnableVertexAttribArray texHandle");
 
+        float anchorOffsetX = -1 * anchorX * dstW;
+        float anchorOffsetY = -1 * anchorY * dstH;
         Matrix.setIdentityM(modelMatrix_, 0);
         Matrix.translateM(modelMatrix_, 0, dstX, dstY, 0);
+        Matrix.rotateM(modelMatrix_, 0, rot, 0, 0, 1);
+        Matrix.translateM(modelMatrix_, 0, anchorOffsetX, anchorOffsetY, 0);
         Matrix.scaleM(modelMatrix_, 0, dstW, dstH, 0);
         Matrix.multiplyMM(viewProjMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
         Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, viewProjMatrix_, 0);
