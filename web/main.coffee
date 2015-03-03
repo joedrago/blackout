@@ -31,7 +31,14 @@ class NativeApp
     console.log "NativeApp.log(): #{s}"
 
   blit: (textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY) ->
-    @context.drawImage(@textures[textureName], srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH)
+    @context.save()
+    @context.translate dstX, dstY
+    @context.rotate rot
+    anchorOffsetX = -1 * anchorX * dstW
+    anchorOffsetY = -1 * anchorY * dstH
+    @context.translate anchorOffsetX, anchorOffsetY
+    @context.drawImage(@textures[textureName], srcX, srcY, srcW, srcH, 0, 0, dstW, dstH)
+    @context.restore()
 
   update: ->
     @context.clearRect(0, 0, @width, @height)
