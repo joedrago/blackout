@@ -11,6 +11,7 @@
     "coffee-script": "*",
     "browserify": "*",
     "coffeeify": "*",
+    "mkdirp": "*",
     "node-static": "*",
     "node-watch": "*"
   }

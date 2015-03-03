@@ -1,6 +1,7 @@
 fs = require 'fs'
-util = require 'util'
 http = require 'http'
+mkdirp = require 'mkdirp'
+util = require 'util'
 watch = require 'node-watch'
 {spawn, exec} = require 'child_process'
 
@@ -40,12 +41,10 @@ getCoffeeScriptCmdline = (dir) ->
 buildGameBundle = (cb) ->
   cmdline = getCoffeeScriptCmdline(gameSrcPath)
   util.log "Bundling (game): #{cmdline.names}"
+  mkdirp.sync(outputClassDir)
   shell true, """
-    mkdir -p #{outputClassDir}
     browserify -o #{outputClassDir}/Script.js -t coffeeify #{cmdline.sources}
     coffee -bcp ./#{gameSrcPath}/boot.coffee >> #{outputClassDir}/Script.js
-    javac -target 1.5 -source 1.5 -d #{outputClassDir} #{bridgeSrcPath}/NativeApp.java #{bridgeSrcPath}/BaseScript.java
-    java -cp #{rhinoLib}:#{outputClassDir} org.mozilla.javascript.tools.jsc.Main -opt -1 -implements com.jdrago.blackout.bridge.BaseScript -package com.jdrago.blackout.bridge #{outputClassDir}/Script.js
   """, ->
     cb() if cb?
 
@@ -53,13 +52,24 @@ buildWebBundle = (cb) ->
   gameCmdline = getCoffeeScriptCmdline(gameSrcPath)
   webCmdline = getCoffeeScriptCmdline(webSrcPath)
   util.log "Bundling (web): #{webCmdline.names}"
+  mkdirp.sync(outputClassDir)
   shell false, """
     browserify -o #{outputClassDir}/web.js #{gameCmdline.externals} -t coffeeify #{webCmdline.sources}
   """, ->
     cb() if cb?
 
+buildJavaClasses = (cb) ->
+  util.log "Generating Java classes"
+  mkdirp.sync(outputClassDir)
+  shell true, """
+    javac -target 1.5 -source 1.5 -d #{outputClassDir} #{bridgeSrcPath}/NativeApp.java #{bridgeSrcPath}/BaseScript.java
+    java -cp #{rhinoLib}:#{outputClassDir} org.mozilla.javascript.tools.jsc.Main -opt -1 -implements com.jdrago.blackout.bridge.BaseScript -package com.jdrago.blackout.bridge #{outputClassDir}/Script.js
+  """, ->
+    cb() if cb?
+
 task 'build', 'build JS bundle', (options) ->
-  buildGameBundle()
+  buildGameBundle ->
+    buildJavaClasses()
 
 task 'web', 'build web version', (options) ->
   buildGameBundle ->
