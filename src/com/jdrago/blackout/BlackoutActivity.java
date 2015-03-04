@@ -52,9 +52,11 @@ public class BlackoutActivity extends Activity
 
         app_ = new BlackoutApp(this);
         script_ = new Script();
-        script_.startup(app_, size.x, size.y);
-        renderer_ = new BlackoutRenderer(getApplication(), script_);
-        view_ = new BlackoutView(getApplication(), renderer_, script_);
+        synchronized(script_) {
+            script_.startup(app_, size.x, size.y);
+        }
+        renderer_ = new BlackoutRenderer(getApplication(), this);
+        view_ = new BlackoutView(getApplication(), renderer_, this);
         setContentView(view_);
         immerse();
 
@@ -63,7 +65,9 @@ public class BlackoutActivity extends Activity
             state = savedInstanceState.getString("state");
 
         Log.d(TAG, "about to call load with: "+state);
-        script_.load(state);
+        synchronized(script_) {
+            script_.load(state);
+        }
     }
 
     @Override
@@ -89,7 +93,10 @@ public class BlackoutActivity extends Activity
 
         Log.d(TAG, "onSaveInstanceState (native)");
 
-        String state = script_.save();
+        String state;
+        synchronized(script_) {
+            state = script_.save();
+        }
         savedInstanceState.putString("state", state);
     }
 
@@ -103,6 +110,34 @@ public class BlackoutActivity extends Activity
             | View.SYSTEM_UI_FLAG_FULLSCREEN
             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
             | View.INVISIBLE);
+    }
+
+    public void update()
+    {
+        synchronized(script_) {
+            script_.update();
+        }
+    }
+
+    public void touchDown(double x, double y)
+    {
+        synchronized(script_) {
+            script_.touchDown(x, y);
+        }
+    }
+
+    public void touchMove(double x, double y)
+    {
+        synchronized(script_) {
+            script_.touchMove(x, y);
+        }
+    }
+
+    public void touchUp(double x, double y)
+    {
+        synchronized(script_) {
+            script_.touchUp(x, y);
+        }
     }
 
     public void blit(String textureName, int srcX, int srcY, int srcW, int srcH, int dstX, int dstY, int dstW, int dstH, float rot, float anchorX, float anchorY)

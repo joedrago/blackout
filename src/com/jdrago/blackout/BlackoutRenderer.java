@@ -10,13 +10,11 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class BlackoutRenderer extends QuadRenderer
 {
-    private Script script_;
-
-    public BlackoutRenderer(Context context, Script script)
+    public BlackoutRenderer(Context context, BlackoutActivity activity)
     {
         super(context);
 
-        script_ = script;
+        activity_ = activity;
         textures_ = new HashMap<String, Texture>();
         Log.d(TAG, "created textures_");
     }
@@ -34,10 +32,11 @@ public class BlackoutRenderer extends QuadRenderer
     public void onDrawFrame(GL10 glUnused)
     {
         renderBegin(0.0f, 0.0f, 0.0f);
-        script_.update();
+        activity_.update();
         renderEnd();
     }
 
     private static String TAG = "Blackout";
     private HashMap<String, Texture> textures_;
+    private BlackoutActivity activity_;
 }

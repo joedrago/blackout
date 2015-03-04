@@ -12,11 +12,11 @@ import javax.microedition.khronos.opengles.GL10;
 
 class BlackoutView extends GLSurfaceView
 {
-    public BlackoutView(Context context, BlackoutRenderer renderer, Script script)
+    public BlackoutView(Context context, BlackoutRenderer renderer, BlackoutActivity activity)
     {
         super(context);
         setEGLContextClientVersion(2);
-        script_ = script;
+        activity_ = activity;
         setRenderer(renderer);
     }
 
@@ -28,13 +28,13 @@ class BlackoutView extends GLSurfaceView
         switch(action)
         {
             case MotionEvent.ACTION_DOWN:
-                script_.touchDown(x, y);
+                activity_.touchDown(x, y);
                 break;
             case MotionEvent.ACTION_MOVE:
-                script_.touchMove(x, y);
+                activity_.touchMove(x, y);
                 break;
             case MotionEvent.ACTION_UP:
-                script_.touchUp(x, y);
+                activity_.touchUp(x, y);
                 break;
         }
         return true;
@@ -70,5 +70,5 @@ class BlackoutView extends GLSurfaceView
     }
 
     private static String TAG = "Blackout";
-    private Script script_;
+    private BlackoutActivity activity_;
 }

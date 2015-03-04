@@ -2,40 +2,82 @@ CardRenderer = require 'CardRenderer'
 
 class Game
   constructor: (@native, @width, @height) ->
-    @native.log("Game constructed: #{@width}x#{@height}")
-    @cardRenderer = new CardRenderer @native, @width, @height
+    @log("Game constructed: #{@width}x#{@height}")
+    @cardRenderer = new CardRenderer this, @width, @height
+    @zones = []
 
-    @x = @width / 2
-    @y = @height / 2
-    @which = 0
-    @dragging = false
+    @hand = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
-    @handSize = 13
-    @hand = (v for v in [0...13])
+  log: (s) ->
+    @native.log(s)
+
+  blit: (textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY, cb) ->
+    @native.blit(textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY)
+    if cb?
+      # caller wants to remember where this was drawn, and wants to be called back if it is ever touched
+      # This is called a "zone". Since zones are traversed in reverse order, the natural overlap of
+      # a series of blits is respected accordingly.
+      anchorOffsetX = -1 * anchorX * dstW
+      anchorOffsetY = -1 * anchorY * dstH
+      zone =
+        # center (X,Y) and reversed rotation, used to put the coordinate in local space to the zone
+        cx:  dstX
+        cy:  dstY
+        rot: rot * -1
+        # the axis aligned bounding box used for detection of a localspace coord
+        l:   anchorOffsetX
+        t:   anchorOffsetY
+        r:   anchorOffsetX + dstW
+        b:   anchorOffsetY + dstH
+        # callback to call if the zone is clicked on
+        cb:  cb
+      @zones.push zone
 
   load: (data) ->
-    @native.log "load: #{data}"
+    @log "load: #{data}"
 
   save: ->
-    @native.log "save"
+    @log "save"
     return "{}"
 
-  touchDown: (@x, @y) ->
-    @dragging = true
-    @which = (@which + 1) % 52
+  makeHand: (index) ->
+    for v in [0...13]
+      if v == index
+        @hand[v] = 13
+      else
+        @hand[v] = v
 
-    @handSize--
-    @handSize = 13 if @handSize == 0
-    @hand = (v for v in [0...@handSize])
+  touchDown: (x, y) ->
+    if not @checkZones(x, y)
+      @makeHand(-1)
+
+    @dragging = true
 
   touchMove: (x, y) ->
     if @dragging
-      @x = x
-      @y = y
-  touchUp: (@x, @y) ->
+      if not @checkZones(x, y)
+        @makeHand(-1)
+
+  touchUp: (x, y) ->
     @dragging = false
 
+  checkZones: (x, y) ->
+    for zone in @zones by -1
+      # move coord into space relative to the quad, then rotate it to match
+      unrotatedLocalX = x - zone.cx
+      unrotatedLocalY = y - zone.cy
+      localX = unrotatedLocalX * Math.cos(zone.rot) - unrotatedLocalY * Math.sin(zone.rot)
+      localY = unrotatedLocalX * Math.sin(zone.rot) + unrotatedLocalY * Math.cos(zone.rot)
+      if (localX < zone.l) or (localX > zone.r) or (localY < zone.t) or (localY > zone.b)
+        # outside of oriented bounding box
+        continue
+      zone.cb()
+      return true
+    return false
+
   update: ->
-    @cardRenderer.renderHand @hand
+    @zones.length = 0 # forget about zones from the last frame. we're about to make some new ones!
+    @cardRenderer.renderHand @hand, (index) =>
+      @makeHand(index)
 
 module.exports = Game
