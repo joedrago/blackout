@@ -4,7 +4,7 @@ CARD_IMAGE_OFF_X = 4
 CARD_IMAGE_OFF_Y = 4
 CARD_IMAGE_ADV_X = CARD_IMAGE_W
 CARD_IMAGE_ADV_Y = CARD_IMAGE_H
-CARD_RENDER_SCALE = 0.5 # card height coefficient from the screen's height
+CARD_RENDER_SCALE = 0.4 # card height coefficient from the screen's height
 CARD_HAND_CURVE_DIST_FACTOR = 1 # factor with screen height to figure out center of arc. bigger number is less arc
 
 # taken from http://stackoverflow.com/questions/1211212/how-to-calculate-an-angle-from-three-points

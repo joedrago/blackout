@@ -87,7 +87,7 @@ class QuadRenderer implements GLSurfaceView.Renderer
         float anchorOffsetY = -1 * anchorY * dstH;
         Matrix.setIdentityM(modelMatrix_, 0);
         Matrix.translateM(modelMatrix_, 0, dstX, dstY, 0);
-        Matrix.rotateM(modelMatrix_, 0, rot, 0, 0, 1);
+        Matrix.rotateM(modelMatrix_, 0, rot * 180.0f / (float)Math.PI, 0, 0, 1);
         Matrix.translateM(modelMatrix_, 0, anchorOffsetX, anchorOffsetY, 0);
         Matrix.scaleM(modelMatrix_, 0, dstW, dstH, 0);
         Matrix.multiplyMM(viewProjMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
