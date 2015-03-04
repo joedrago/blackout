@@ -31,7 +31,7 @@ class CardRenderer
     @handAngle = findAngle(bottomLeft, @handCenter  , bottomRight) # * (180 / Math.PI)
     @handDistance = calcDistance(bottomLeft, @handCenter)
     @handAngleAdvance = @handAngle / 13
-    console.log "Hand distance #{@handDistance}, angle #{@handAngle} (screen height #{@screenHeight})"
+    @native.log "Hand distance #{@handDistance}, angle #{@handAngle} (screen height #{@screenHeight})"
 
   renderCard: (v, x, y, rot) ->
     rot = 0 if not rot
