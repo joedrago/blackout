@@ -51,16 +51,16 @@ class QuadRenderer implements GLSurfaceView.Renderer
     {
     }
 
-    public void blit(Texture texture, int srcX, int srcY, int srcW, int srcH, int dstX, int dstY, int dstW, int dstH, float rot, float anchorX, float anchorY)
+    public void blit(Texture texture, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY)
     {
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
-        float uvL = (float)srcX / (float)texture.width;
-        float uvT = (float)srcY / (float)texture.height;
-        float uvR = (float)(srcX + srcW) / (float)texture.width;
-        float uvB = (float)(srcY + srcH) / (float)texture.height;
+        float uvL = srcX / (float)texture.width;
+        float uvT = srcY / (float)texture.height;
+        float uvR = (srcX + srcW) / (float)texture.width;
+        float uvB = (srcY + srcH) / (float)texture.height;
 
         float[] vertData = {
             // X, Y, Z, U, V

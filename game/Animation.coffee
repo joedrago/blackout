@@ -1,3 +1,10 @@
+calcSign = (v) ->
+  if v == 0
+    return 0
+  else if v < 0
+    return -1
+  return 1
+
 class Animation
   constructor: (data) ->
     @speed = data.speed
@@ -20,7 +27,7 @@ class Animation
         # pick a direction and turn
         dr = @req.r - @cur.r
         dist = Math.abs(dr)
-        sign = Math.sign(dr)
+        sign = calcSign(dr)
         if dist > Math.PI
           # spin the other direction, it is closer
           dist = twoPi - dist
@@ -37,10 +44,9 @@ class Animation
     # translation
     if @cur.x? and @cur.y?
       if (@req.x != @cur.x) or (@req.y != @cur.y)
-        vec =
-          x: @req.x - @cur.x
-          y: @req.y - @cur.y
-        dist = Math.sqrt((vec.x * vec.x) + (vec.y * vec.y))
+        vecX = @req.x - @cur.x
+        vecY = @req.y - @cur.y
+        dist = Math.sqrt((vecX * vecX) + (vecY * vecY))
         maxDist = dt * @speed.t / 1000
         if dist < maxDist
           # we can finish this frame
@@ -48,7 +54,7 @@ class Animation
           @cur.y = @req.y
         else
           # move as much as possible
-          @cur.x += (vec.x / dist) * maxDist
-          @cur.y += (vec.y / dist) * maxDist
+          @cur.x += (vecX / dist) * maxDist
+          @cur.y += (vecY / dist) * maxDist
 
 module.exports = Animation

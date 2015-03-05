@@ -21,7 +21,7 @@ class BlackoutApp implements NativeApp
         activity_ = activity;
     }
 
-    public void blit(String textureName, int srcX, int srcY, int srcW, int srcH, int dstX, int dstY, int dstW, int dstH, float rot, float anchorX, float anchorY)
+    public void blit(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY)
     {
         activity_.blit(textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY);
     }
@@ -40,11 +40,14 @@ public class BlackoutActivity extends Activity
     private BlackoutView view_;
     private BlackoutRenderer renderer_;
     private Script script_;
+    private long lastTime_;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        lastTime_ = System.currentTimeMillis();
 
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -114,8 +117,11 @@ public class BlackoutActivity extends Activity
 
     public void update()
     {
+        long now = System.currentTimeMillis();
+        double dt = (double)(now - lastTime_);
+        lastTime_ = now;
         synchronized(script_) {
-            script_.update();
+            script_.update(dt);
         }
     }
 
@@ -140,7 +146,7 @@ public class BlackoutActivity extends Activity
         }
     }
 
-    public void blit(String textureName, int srcX, int srcY, int srcW, int srcH, int dstX, int dstY, int dstW, int dstH, float rot, float anchorX, float anchorY)
+    public void blit(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY)
     {
         renderer_.blit(textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY);
     }
