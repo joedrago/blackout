@@ -63,8 +63,14 @@ class NativeApp
 
 screen = document.getElementById 'screen'
 resizeScreen = ->
-  screen.width = window.innerWidth
-  screen.height = window.innerHeight
+  desiredAspectRatio = 16 / 9
+  currentAspectRatio = window.innerWidth / window.innerHeight
+  if currentAspectRatio < desiredAspectRatio
+    screen.width = window.innerWidth
+    screen.height = Math.floor(window.innerWidth * (1 / desiredAspectRatio))
+  else
+    screen.width = Math.floor(window.innerHeight * desiredAspectRatio)
+    screen.height = window.innerHeight
 resizeScreen()
 # window.addEventListener 'resize', resizeScreen, false
 

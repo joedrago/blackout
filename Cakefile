@@ -38,22 +38,22 @@ getCoffeeScriptCmdline = (dir) ->
     externals: externals
   }
 
-buildGameBundle = (cb) ->
+buildGameBundle = (exitOnFailure, cb) ->
   cmdline = getCoffeeScriptCmdline(gameSrcPath)
   util.log "Bundling (game): #{cmdline.names}"
   mkdirp.sync(outputClassDir)
-  shell true, """
+  shell exitOnFailure, """
     browserify -o #{outputClassDir}/Script.js -t coffeeify #{cmdline.sources}
     coffee -bcp ./#{gameSrcPath}/boot.coffee >> #{outputClassDir}/Script.js
   """, ->
     cb() if cb?
 
-buildWebBundle = (cb) ->
+buildWebBundle = (exitOnFailure, cb) ->
   gameCmdline = getCoffeeScriptCmdline(gameSrcPath)
   webCmdline = getCoffeeScriptCmdline(webSrcPath)
   util.log "Bundling (web): #{webCmdline.names}"
   mkdirp.sync(outputClassDir)
-  shell false, """
+  shell exitOnFailure, """
     browserify -o #{outputClassDir}/web.js #{gameCmdline.externals} -t coffeeify #{webCmdline.sources}
   """, ->
     cb() if cb?
@@ -68,18 +68,18 @@ buildJavaClasses = (cb) ->
     cb() if cb?
 
 task 'build', 'build JS bundle', (options) ->
-  buildGameBundle ->
+  buildGameBundle true, ->
     buildJavaClasses()
 
 task 'web', 'build web version', (options) ->
-  buildGameBundle ->
+  buildGameBundle true, ->
     buildWebBundle()
 
 option '-p', '--port [PORT]', 'Dev server port'
 
 task 'server', 'run web server', (options) ->
-  buildGameBundle ->
-    buildWebBundle ->
+  buildGameBundle false, ->
+    buildWebBundle false, ->
       options.port ?= 9000
       util.log "Starting server at http://localhost:#{options.port}/"
 
@@ -94,8 +94,8 @@ task 'server', 'run web server', (options) ->
 
       watch gameSrcPath, (filename) ->
         util.log "Source code #{filename} changed, regenerating bundle..."
-        buildGameBundle()
+        buildGameBundle(false)
 
       watch webSrcPath, (filename) ->
         util.log "Source code #{filename} changed, regenerating bundle..."
-        buildWebBundle()
+        buildWebBundle(false)

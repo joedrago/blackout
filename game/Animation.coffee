@@ -15,6 +15,23 @@ class Animation
         @req[k] = v
         @cur[k] = v
 
+  # 'finishes' all animations
+  warp: ->
+    if @cur.r?
+      @cur.r = @req.r
+    if @cur.x? and @cur.y?
+      @cur.x = @req.x
+      @cur.y = @req.y
+
+  animating: ->
+    if @cur.r?
+      if @req.r != @cur.r
+        return true
+    if @cur.x? and @cur.y?
+      if (@req.x != @cur.x) or (@req.y != @cur.y)
+        return true
+    return false
+
   update: (dt) ->
     # rotation
     if @cur.r?
