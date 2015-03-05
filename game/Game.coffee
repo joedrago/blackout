@@ -1,15 +1,17 @@
 Animation = require 'Animation'
 CardRenderer = require 'CardRenderer'
+FontRenderer = require 'FontRenderer'
 
 class Game
   constructor: (@native, @width, @height) ->
     @log("Game constructed: #{@width}x#{@height}")
     @cardRenderer = new CardRenderer this, @width, @height
+    @fontRenderer = new FontRenderer this, @width, @height
     @zones = []
 
     @hand = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
     @anim = new Animation {
-      speed: { r: Math.PI * 4, s: 0.5, t: 2 * @width }
+      speed: { r: Math.PI * 2, s: 0.5, t: 2 * @width }
       x: 100
       y: 100
       r: 0
@@ -60,14 +62,14 @@ class Game
 
     @dragging = true
 
-    @anim.req.x = x
-    @anim.req.y = y
-    @anim.req.r = (y / @height) * (Math.PI * 2)
-
   touchMove: (x, y) ->
     if @dragging
       if not @checkZones(x, y)
         @makeHand(-1)
+
+    @anim.req.x = x
+    @anim.req.y = y
+    @anim.req.r = (y / @height) * (Math.PI * 2)
 
   touchUp: (x, y) ->
     @dragging = false
@@ -93,5 +95,7 @@ class Game
 
     @anim.update dt
     @cardRenderer.renderCard 51, @anim.cur.x, @anim.cur.y, @anim.cur.r
+
+    @fontRenderer.renderString "font", 32, "lel", 0, 0, 0, 0
 
 module.exports = Game
