@@ -4,6 +4,7 @@ Game = require 'Game'
 
 class NativeApp
   constructor: (@screen, @width, @height) ->
+    @lastTime = new Date().getTime()
     window.addEventListener 'mousedown', @onMouseDown.bind(this), false
     window.addEventListener 'mousemove', @onMouseMove.bind(this), false
     window.addEventListener 'mouseup',   @onMouseUp.bind(this), false
@@ -41,8 +42,12 @@ class NativeApp
     @context.restore()
 
   update: ->
+    now = new Date().getTime()
+    dt = now - @lastTime
+    @lastTime = now
+
     @context.clearRect(0, 0, @width, @height)
-    @game.update()
+    @game.update(dt)
 
     requestAnimationFrame => @update()
 

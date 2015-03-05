@@ -1,3 +1,4 @@
+Animation = require 'Animation'
 CardRenderer = require 'CardRenderer'
 
 class Game
@@ -7,6 +8,12 @@ class Game
     @zones = []
 
     @hand = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+    @anim = new Animation {
+      speed: { r: Math.PI * 4, s: 0.5, t: 2 * @width }
+      x: 100
+      y: 100
+      r: 0
+    }
 
   log: (s) ->
     @native.log(s)
@@ -53,6 +60,10 @@ class Game
 
     @dragging = true
 
+    @anim.req.x = x
+    @anim.req.y = y
+    @anim.req.r = (y / @height) * (Math.PI * 2)
+
   touchMove: (x, y) ->
     if @dragging
       if not @checkZones(x, y)
@@ -75,9 +86,12 @@ class Game
       return true
     return false
 
-  update: ->
+  update: (dt) ->
     @zones.length = 0 # forget about zones from the last frame. we're about to make some new ones!
     @cardRenderer.renderHand @hand, (index) =>
       @makeHand(index)
+
+    @anim.update dt
+    @cardRenderer.renderCard 51, @anim.cur.x, @anim.cur.y, @anim.cur.r
 
 module.exports = Game
