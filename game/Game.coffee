@@ -94,8 +94,8 @@ class Game
       @makeHand(index)
 
     @anim.update dt
-    @cardRenderer.renderCard 51, @anim.cur.x, @anim.cur.y, @anim.cur.r
+    # @cardRenderer.renderCard 51, @anim.cur.x, @anim.cur.y, @anim.cur.r
 
-    @fontRenderer.renderString "font", 32, "lel", 0, 0, 0, 0
+    @fontRenderer.renderString "font", @height / 5, "Centered Text", @width / 2, @height / 2, 0.5, 0.5
 
 module.exports = Game
