@@ -11,8 +11,8 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class BlackoutRenderer extends QuadRenderer
 {
-    //static private final int MAX_FPS = 60;
-    //static private final int MIN_MS_PER_FRAME = 1000 / MAX_FPS;
+    static private final int MAX_FPS = 20;
+    static private final int MIN_MS_PER_FRAME = 1000 / MAX_FPS;
 
     public BlackoutRenderer(Context context, BlackoutActivity activity, BlackoutView view)
     {
@@ -44,20 +44,20 @@ public class BlackoutRenderer extends QuadRenderer
         frameCounter_++;
         // Log.d(TAG, "onDrawFrame: "+frameCounter_);
 
-        //// Cap our framerate at 30fps by measuring the time it took
-        //// to get back in this function and taking a break before rendering again
-        //long now = System.currentTimeMillis();
-        //long dt = now - lastTime_;
-        //if(dt < MIN_MS_PER_FRAME)
-        //{
-        //    try {
-        //        Thread.sleep(MIN_MS_PER_FRAME - dt);
-        //    } catch(InterruptedException e) {
-        //        // Restore the interrupted status
-        //        Thread.currentThread().interrupt();
-        //    }
-        //}
-        //lastTime_ = System.currentTimeMillis();
+        // Cap our framerate to MAX_FPS by measuring the time it took
+        // to get back in this function and taking a break before rendering again
+        long now = System.currentTimeMillis();
+        long dt = now - lastTime_;
+        if(dt < MIN_MS_PER_FRAME)
+        {
+           try {
+               Thread.sleep(MIN_MS_PER_FRAME - dt);
+           } catch(InterruptedException e) {
+               // Restore the interrupted status
+               Thread.currentThread().interrupt();
+           }
+        }
+        lastTime_ = System.currentTimeMillis();
 
         boolean needsRender = activity_.update();
         renderBegin(0.0f, 0.0f, 0.0f);
