@@ -11,7 +11,8 @@ class NativeApp
     @context = @screen.getContext("2d")
     @textures =
       cards: "../res/raw/cards.png"
-      font: "../res/raw/font.png"
+      unispace: "../res/raw/unispace.png"
+      square: "../res/raw/square.png"
 
     @game = new Game(this, @width, @height)
 

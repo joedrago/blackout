@@ -738,6 +738,7 @@ class Blackout
 # Exports
 
 module.exports =
+  Card: Card
   Blackout: Blackout
   State: State
   OK: OK

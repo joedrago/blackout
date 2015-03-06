@@ -14,7 +14,7 @@ class FontRenderer
       code = ch.charCodeAt(0)
       glyph = metrics.glyphs[code]
       continue if not glyph
-      totalWidth += metrics.advance * scale
+      totalWidth += glyph.xadvance * scale
 
     anchorOffsetX = -1 * anchorX * totalWidth
     anchorOffsetY = -1 * anchorY * totalHeight
@@ -27,6 +27,6 @@ class FontRenderer
         glyph.x, glyph.y, glyph.width, glyph.height,
         currX + (glyph.xoffset * scale) + anchorOffsetX, y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale,
         0, 0, 0, cb
-      currX += metrics.advance * scale
+      currX += glyph.xadvance * scale
 
 module.exports = FontRenderer

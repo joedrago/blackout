@@ -30,7 +30,8 @@ public class BlackoutRenderer extends QuadRenderer
     public void loadTextures()
     {
         textures_.put("cards", loadPNG(R.raw.cards));
-        textures_.put("font", loadPNG(R.raw.font));
+        textures_.put("unispace", loadPNG(R.raw.unispace));
+        textures_.put("square", loadPNG(R.raw.square));
     }
 
     public void drawImage(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY)

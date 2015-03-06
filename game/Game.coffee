@@ -1,9 +1,10 @@
 Animation = require 'Animation'
 FontRenderer = require 'FontRenderer'
 Hand = require 'Hand'
-{Blackout, State} = require 'Blackout'
+{Blackout, State, OK} = require 'Blackout'
 
 AI_TICK_RATE_MS = 1000
+LOG_FONT = "square"
 
 class Game
   constructor: (@native, @width, @height) ->
@@ -78,6 +79,15 @@ class Game
         ai: false
       }
 
+    if @blackout.state == State.TRICK
+      ret = @blackout.play {
+        id: 1
+        which: cardToPlay
+      }
+      if ret == OK
+        @hand.set @blackout.players[0].hand
+
+
     if 0 # you are allowed to play this card
       # this should be replaced with the actual blackout engine giving you a new hand
       newCards = []
@@ -112,13 +122,13 @@ class Game
 
     # left side
     headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name}"
-    @fontRenderer.renderString "font", textHeight, headline, 0, 0, 0, 0
+    @fontRenderer.renderString LOG_FONT, textHeight, headline, 0, 0, 0, 0
     for line, i in @blackout.log
-      @fontRenderer.renderString "font", textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0
+      @fontRenderer.renderString LOG_FONT, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0
 
     # right side
     for player, i in @blackout.players
-      @fontRenderer.renderString "font", textHeight, player.name, @width, i * (textHeight + textPadding), 1, 0
+      @fontRenderer.renderString LOG_FONT, textHeight, player.name, @width, i * (textHeight + textPadding), 1, 0
 
     @hand.render()
 
