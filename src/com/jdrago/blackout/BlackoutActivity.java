@@ -60,6 +60,11 @@ public class BlackoutActivity extends Activity
         Display display = getWindowManager().getDefaultDisplay();
         displaySize_ = new Point();
         display.getRealSize(displaySize_);
+
+        // Halve the resolution so phones don't choke on the awesome
+        displaySize_.x /= 2;
+        displaySize_.y /= 2;
+
         coordinateScale_ = 1;
         Log.d(TAG, "BlackoutActivity::onCreate(): displaySize: "+displaySize_.x+","+displaySize_.y);
 
