@@ -2,6 +2,7 @@ package com.jdrago.blackout;
 
 import com.jdrago.blackout.bridge.*;
 
+import android.graphics.Point;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.view.MenuItem;
@@ -12,12 +13,16 @@ import javax.microedition.khronos.opengles.GL10;
 
 class BlackoutView extends GLSurfaceView
 {
-    public BlackoutView(Context context, BlackoutRenderer renderer, BlackoutActivity activity)
+    public BlackoutView(Context context, BlackoutActivity activity, Point displaySize)
     {
         super(context);
         setEGLContextClientVersion(2);
         activity_ = activity;
-        setRenderer(renderer);
+
+        getHolder().setFixedSize(displaySize.x, displaySize.y);
+        renderer_ = new BlackoutRenderer(context, activity, this);
+        setRenderer(renderer_);
+        setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
 
     public boolean onTouchEvent(MotionEvent event)
@@ -38,6 +43,11 @@ class BlackoutView extends GLSurfaceView
                 break;
         }
         return true;
+    }
+
+    public BlackoutRenderer renderer()
+    {
+        return renderer_;
     }
 
     public boolean menuChoice(int itemID)
@@ -71,4 +81,5 @@ class BlackoutView extends GLSurfaceView
 
     private static String TAG = "Blackout";
     private BlackoutActivity activity_;
+    private BlackoutRenderer renderer_;
 }
