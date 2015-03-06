@@ -3,10 +3,14 @@ package com.jdrago.blackout;
 import android.app.Activity;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.Window;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import com.jdrago.blackout.bridge.*;
 import com.jdrago.blackout.BlackoutView;
@@ -43,6 +47,7 @@ public class BlackoutActivity extends Activity
     private long lastTime_;
     Point displaySize_;
     private double coordinateScale_;
+    boolean paused_;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -50,6 +55,7 @@ public class BlackoutActivity extends Activity
         super.onCreate(savedInstanceState);
 
         lastTime_ = System.currentTimeMillis();
+        paused_ = true;
 
         Display display = getWindowManager().getDefaultDisplay();
         displaySize_ = new Point();
@@ -75,6 +81,23 @@ public class BlackoutActivity extends Activity
         synchronized(script_) {
             script_.load(state);
         }
+
+        // This block of code ensures that we re-render at least once a second (1 FPS).
+        final Handler handler = new Handler();
+        Timer timer = new Timer(false);
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(!paused_)
+                            view_.requestRender();
+                    }
+                });
+            }
+        };
+        timer.scheduleAtFixedRate(timerTask, 1000, 1000);
     }
 
     @Override
@@ -95,6 +118,7 @@ public class BlackoutActivity extends Activity
         Log.d(TAG, "onPause (native)");
 
         super.onPause();
+        paused_ = true;
     }
 
     @Override
@@ -104,6 +128,7 @@ public class BlackoutActivity extends Activity
 
         super.onResume();
         immerse();
+        paused_ = false;
     }
 
     protected void onSaveInstanceState(Bundle savedInstanceState)
