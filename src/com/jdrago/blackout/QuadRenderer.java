@@ -102,9 +102,7 @@ class QuadRenderer implements GLSurfaceView.Renderer
         Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, viewProjMatrix_, 0);
 
         GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
-        // GLES20.glUniform4f(vertColorHandle_, q.r, q.g, q.b, q.a);
-        GLES20.glUniform4f(vertColorHandle_, 1,1,1,1);
-        // GLES20.glUniform2f(uvOffsetHandle_, digitBuffer_[(digitCount - i) - 1] * DIGIT_UV_W, 0.0f);
+        GLES20.glUniform4f(vertColorHandle_, r, g, b, a);
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, indices_);
         checkGlError("glDrawArrays");
     }
