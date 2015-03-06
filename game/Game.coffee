@@ -1,6 +1,7 @@
 Animation = require 'Animation'
 FontRenderer = require 'FontRenderer'
 Hand = require 'Hand'
+{Blackout, State} = require 'Blackout'
 
 class Game
   constructor: (@native, @width, @height) ->
@@ -8,23 +9,20 @@ class Game
     @fontRenderer = new FontRenderer this
     @zones = []
 
-    @hand = new Hand this, @width, @height
-    @hand.set (v for v in [30..42])
-
-    @flyaway = new Animation {
-      speed: @hand.cardSpeed
-      x: 0
-      y: 0
-      r: 0
+    @blackout = new Blackout this, {
+      rounds: "13|13|13|13"
+      players: [
+        { id: 1, name: 'joe' }
+      ]
     }
+    @blackout.addAI()
+    @blackout.addAI()
+    @blackout.addAI()
+    @log "next: " + @blackout.next()
+    @log "player 0's hand: " + JSON.stringify(@blackout.players[0].hand)
 
-    # @hand = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-    # @anim = new Animation {
-    #   speed: { r: Math.PI * 2, s: 0.5, t: 2 * @width }
-    #   x: 100
-    #   y: 100
-    #   r: 0
-    # }
+    @hand = new Hand this, @width, @height
+    @hand.set @blackout.players[0].hand
 
   # -----------------------------------------------------------------------------------------------------
   # logging
@@ -55,18 +53,11 @@ class Game
   # input handling
 
   touchDown: (x, y) ->
+    @log "touchDown (CS) #{x},#{y}"
     @checkZones(x, y)
 
   touchMove: (x, y) ->
     @hand.move(x, y)
-
-    # if @dragging
-    #   if not @checkZones(x, y)
-    #     @makeHand(-1)
-
-    # @anim.req.x = x
-    # @anim.req.y = y
-    # @anim.req.r = (y / @height) * (Math.PI * 2)
 
   touchUp: (x, y) ->
     @hand.up(x, y)
@@ -77,7 +68,14 @@ class Game
   play: (cardToPlay, x, y, r) ->
     @log "(game) playing card #{cardToPlay}"
 
-    if 1 # you are allowed to play this card
+    if @blackout.state == State.BID
+      @blackout.bid {
+        id: 1
+        bid: 0
+        ai: false
+      }
+
+    if 0 # you are allowed to play this card
       # this should be replaced with the actual blackout engine giving you a new hand
       newCards = []
       for card in @hand.cards
@@ -88,32 +86,35 @@ class Game
         newCards = (v for v in [30..42])
       @hand.set newCards
 
-      @flyaway.card = cardToPlay
-      @flyaway.req.x = x
-      @flyaway.req.y = y
-      @flyaway.req.r = r
-      @flyaway.warp()
-      @flyaway.req.x = @width / 2
-      @flyaway.req.y = -1 * (@height / 4)
-      @flyaway.req.r = Math.PI # derp?
-
   # -----------------------------------------------------------------------------------------------------
   # main loop
 
   update: (dt) ->
     @zones.length = 0 # forget about zones from the last frame. we're about to make some new ones!
 
-    @fontRenderer.renderString "font", @height / 20, "Blackout", @width / 2, 0, 0.5, 0
+    updated = false
+    if @blackout.aiTick()
+      updated = true
+    if @hand.update(dt)
+      updated = true
 
-    @hand.update(dt)
+    return updated
+
+  render: ->
+    textHeight = @height / 30
+    textPadding = textHeight / 2
+
+    # left side
+    headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name}"
+    @fontRenderer.renderString "font", textHeight, headline, 0, 0, 0, 0
+    for line, i in @blackout.log
+      @fontRenderer.renderString "font", textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0
+
+    # right side
+    for player, i in @blackout.players
+      @fontRenderer.renderString "font", textHeight, player.name, @width, i * (textHeight + textPadding), 1, 0
+
     @hand.render()
-
-    @flyaway.update(dt)
-    if @flyaway.animating()
-      @hand.renderCard @flyaway.card, @flyaway.cur.x, @flyaway.cur.y, @flyaway.cur.r
-
-    # @anim.update dt
-    # @cardRenderer.renderCard 51, @anim.cur.x, @anim.cur.y, @anim.cur.r
 
   # -----------------------------------------------------------------------------------------------------
   # rendering and zones

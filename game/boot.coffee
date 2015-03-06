@@ -10,7 +10,10 @@ shutdown = ->
   return
 
 update = (dt) ->
-  game_.update(Number(dt))
+  return game_.update(Number(dt))
+
+render = ->
+  game_.render()
   return
 
 load = (data) ->

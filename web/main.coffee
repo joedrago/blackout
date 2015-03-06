@@ -49,6 +49,7 @@ class NativeApp
 
     @context.clearRect(0, 0, @width, @height)
     @game.update(dt)
+    @game.render()
 
     requestAnimationFrame => @update()
 
