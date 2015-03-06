@@ -67,7 +67,6 @@ class Hand
     for card in @cards
       seen[card]++
       if not @anims[card]
-        @game.log "creating anim for #{card}"
         @anims[card] = new Animation {
           speed: @cardSpeed
           x: 0
@@ -174,8 +173,11 @@ class Hand
     @updatePositions()
 
   update: (dt) ->
+    updated = false
     for card,anim of @anims
-      anim.update(dt)
+      if anim.update(dt)
+        updated = true
+    return updated
 
   render: ->
     return if @cards.length == 0
