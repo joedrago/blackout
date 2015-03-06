@@ -3,11 +3,14 @@ FontRenderer = require 'FontRenderer'
 Hand = require 'Hand'
 {Blackout, State} = require 'Blackout'
 
+AI_TICK_RATE_MS = 1000
+
 class Game
   constructor: (@native, @width, @height) ->
     @log("Game constructed: #{@width}x#{@height}")
     @fontRenderer = new FontRenderer this
     @zones = []
+    @nextAITick = AI_TICK_RATE_MS
 
     @blackout = new Blackout this, {
       rounds: "13|13|13|13"
@@ -93,8 +96,11 @@ class Game
     @zones.length = 0 # forget about zones from the last frame. we're about to make some new ones!
 
     updated = false
-    if @blackout.aiTick()
-      updated = true
+    @nextAITick -= dt
+    if @nextAITick <= 0
+      @nextAITick = AI_TICK_RATE_MS
+      if @blackout.aiTick()
+        updated = true
     if @hand.update(dt)
       updated = true
 
