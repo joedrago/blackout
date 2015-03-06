@@ -8,7 +8,7 @@ CARD_IMAGE_ADV_X = CARD_IMAGE_W
 CARD_IMAGE_ADV_Y = CARD_IMAGE_H
 CARD_RENDER_SCALE = 0.4                  # card height coefficient from the screen's height
 CARD_HAND_CURVE_DIST_FACTOR = 1.5        # factor with screen height to figure out center of arc. bigger number is less arc
-CARD_HOLDING_ROT_ORDER = Math.PI / 6     # desired rotation of the card when being dragged around for ordering's sake
+CARD_HOLDING_ROT_ORDER = Math.PI / 12    # desired rotation of the card when being dragged around for ordering's sake
 CARD_HOLDING_ROT_PLAY = Math.PI / 2      # desired rotation of the card when being dragged around with intent to play
 CARD_PLAY_CEILING = 0.45                 # how much of the top of the screen represents "I want to play this" vs "I want to reorder"
 
@@ -191,7 +191,7 @@ class Hand
     rot = 0 if not rot
     rank = Math.floor(v % 13)
     suit = Math.floor(v / 13)
-    @game.blit "cards",
+    @game.drawImage "cards",
       CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank), CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit), CARD_IMAGE_W, CARD_IMAGE_H,
       x, y, @cardWidth, @cardHeight,
       rot, 0.5, 0.5, cb

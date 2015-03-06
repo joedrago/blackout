@@ -118,12 +118,12 @@ class Game
   # -----------------------------------------------------------------------------------------------------
   # rendering and zones
 
-  blit: (textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY, cb) ->
-    @native.blit(textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY)
+  drawImage: (textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY, cb) ->
+    @native.drawImage(textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY)
     if cb?
       # caller wants to remember where this was drawn, and wants to be called back if it is ever touched
       # This is called a "zone". Since zones are traversed in reverse order, the natural overlap of
-      # a series of blits is respected accordingly.
+      # a series of renders is respected accordingly.
       anchorOffsetX = -1 * anchorX * dstW
       anchorOffsetY = -1 * anchorY * dstH
       zone =

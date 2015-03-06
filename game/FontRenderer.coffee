@@ -23,7 +23,7 @@ class FontRenderer
       code = ch.charCodeAt(0)
       glyph = metrics.glyphs[code]
       continue if not glyph
-      @game.blit font,
+      @game.drawImage font,
         glyph.x, glyph.y, glyph.width, glyph.height,
         currX + (glyph.xoffset * scale) + anchorOffsetX, y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale,
         0, 0, 0, cb

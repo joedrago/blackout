@@ -25,9 +25,9 @@ public class BlackoutRenderer extends QuadRenderer
         textures_.put("font", loadPNG(R.raw.font));
     }
 
-    public void blit(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY)
+    public void drawImage(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY)
     {
-        blit(textures_.get(textureName), srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY);
+        drawImage(textures_.get(textureName), srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY);
     }
 
     public void onDrawFrame(GL10 glUnused)
