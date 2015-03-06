@@ -51,8 +51,16 @@ class QuadRenderer implements GLSurfaceView.Renderer
     {
     }
 
-    public void drawImage(Texture texture, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY)
+    public Texture getTexture(String textureName)
     {
+        // override this
+        return null;
+    }
+
+    public void drawImage(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY, float r, float g, float b, float a)
+    {
+        Texture texture = getTexture(textureName);
+
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);

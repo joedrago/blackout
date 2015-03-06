@@ -11,6 +11,7 @@ class Game
     @log("Game constructed: #{@width}x#{@height}")
     @fontRenderer = new FontRenderer this
     @zones = []
+    @white = { r: 1, g: 1, b: 1, a: 1 }
     @nextAITick = AI_TICK_RATE_MS
 
     @blackout = new Blackout this, {
@@ -137,26 +138,36 @@ class Game
   # -----------------------------------------------------------------------------------------------------
   # rendering and zones
 
-  drawImage: (textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY, cb) ->
-    @native.drawImage(textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY)
-    if cb?
+  drawImage: (args) ->
+    # texture, src.[x,y,w,h], dst.[x,y,w,h], rot, anchor.[x,y], color.[r,g,b,a], cb
+    color = args.color
+    if not color
+      color = @white
+    @native.drawImage(
+      args.texture,
+      args.src.x, args.src.y, args.src.w, args.src.h,
+      args.dst.x, args.dst.y, args.dst.w, args.dst.h,
+      args.rot, args.anchor.x, args.anchor.y,
+      color.r, color.g, color.b, color.a)
+
+    if args.cb?
       # caller wants to remember where this was drawn, and wants to be called back if it is ever touched
       # This is called a "zone". Since zones are traversed in reverse order, the natural overlap of
       # a series of renders is respected accordingly.
-      anchorOffsetX = -1 * anchorX * dstW
-      anchorOffsetY = -1 * anchorY * dstH
+      anchorOffsetX = -1 * args.anchor.x * args.dst.w
+      anchorOffsetY = -1 * args.anchor.y * args.dst.h
       zone =
         # center (X,Y) and reversed rotation, used to put the coordinate in local space to the zone
-        cx:  dstX
-        cy:  dstY
-        rot: rot * -1
+        cx:  args.dst.x
+        cy:  args.dst.y
+        rot: args.rot * -1
         # the axis aligned bounding box used for detection of a localspace coord
         l:   anchorOffsetX
         t:   anchorOffsetY
-        r:   anchorOffsetX + dstW
-        b:   anchorOffsetY + dstH
+        r:   anchorOffsetX + args.dst.w
+        b:   anchorOffsetY + args.dst.h
         # callback to call if the zone is clicked on
-        cb:  cb
+        cb:  args.cb
       @zones.push zone
 
   checkZones: (x, y) ->

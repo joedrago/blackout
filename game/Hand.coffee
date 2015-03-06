@@ -193,10 +193,24 @@ class Hand
     rot = 0 if not rot
     rank = Math.floor(v % 13)
     suit = Math.floor(v / 13)
-    @game.drawImage "cards",
-      CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank), CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit), CARD_IMAGE_W, CARD_IMAGE_H,
-      x, y, @cardWidth, @cardHeight,
-      rot, 0.5, 0.5, cb
+    @game.drawImage {
+      texture: "cards"
+      src:
+        x: CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank)
+        y: CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit)
+        w: CARD_IMAGE_W
+        h: CARD_IMAGE_H
+      dst:
+        x: x
+        y: y
+        w: @cardWidth
+        h: @cardHeight
+      rot: rot
+      anchor:
+        x: 0.5
+        y: 0.5
+      cb: cb
+    }
 
   calcPositions: (handSize) ->
     if @positionCache.hasOwnProperty(handSize)

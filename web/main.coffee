@@ -33,7 +33,7 @@ class NativeApp
   log: (s) ->
     console.log "NativeApp.log(): #{s}"
 
-  drawImage: (textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY) ->
+  drawImage: (textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY, r, g, b, a) ->
     @context.save()
     @context.translate dstX, dstY
     @context.rotate rot # * 3.141592 / 180.0

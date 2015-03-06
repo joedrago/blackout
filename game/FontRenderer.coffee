@@ -23,10 +23,24 @@ class FontRenderer
       code = ch.charCodeAt(0)
       glyph = metrics.glyphs[code]
       continue if not glyph
-      @game.drawImage font,
-        glyph.x, glyph.y, glyph.width, glyph.height,
-        currX + (glyph.xoffset * scale) + anchorOffsetX, y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale,
-        0, 0, 0, cb
+      @game.drawImage {
+        texture: font
+        src:
+          x: glyph.x
+          y: glyph.y
+          w: glyph.width
+          h: glyph.height
+        dst:
+          x: currX + (glyph.xoffset * scale) + anchorOffsetX
+          y: y + (glyph.yoffset * scale) + anchorOffsetY
+          w: glyph.width * scale
+          h: glyph.height * scale
+        rot: 0
+        anchor:
+          x: 0
+          y: 0
+        cb: cb
+      }
       currX += glyph.xadvance * scale
 
 module.exports = FontRenderer

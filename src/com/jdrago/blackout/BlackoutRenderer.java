@@ -9,7 +9,7 @@ import java.lang.Thread;
 import java.util.HashMap;
 import javax.microedition.khronos.opengles.GL10;
 
-public class BlackoutRenderer extends QuadRenderer
+public class BlackoutRenderer extends QuadRenderer implements NativeApp
 {
     static private final int MAX_FPS = 20;
     static private final int MIN_MS_PER_FRAME = 1000 / MAX_FPS;
@@ -34,9 +34,15 @@ public class BlackoutRenderer extends QuadRenderer
         textures_.put("square", loadPNG(R.raw.square));
     }
 
-    public void drawImage(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY)
+    @Override
+    public Texture getTexture(String textureName)
     {
-        drawImage(textures_.get(textureName), srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY);
+        return textures_.get(textureName);
+    }
+
+    public void log(String s)
+    {
+        Log.v(TAG, s);
     }
 
     public void onDrawFrame(GL10 glUnused)

@@ -15,33 +15,10 @@ import java.util.TimerTask;
 import com.jdrago.blackout.bridge.*;
 import com.jdrago.blackout.BlackoutView;
 
-class BlackoutApp implements NativeApp
-{
-    private static final String TAG = "Blackout";
-
-    private BlackoutActivity activity_;
-
-    public BlackoutApp(BlackoutActivity activity)
-    {
-        activity_ = activity;
-    }
-
-    public void drawImage(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY)
-    {
-        activity_.drawImage(textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY);
-    }
-
-    public void log(String s)
-    {
-        Log.v(TAG, s);
-    }
-}
-
 public class BlackoutActivity extends Activity
 {
     private static final String TAG = "Blackout";
 
-    private BlackoutApp app_;
     private BlackoutView view_;
     private Script script_;
     private long lastTime_;
@@ -68,13 +45,12 @@ public class BlackoutActivity extends Activity
         coordinateScale_ = 1;
         Log.d(TAG, "BlackoutActivity::onCreate(): displaySize: "+displaySize_.x+","+displaySize_.y);
 
-        app_ = new BlackoutApp(this);
+        view_ = new BlackoutView(getApplication(), this, displaySize_);
         script_ = new Script();
         synchronized(script_) {
-            script_.startup(app_, displaySize_.x, displaySize_.y);
+            script_.startup(view_.renderer(), displaySize_.x, displaySize_.y);
         }
 
-        view_ = new BlackoutView(getApplication(), this, displaySize_);
         setContentView(view_);
         immerse();
 
@@ -208,10 +184,5 @@ public class BlackoutActivity extends Activity
             script_.touchUp(x, y);
         }
         view_.requestRender();
-    }
-
-    public void drawImage(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY)
-    {
-        view_.renderer().drawImage(textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY);
     }
 }
