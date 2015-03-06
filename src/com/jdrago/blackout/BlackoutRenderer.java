@@ -41,7 +41,7 @@ public class BlackoutRenderer extends QuadRenderer
     public void onDrawFrame(GL10 glUnused)
     {
         frameCounter_++;
-        Log.d(TAG, "onDrawFrame: "+frameCounter_);
+        // Log.d(TAG, "onDrawFrame: "+frameCounter_);
 
         //// Cap our framerate at 30fps by measuring the time it took
         //// to get back in this function and taking a break before rendering again
