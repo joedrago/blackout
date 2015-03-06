@@ -4,7 +4,7 @@ Hand = require 'Hand'
 {Blackout, State, OK} = require 'Blackout'
 
 AI_TICK_RATE_MS = 1000
-LOG_FONT = "square"
+LOG_FONT = "unispace"
 
 class Game
   constructor: (@native, @width, @height) ->
@@ -24,6 +24,7 @@ class Game
     @blackout.addAI()
     @log "next: " + @blackout.next()
     @log "player 0's hand: " + JSON.stringify(@blackout.players[0].hand)
+    @lastErr = ''
 
     @hand = new Hand this, @width, @height
     @hand.set @blackout.players[0].hand
@@ -84,6 +85,7 @@ class Game
         id: 1
         which: cardToPlay
       }
+      @lastErr = ret
       if ret == OK
         @hand.set @blackout.players[0].hand
 
@@ -121,7 +123,7 @@ class Game
     textPadding = textHeight / 2
 
     # left side
-    headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name}"
+    headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
     @fontRenderer.renderString LOG_FONT, textHeight, headline, 0, 0, 0, 0
     for line, i in @blackout.log
       @fontRenderer.renderString LOG_FONT, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0

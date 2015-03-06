@@ -591,10 +591,10 @@ class Blackout
 
   # Tries to play highest cards first (moves left)
   aiPlayHigh: (currentPlayer, startingPoint) ->
-    for i in [0...startingPoint] by -1
+    for i in [startingPoint..0] by -1
       if(@aiPlay(currentPlayer, i))
         return true
-    for i in [startingPoint+1...currentPlayer.hand.length] by -1
+    for i in [currentPlayer.hand.length-1...startingPoint] by -1
       if @aiPlay(currentPlayer, i)
         return true
     return false
@@ -793,7 +793,7 @@ lowestValueIndex = (hand, avoidSuit) -> # use Suit.NONE to return any suit
 highestValueNonSpadeIndex = (hand, avoidSuit) ->
   highestIndex = -1
   highestValue = -1
-  for i in [0...hand.length] by -1
+  for i in [hand.length-1..0] by -1
     card = new Card(hand[i])
     if (card.suit != avoidSuit) && (card.suit != Suit.SPADES)
       if card.value > highestValue
@@ -802,7 +802,7 @@ highestValueNonSpadeIndex = (hand, avoidSuit) ->
   return highestIndex
 
 highestValueIndexInSuitLowerThan = (hand, winningCard) ->
-  for i in [0...hand.length] by -1
+  for i in [hand.length-1..0] by -1
     card = new Card(hand[i])
     if (card.suit == winningCard.suit) && (card.value < winningCard.value)
       return i
