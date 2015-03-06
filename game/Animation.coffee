@@ -33,9 +33,11 @@ class Animation
     return false
 
   update: (dt) ->
+    updated = false
     # rotation
     if @cur.r?
       if @req.r != @cur.r
+        updated = true
         # sanitize requested rotation
         twoPi = Math.PI * 2
         negTwoPi = -1 * twoPi
@@ -61,6 +63,7 @@ class Animation
     # translation
     if @cur.x? and @cur.y?
       if (@req.x != @cur.x) or (@req.y != @cur.y)
+        updated = true
         vecX = @req.x - @cur.x
         vecY = @req.y - @cur.y
         dist = Math.sqrt((vecX * vecX) + (vecY * vecY))
@@ -73,5 +76,7 @@ class Animation
           # move as much as possible
           @cur.x += (vecX / dist) * maxDist
           @cur.y += (vecY / dist) * maxDist
+
+    return updated
 
 module.exports = Animation
