@@ -71,7 +71,7 @@ public class BlackoutRenderer extends QuadRenderer implements NativeApp
         renderEnd();
 
         if(needsRender) {
-            Log.d(TAG, "needsRender from onDrawFrame");
+            // Log.d(TAG, "needsRender from onDrawFrame");
             view_.requestRender();
         }
     }
