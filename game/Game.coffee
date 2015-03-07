@@ -11,8 +11,10 @@ class Game
     @log("Game constructed: #{@width}x#{@height}")
     @fontRenderer = new FontRenderer this
     @zones = []
-    @white = { r: 1, g: 1, b: 1, a: 1 }
     @nextAITick = AI_TICK_RATE_MS
+    @colors =
+      red:   { r: 1, g: 0, b: 0, a: 1 }
+      white: { r: 1, g: 1, b: 1, a: 1 }
 
     @blackout = new Blackout this, {
       rounds: "13|13|13|13"
@@ -134,6 +136,7 @@ class Game
       anchor:
         x: 0
         y: 0
+      color: @colors.red
     }
     for line, i in @blackout.log
       @fontRenderer.render {
@@ -169,7 +172,7 @@ class Game
     # texture, src.[x,y,w,h], dst.[x,y,w,h], rot, anchor.[x,y], color.[r,g,b,a], cb
     color = args.color
     if not color
-      color = @white
+      color = @colors.white
     @native.drawImage(
       args.texture,
       args.src.x, args.src.y, args.src.w, args.src.h,
