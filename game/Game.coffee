@@ -125,13 +125,40 @@ class Game
 
     # left side
     headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
-    @fontRenderer.renderString LOG_FONT, textHeight, headline, 0, 0, 0, 0
+    @fontRenderer.render {
+      font: LOG_FONT
+      height: textHeight
+      str: headline
+      x: 0
+      y: 0
+      anchor:
+        x: 0
+        y: 0
+    }
     for line, i in @blackout.log
-      @fontRenderer.renderString LOG_FONT, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0
+      @fontRenderer.render {
+        font: LOG_FONT
+        height: textHeight
+        str: line
+        x: 0
+        y: (i+1) * (textHeight + textPadding)
+        anchor:
+          x: 0
+          y: 0
+      }
 
     # right side
     for player, i in @blackout.players
-      @fontRenderer.renderString LOG_FONT, textHeight, player.name, @width, i * (textHeight + textPadding), 1, 0
+      @fontRenderer.render {
+        font: LOG_FONT
+        height: textHeight
+        str: player.name
+        x: @width
+        y: i * (textHeight + textPadding)
+        anchor:
+          x: 1
+          y: 0
+      }
 
     @hand.render()
 

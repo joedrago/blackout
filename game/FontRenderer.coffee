@@ -3,33 +3,38 @@ fontmetrics = require 'fontmetrics'
 class FontRenderer
   constructor:  (@game) ->
 
-  renderString:  (font, height, str, x, y, anchorX, anchorY, cb) ->
-    metrics = fontmetrics[font]
+  render: (args) ->
+    # font, height, str, x, y, anchor.[xy], cb
+    metrics = fontmetrics[args.font]
     return if not metrics
-    scale = height / metrics.height
+    scale = args.height / metrics.height
 
     totalWidth = 0
     totalHeight = metrics.height * scale
-    for ch, i in str
+    for ch, i in args.str
       code = ch.charCodeAt(0)
       glyph = metrics.glyphs[code]
       continue if not glyph
       totalWidth += glyph.xadvance * scale
 
-    anchorOffsetX = -1 * anchorX * totalWidth
-    anchorOffsetY = -1 * anchorY * totalHeight
-    currX = x
+    anchorOffsetX = -1 * args.anchor.x * totalWidth
+    anchorOffsetY = -1 * args.anchor.y * totalHeight
+    currX = args.x
     renderParams =
-      texture: font
+      texture: args.font
       src: { x: 0, y: 0, w: 0, h: 0} # filled in during the loop
       dst: { x: 0, y: 0, w: 0, h: 0} # filled in during the loop
       rot: 0
       anchor:
         x: 0
         y: 0
-      cb: cb
+      cb: args.cb
+      color: args.color
 
-    for ch, i in str
+    if not renderParams.color
+      renderParams.color = { r: 1, g: 1, b: 1, a: 1 }
+
+    for ch, i in args.str
       code = ch.charCodeAt(0)
       glyph = metrics.glyphs[code]
       continue if not glyph
@@ -38,7 +43,7 @@ class FontRenderer
       renderParams.src.w = glyph.width
       renderParams.src.h = glyph.height
       renderParams.dst.x = currX + (glyph.xoffset * scale) + anchorOffsetX
-      renderParams.dst.y = y + (glyph.yoffset * scale) + anchorOffsetY
+      renderParams.dst.y = args.y + (glyph.yoffset * scale) + anchorOffsetY
       renderParams.dst.w = glyph.width * scale
       renderParams.dst.h = glyph.height * scale
       @game.drawImage renderParams
