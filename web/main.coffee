@@ -2,6 +2,13 @@ console.log 'web startup'
 
 Game = require 'Game'
 
+# taken from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+componentToHex = (c) ->
+  hex = (c * 255).toString(16)
+  return if hex.length == 1 then "0" + hex else hex
+rgbToHex = (r, g, b) ->
+  return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b)
+
 class NativeApp
   constructor: (@screen, @width, @height) ->
     @lastTime = new Date().getTime()
@@ -34,13 +41,29 @@ class NativeApp
     console.log "NativeApp.log(): #{s}"
 
   drawImage: (textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY, r, g, b, a) ->
+    texture = @textures[textureName]
+    if (r != 1) or (g != 1) or (b != 1)
+      # this is probably insanely inefficient, but i imagine caching would be as well
+      tempTexture = document.createElement('canvas')
+      tempTexture.width = srcW
+      tempTexture.height = srcH
+      tempTextureContext = tempTexture.getContext('2d')
+      tempTextureContext.fillStyle = rgbToHex(r, g, b)
+      tempTextureContext.fillRect(0, 0, tempTexture.width, tempTexture.height)
+      tempTextureContext.globalCompositeOperation = 'destination-atop'
+      tempTextureContext.drawImage(texture, srcX, srcY, srcW, srcH, 0, 0, srcW, srcH)
+      texture = tempTexture
+      srcX = 0
+      srcY = 0
+
     @context.save()
     @context.translate dstX, dstY
     @context.rotate rot # * 3.141592 / 180.0
     anchorOffsetX = -1 * anchorX * dstW
     anchorOffsetY = -1 * anchorY * dstH
     @context.translate anchorOffsetX, anchorOffsetY
-    @context.drawImage(@textures[textureName], srcX, srcY, srcW, srcH, 0, 0, dstW, dstH)
+    @context.globalAlpha = a
+    @context.drawImage(texture, srcX, srcY, srcW, srcH, 0, 0, dstW, dstH)
     @context.restore()
 
   update: ->
