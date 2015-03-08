@@ -20,33 +20,19 @@ class FontRenderer
     anchorOffsetX = -1 * args.anchor.x * totalWidth
     anchorOffsetY = -1 * args.anchor.y * totalHeight
     currX = args.x
-    renderParams =
-      texture: args.font
-      src: { x: 0, y: 0, w: 0, h: 0} # filled in during the loop
-      dst: { x: 0, y: 0, w: 0, h: 0} # filled in during the loop
-      rot: 0
-      anchor:
-        x: 0
-        y: 0
-      cb: args.cb
-      color: args.color
 
-    if not renderParams.color
-      renderParams.color = { r: 1, g: 1, b: 1, a: 1 }
+    # if not renderParams.color
+    #   renderParams.color = { r: 1, g: 1, b: 1, a: 1 }
 
     for ch, i in args.str
       code = ch.charCodeAt(0)
       glyph = metrics.glyphs[code]
       continue if not glyph
-      renderParams.src.x = glyph.x
-      renderParams.src.y = glyph.y
-      renderParams.src.w = glyph.width
-      renderParams.src.h = glyph.height
-      renderParams.dst.x = currX + (glyph.xoffset * scale) + anchorOffsetX
-      renderParams.dst.y = args.y + (glyph.yoffset * scale) + anchorOffsetY
-      renderParams.dst.w = glyph.width * scale
-      renderParams.dst.h = glyph.height * scale
-      @game.drawImage renderParams
+      @game.drawImage args.font,
+      glyph.x, glyph.y, glyph.width, glyph.height,
+      currX + (glyph.xoffset * scale) + anchorOffsetX, args.y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale,
+      0, 0, 0,
+      1,1,1,1
       currX += glyph.xadvance * scale
 
 module.exports = FontRenderer

@@ -57,24 +57,6 @@ class Hand
     @handAngleAdvance = @handAngle / 13
     @game.log "Hand distance #{@handDistance}, angle #{@handAngle} (screen height #{@screenHeight})"
 
-    @cardRenderParams =
-      texture: "cards"
-      src:
-        x: 0 # filled in during render
-        y: 0 # filled in during render
-        w: CARD_IMAGE_W
-        h: CARD_IMAGE_H
-      dst:
-        x: 0 # filled in during render
-        y: 0 # filled in during render
-        w: @cardWidth
-        h: @cardHeight
-      rot: 0 # filled in during render
-      anchor:
-        x: 0.5
-        y: 0.5
-      cb: null # filled in during render
-
   set: (cards) ->
     @cards = cards.slice(0)
     @syncAnims()
@@ -212,13 +194,10 @@ class Hand
     rank = Math.floor(v % 13)
     suit = Math.floor(v / 13)
 
-    @cardRenderParams.src.x = CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank)
-    @cardRenderParams.src.y = CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit)
-    @cardRenderParams.dst.x = x
-    @cardRenderParams.dst.y = y
-    @cardRenderParams.rot = rot
-    @cardRenderParams.cb = cb
-    @game.drawImage @cardRenderParams
+    @game.drawImage "cards",
+    CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank), CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit), CARD_IMAGE_W, CARD_IMAGE_H,
+    x, y, @cardWidth, @cardHeight,
+    rot, 0.5, 0.5, 1,1,1,1, cb
 
   calcPositions: (handSize) ->
     if @positionCache.hasOwnProperty(handSize)

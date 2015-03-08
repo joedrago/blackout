@@ -1064,7 +1064,7 @@ FontRenderer = (function() {
   }
 
   FontRenderer.prototype.render = function(args) {
-    var anchorOffsetX, anchorOffsetY, ch, code, currX, glyph, i, j, k, len, len1, metrics, ref, ref1, renderParams, results, scale, totalHeight, totalWidth;
+    var anchorOffsetX, anchorOffsetY, ch, code, currX, glyph, i, j, k, len, len1, metrics, ref, ref1, results, scale, totalHeight, totalWidth;
     metrics = fontmetrics[args.font];
     if (!metrics) {
       return;
@@ -1085,36 +1085,6 @@ FontRenderer = (function() {
     anchorOffsetX = -1 * args.anchor.x * totalWidth;
     anchorOffsetY = -1 * args.anchor.y * totalHeight;
     currX = args.x;
-    renderParams = {
-      texture: args.font,
-      src: {
-        x: 0,
-        y: 0,
-        w: 0,
-        h: 0
-      },
-      dst: {
-        x: 0,
-        y: 0,
-        w: 0,
-        h: 0
-      },
-      rot: 0,
-      anchor: {
-        x: 0,
-        y: 0
-      },
-      cb: args.cb,
-      color: args.color
-    };
-    if (!renderParams.color) {
-      renderParams.color = {
-        r: 1,
-        g: 1,
-        b: 1,
-        a: 1
-      };
-    }
     ref1 = args.str;
     results = [];
     for (i = k = 0, len1 = ref1.length; k < len1; i = ++k) {
@@ -1124,15 +1094,7 @@ FontRenderer = (function() {
       if (!glyph) {
         continue;
       }
-      renderParams.src.x = glyph.x;
-      renderParams.src.y = glyph.y;
-      renderParams.src.w = glyph.width;
-      renderParams.src.h = glyph.height;
-      renderParams.dst.x = currX + (glyph.xoffset * scale) + anchorOffsetX;
-      renderParams.dst.y = args.y + (glyph.yoffset * scale) + anchorOffsetY;
-      renderParams.dst.w = glyph.width * scale;
-      renderParams.dst.h = glyph.height * scale;
-      this.game.drawImage(renderParams);
+      this.game.drawImage(args.font, glyph.x, glyph.y, glyph.width, glyph.height, currX + (glyph.xoffset * scale) + anchorOffsetX, args.y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale, 0, 0, 0, 1, 1, 1, 1);
       results.push(currX += glyph.xadvance * scale);
     }
     return results;
@@ -1199,6 +1161,7 @@ Game = (function() {
     this.log("next: " + this.blackout.next());
     this.log("player 0's hand: " + JSON.stringify(this.blackout.players[0].hand));
     this.lastErr = '';
+    this.renderCommands = [];
     this.hand = new Hand(this, this.width, this.height);
     this.hand.set(this.blackout.players[0].hand);
   }
@@ -1217,9 +1180,9 @@ Game = (function() {
   };
 
   Game.prototype.makeHand = function(index) {
-    var i, results, v;
+    var j, results, v;
     results = [];
-    for (v = i = 0; i < 13; v = ++i) {
+    for (v = j = 0; j < 13; v = ++j) {
       if (v === index) {
         results.push(this.hand[v] = 13);
       } else {
@@ -1243,7 +1206,7 @@ Game = (function() {
   };
 
   Game.prototype.play = function(cardToPlay, x, y, r) {
-    var card, i, len, newCards, ref1, ret, v;
+    var card, j, len, newCards, ref1, ret, v;
     this.log("(game) playing card " + cardToPlay);
     if (this.blackout.state === State.BID) {
       this.blackout.bid({
@@ -1265,17 +1228,17 @@ Game = (function() {
     if (0) {
       newCards = [];
       ref1 = this.hand.cards;
-      for (i = 0, len = ref1.length; i < len; i++) {
-        card = ref1[i];
+      for (j = 0, len = ref1.length; j < len; j++) {
+        card = ref1[j];
         if (card !== cardToPlay) {
           newCards.push(card);
         }
       }
       if (newCards.length === 0) {
         newCards = (function() {
-          var j, results;
+          var k, results;
           results = [];
-          for (v = j = 30; j <= 42; v = ++j) {
+          for (v = k = 30; k <= 42; v = ++k) {
             results.push(v);
           }
           return results;
@@ -1303,41 +1266,82 @@ Game = (function() {
   };
 
   Game.prototype.render = function() {
-    var textHeight, textPadding;
+    var headline, i, j, k, len, len1, line, player, ref1, ref2, textHeight, textPadding;
+    this.renderCommands.length = 0;
     textHeight = this.height / 30;
     textPadding = textHeight / 2;
-    return this.hand.render();
+    headline = "State: " + this.blackout.state + ", Turn: " + this.blackout.players[this.blackout.turn].name + " Err: " + this.lastErr;
+    this.fontRenderer.render({
+      font: LOG_FONT,
+      height: textHeight,
+      str: headline,
+      x: 0,
+      y: 0,
+      anchor: {
+        x: 0,
+        y: 0
+      },
+      color: this.colors.red
+    });
+    ref1 = this.blackout.log;
+    for (i = j = 0, len = ref1.length; j < len; i = ++j) {
+      line = ref1[i];
+      this.fontRenderer.render({
+        font: LOG_FONT,
+        height: textHeight,
+        str: line,
+        x: 0,
+        y: (i + 1) * (textHeight + textPadding),
+        anchor: {
+          x: 0,
+          y: 0
+        }
+      });
+    }
+    ref2 = this.blackout.players;
+    for (i = k = 0, len1 = ref2.length; k < len1; i = ++k) {
+      player = ref2[i];
+      this.fontRenderer.render({
+        font: LOG_FONT,
+        height: textHeight,
+        str: player.name,
+        x: this.width,
+        y: i * (textHeight + textPadding),
+        anchor: {
+          x: 1,
+          y: 0
+        }
+      });
+    }
+    this.hand.render();
+    return this.renderCommands;
   };
 
-  Game.prototype.drawImage = function(args) {
-    var anchorOffsetX, anchorOffsetY, color, zone;
-    color = args.color;
-    if (!color) {
-      color = this.colors.white;
-    }
-    this["native"].drawImage(args.texture, args.src.x, args.src.y, args.src.w, args.src.h, args.dst.x, args.dst.y, args.dst.w, args.dst.h, args.rot, args.anchor.x, args.anchor.y, color.r, color.g, color.b, color.a);
-    if (args.cb != null) {
-      anchorOffsetX = -1 * args.anchor.x * args.dst.w;
-      anchorOffsetY = -1 * args.anchor.y * args.dst.h;
+  Game.prototype.drawImage = function(texture, sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a, cb) {
+    var anchorOffsetX, anchorOffsetY, zone;
+    this.renderCommands.push([texture, sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a]);
+    if (cb != null) {
+      anchorOffsetX = -1 * anchorx * dw;
+      anchorOffsetY = -1 * anchory * dh;
       zone = {
-        cx: args.dst.x,
-        cy: args.dst.y,
-        rot: args.rot * -1,
+        cx: dx,
+        cy: dy,
+        rot: rot * -1,
         l: anchorOffsetX,
         t: anchorOffsetY,
-        r: anchorOffsetX + args.dst.w,
-        b: anchorOffsetY + args.dst.h,
-        cb: args.cb
+        r: anchorOffsetX + dw,
+        b: anchorOffsetY + dh,
+        cb: cb
       };
       return this.zones.push(zone);
     }
   };
 
   Game.prototype.checkZones = function(x, y) {
-    var i, localX, localY, ref1, unrotatedLocalX, unrotatedLocalY, zone;
+    var j, localX, localY, ref1, unrotatedLocalX, unrotatedLocalY, zone;
     ref1 = this.zones;
-    for (i = ref1.length - 1; i >= 0; i += -1) {
-      zone = ref1[i];
+    for (j = ref1.length - 1; j >= 0; j += -1) {
+      zone = ref1[j];
       unrotatedLocalX = x - zone.cx;
       unrotatedLocalY = y - zone.cy;
       localX = unrotatedLocalX * Math.cos(zone.rot) - unrotatedLocalY * Math.sin(zone.rot);
@@ -1443,27 +1447,6 @@ Hand = (function() {
     this.handDistance = calcDistance(bottomLeft, this.handCenter);
     this.handAngleAdvance = this.handAngle / 13;
     this.game.log("Hand distance " + this.handDistance + ", angle " + this.handAngle + " (screen height " + this.screenHeight + ")");
-    this.cardRenderParams = {
-      texture: "cards",
-      src: {
-        x: 0,
-        y: 0,
-        w: CARD_IMAGE_W,
-        h: CARD_IMAGE_H
-      },
-      dst: {
-        x: 0,
-        y: 0,
-        w: this.cardWidth,
-        h: this.cardHeight
-      },
-      rot: 0,
-      anchor: {
-        x: 0.5,
-        y: 0.5
-      },
-      cb: null
-    };
   }
 
   Hand.prototype.set = function(cards) {
@@ -1684,13 +1667,7 @@ Hand = (function() {
     }
     rank = Math.floor(v % 13);
     suit = Math.floor(v / 13);
-    this.cardRenderParams.src.x = CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank);
-    this.cardRenderParams.src.y = CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit);
-    this.cardRenderParams.dst.x = x;
-    this.cardRenderParams.dst.y = y;
-    this.cardRenderParams.rot = rot;
-    this.cardRenderParams.cb = cb;
-    return this.game.drawImage(this.cardRenderParams);
+    return this.game.drawImage("cards", CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank), CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit), CARD_IMAGE_W, CARD_IMAGE_H, x, y, this.cardWidth, this.cardHeight, rot, 0.5, 0.5, 1, 1, 1, 1, cb);
   };
 
   Hand.prototype.calcPositions = function(handSize) {
@@ -3406,7 +3383,7 @@ update = function(dt) {
 };
 
 render = function() {
-  game_.render();
+  return game_.render();
 };
 
 load = function(data) {

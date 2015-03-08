@@ -16,8 +16,7 @@ update = (dt) ->
   return game_.update(Number(dt))
 
 render = ->
-  game_.render()
-  return
+  return game_.render()
 
 load = (data) ->
   game_.load(data)

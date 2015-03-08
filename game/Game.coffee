@@ -28,6 +28,7 @@ class Game
     @log "next: " + @blackout.next()
     @log "player 0's hand: " + JSON.stringify(@blackout.players[0].hand)
     @lastErr = ''
+    @renderCommands = []
 
     @hand = new Hand this, @width, @height
     @hand.set @blackout.players[0].hand
@@ -122,82 +123,88 @@ class Game
     return updated
 
   render: ->
+    @renderCommands.length = 0
+
     textHeight = @height / 30
     textPadding = textHeight / 2
 
     # left side
-    # headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
-    # @fontRenderer.render {
-    #   font: LOG_FONT
-    #   height: textHeight
-    #   str: headline
-    #   x: 0
-    #   y: 0
-    #   anchor:
-    #     x: 0
-    #     y: 0
-    #   color: @colors.red
-    # }
-    # for line, i in @blackout.log
-    #   @fontRenderer.render {
-    #     font: LOG_FONT
-    #     height: textHeight
-    #     str: line
-    #     x: 0
-    #     y: (i+1) * (textHeight + textPadding)
-    #     anchor:
-    #       x: 0
-    #       y: 0
-    #   }
+    headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
+    @fontRenderer.render {
+      font: LOG_FONT
+      height: textHeight
+      str: headline
+      x: 0
+      y: 0
+      anchor:
+        x: 0
+        y: 0
+      color: @colors.red
+    }
+    for line, i in @blackout.log
+      @fontRenderer.render {
+        font: LOG_FONT
+        height: textHeight
+        str: line
+        x: 0
+        y: (i+1) * (textHeight + textPadding)
+        anchor:
+          x: 0
+          y: 0
+      }
 
-    # # right side
-    # for player, i in @blackout.players
-    #   @fontRenderer.render {
-    #     font: LOG_FONT
-    #     height: textHeight
-    #     str: player.name
-    #     x: @width
-    #     y: i * (textHeight + textPadding)
-    #     anchor:
-    #       x: 1
-    #       y: 0
-    #   }
+    # right side
+    for player, i in @blackout.players
+      @fontRenderer.render {
+        font: LOG_FONT
+        height: textHeight
+        str: player.name
+        x: @width
+        y: i * (textHeight + textPadding)
+        anchor:
+          x: 1
+          y: 0
+      }
 
     @hand.render()
+
+    return @renderCommands
 
   # -----------------------------------------------------------------------------------------------------
   # rendering and zones
 
-  drawImage: (args) ->
+  drawImage: (texture, sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a, cb) ->
+    @renderCommands.push [texture, sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a]
     # texture, src.[x,y,w,h], dst.[x,y,w,h], rot, anchor.[x,y], color.[r,g,b,a], cb
-    color = args.color
-    if not color
-      color = @colors.white
-    @native.drawImage(
-      args.texture,
-      args.src.x, args.src.y, args.src.w, args.src.h,
-      args.dst.x, args.dst.y, args.dst.w, args.dst.h,
-      args.rot, args.anchor.x, args.anchor.y,
-      color.r, color.g, color.b, color.a)
+    # color = args.color
+    # if not color
+    #   color = @colors.white
 
-    if args.cb?
+    # @native.drawImage(
+    #   texture,
+    #   sx, sy, sw, sh,
+    #   dx, dy, dw, dh,
+    #   rot, anchorx, anchory,
+    #   1,1,1,1)
+
+    if cb?
       # caller wants to remember where this was drawn, and wants to be called back if it is ever touched
       # This is called a "zone". Since zones are traversed in reverse order, the natural overlap of
       # a series of renders is respected accordingly.
-      anchorOffsetX = -1 * args.anchor.x * args.dst.w
-      anchorOffsetY = -1 * args.anchor.y * args.dst.h
+      anchorOffsetX = -1 * anchorx * dw
+      anchorOffsetY = -1 * anchory * dh
       zone =
         # center (X,Y) and reversed rotation, used to put the coordinate in local space to the zone
-        cx:  args.dst.x
-        cy:  args.dst.y
-        rot: args.rot * -1
+        cx:  dx
+        cy:  dy
+        rot: rot * -1
         # the axis aligned bounding box used for detection of a localspace coord
         l:   anchorOffsetX
         t:   anchorOffsetY
-        r:   anchorOffsetX + args.dst.w
-        b:   anchorOffsetY + args.dst.h
+        r:   anchorOffsetX + dw
+        b:   anchorOffsetY + dh
         # callback to call if the zone is clicked on
-        cb:  args.cb
+        cb:  cb
       @zones.push zone
 
   checkZones: (x, y) ->

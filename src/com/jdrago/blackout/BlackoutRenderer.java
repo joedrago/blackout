@@ -202,10 +202,28 @@ public class BlackoutRenderer extends QuadRenderer //implements NativeApp
 
     public void jsRender()
     {
+        Trace.beginSection("render");
         V8Array parameters = new V8Array(v8_);
-        Trace.beginSection("render"); try {
-        v8_.executeVoidFunction("render", parameters);
-        } finally { Trace.endSection(); }
+        Trace.beginSection("js render");
+        V8Array renderCommands = v8_.executeArrayFunction("render", parameters);
+        Trace.endSection();
+        Trace.beginSection("native render");
+        for(int i = 0; i < renderCommands.length(); i++)
+        {
+            V8Array drawCommand = renderCommands.getArray(i);
+            String textureName = drawCommand.getString(0);
+            double[] d = drawCommand.getDoubles(1, 15);
+            drawCommand.release();
+
+            drawImage(textureName,
+                (float)d[0], (float)d[1], (float)d[2], (float)d[3],
+                (float)d[4], (float)d[5], (float)d[6], (float)d[7],
+                (float)d[8], (float)d[9], (float)d[10],
+                (float)d[11], (float)d[12], (float)d[13], (float)d[14]);
+        }
+        Trace.endSection();
+        renderCommands.release();
+        Trace.endSection();
     }
 
     public void jsLoad(String s)
@@ -256,11 +274,10 @@ public class BlackoutRenderer extends QuadRenderer //implements NativeApp
     public void nativeDrawImage(String textureName, final double srcX, final double srcY, final double srcW, final double srcH, final double dstX, final double dstY, final double dstW, final double dstH, final double rot, final double anchorX, final double anchorY, final double r, final double g, final double b, final double a)
     {
         // Log.d(TAG, "nativeDrawImage() textureName: "+textureName+" srcX: "+srcX+" srcY: "+srcY+" srcW: "+srcW+" srcH: "+srcH+" dstX: "+dstX+" dstY: "+dstY+" dstW: "+dstW+" dstH: "+dstH+" rot: "+rot+" anchorX: "+anchorX+" anchorY: "+anchorY+" r: "+r+" g: "+g+" b: "+b+" a: "+a);
-        for(int i = 0; i < 10; i++)
-        view_.renderer().drawImage(textureName,
-            (float)srcX, (float)srcY, (float)srcW, (float)srcH,
-            (float)dstX, (float)dstY, (float)dstW, (float)dstH,
-            (float)rot, (float)anchorX, (float)anchorY,
-            (float)r, (float)g, (float)b, (float)a);
+        // drawImage(textureName,
+        //     (float)srcX, (float)srcY, (float)srcW, (float)srcH,
+        //     (float)dstX, (float)dstY, (float)dstW, (float)dstH,
+        //     (float)rot, (float)anchorX, (float)anchorY,
+        //     (float)r, (float)g, (float)b, (float)a);
     }
 }
