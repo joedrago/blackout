@@ -9,10 +9,15 @@ import android.view.Display;
 import android.view.View;
 import android.view.Window;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
-import com.jdrago.blackout.bridge.*;
+// import com.jdrago.blackout.bridge.*;
 import com.jdrago.blackout.BlackoutView;
 
 public class BlackoutActivity extends Activity
@@ -20,8 +25,6 @@ public class BlackoutActivity extends Activity
     private static final String TAG = "Blackout";
 
     private BlackoutView view_;
-    private Script script_;
-    private long lastTime_;
     Point displaySize_;
     private double coordinateScale_;
     boolean paused_;
@@ -31,7 +34,6 @@ public class BlackoutActivity extends Activity
     {
         super.onCreate(savedInstanceState);
 
-        lastTime_ = System.currentTimeMillis();
         paused_ = true;
 
         Display display = getWindowManager().getDefaultDisplay();
@@ -45,23 +47,9 @@ public class BlackoutActivity extends Activity
         coordinateScale_ = 1;
         Log.d(TAG, "BlackoutActivity::onCreate(): displaySize: "+displaySize_.x+","+displaySize_.y);
 
-        view_ = new BlackoutView(getApplication(), this, displaySize_);
-        script_ = new Script();
-        synchronized(script_) {
-            script_.startup(view_.renderer(), displaySize_.x, displaySize_.y);
-        }
-
+        view_ = new BlackoutView(getApplication(), this, displaySize_, loadScript(R.raw.script));
         setContentView(view_);
         immerse();
-
-        String state = "";
-        if(savedInstanceState != null)
-            state = savedInstanceState.getString("state");
-
-        Log.d(TAG, "about to call load with: "+state);
-        synchronized(script_) {
-            script_.load(state);
-        }
 
         // This block of code ensures that we re-render at least once a second (1 FPS).
         final Handler handler = new Handler();
@@ -99,6 +87,7 @@ public class BlackoutActivity extends Activity
         Log.d(TAG, "onPause (native)");
 
         super.onPause();
+        view_.onPause();
         paused_ = true;
     }
 
@@ -108,6 +97,7 @@ public class BlackoutActivity extends Activity
         Log.d(TAG, "onResume (native)");
 
         super.onResume();
+        view_.onResume();
         immerse();
         paused_ = false;
     }
@@ -118,11 +108,8 @@ public class BlackoutActivity extends Activity
 
         Log.d(TAG, "onSaveInstanceState (native)");
 
-        String state;
-        synchronized(script_) {
-            state = script_.save();
-        }
-        savedInstanceState.putString("state", state);
+        // String state = jsSave();
+        // savedInstanceState.putString("state", state);
     }
 
     void immerse()
@@ -137,52 +124,44 @@ public class BlackoutActivity extends Activity
             | View.INVISIBLE);
     }
 
-    public boolean update()
-    {
-        long now = System.currentTimeMillis();
-        double dt = (double)(now - lastTime_);
-        lastTime_ = now;
-        boolean needsRender = false;
-        synchronized(script_) {
-            needsRender = script_.update(dt);
-        }
-        return needsRender;
-    }
-
-    public void render()
-    {
-        synchronized(script_) {
-            script_.render();
-        }
-    }
-
     public void touchDown(double x, double y)
     {
         x *= coordinateScale_;
         y *= coordinateScale_;
-        synchronized(script_) {
-            script_.touchDown(x, y);
-        }
-        view_.requestRender();
+        view_.renderer().jsTouchDown(x, y);
     }
 
     public void touchMove(double x, double y)
     {
         x *= coordinateScale_;
         y *= coordinateScale_;
-        synchronized(script_) {
-            script_.touchMove(x, y);
-        }
-        view_.requestRender();
+        view_.renderer().jsTouchMove(x, y);
     }
 
     public void touchUp(double x, double y)
     {
         x *= coordinateScale_;
         y *= coordinateScale_;
-        synchronized(script_) {
-            script_.touchUp(x, y);
+        view_.renderer().jsTouchUp(x, y);
+    }
+
+    public String loadScript(int resId)
+    {
+        InputStream inputStream = getApplication().getResources().openRawResource(resId);
+
+        InputStreamReader inputreader = new InputStreamReader(inputStream);
+        BufferedReader buffreader = new BufferedReader(inputreader);
+        String line;
+        StringBuilder text = new StringBuilder();
+
+        try {
+            while (( line = buffreader.readLine()) != null) {
+                text.append(line);
+                text.append('\n');
+            }
+        } catch (IOException e) {
+            return null;
         }
-        view_.requestRender();
+        return text.toString();
     }
 }

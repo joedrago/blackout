@@ -13,14 +13,14 @@ import javax.microedition.khronos.opengles.GL10;
 
 class BlackoutView extends GLSurfaceView
 {
-    public BlackoutView(Context context, BlackoutActivity activity, Point displaySize)
+    public BlackoutView(Context context, BlackoutActivity activity, Point displaySize, String script)
     {
         super(context);
         setEGLContextClientVersion(2);
         activity_ = activity;
 
         getHolder().setFixedSize(displaySize.x, displaySize.y);
-        renderer_ = new BlackoutRenderer(context, activity, this);
+        renderer_ = new BlackoutRenderer(context, activity, this, displaySize, script);
         setRenderer(renderer_);
         setRenderMode(RENDERMODE_WHEN_DIRTY);
     }

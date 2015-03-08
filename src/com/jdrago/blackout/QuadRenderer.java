@@ -7,6 +7,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
+import android.os.Trace;
 import android.util.Log;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -17,6 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 
 class QuadRenderer implements GLSurfaceView.Renderer
 {
@@ -25,6 +27,25 @@ class QuadRenderer implements GLSurfaceView.Renderer
         int id;
         int width;
         int height;
+    };
+
+    class Quad
+    {
+        float srcX;
+        float srcY;
+        float srcW;
+        float srcH;
+        float dstX;
+        float dstY;
+        float dstW;
+        float dstH;
+        float rot;
+        float anchorX;
+        float anchorY;
+        float r;
+        float g;
+        float b;
+        float a;
     };
 
     // to be implemented by a derived class
@@ -37,6 +58,8 @@ class QuadRenderer implements GLSurfaceView.Renderer
         verts_ = ByteBuffer.allocateDirect(20 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
         indices_ = ByteBuffer.allocateDirect(quadIndicesData_.length * INT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asIntBuffer();
         indices_.put(quadIndicesData_).position(0);
+
+        quadList_ = new ArrayList<Quad>();
     }
 
     public void renderBegin(float r, float g, float b)
@@ -59,25 +82,60 @@ class QuadRenderer implements GLSurfaceView.Renderer
 
     public void drawImage(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY, float r, float g, float b, float a)
     {
+        Quad q = new Quad();
+        q.srcX = srcX;
+        q.srcY = srcY;
+        q.srcW = srcW;
+        q.srcH = srcH;
+        q.dstX = dstX;
+        q.dstY = dstY;
+        q.dstW = dstW;
+        q.dstH = dstH;
+        q.rot = rot;
+        q.anchorX = anchorX;
+        q.anchorY = anchorY;
+        q.r = r;
+        q.g = g;
+        q.b = b;
+        q.a = a;
+        quadList_.add(q);
+    }
+
+    public void drawImages(String textureName)
+    {
+        if(quadList_.size() == 0)
+            return;
+
+        Trace.beginSection("drawImage"); try {
         Texture texture = getTexture(textureName);
 
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
-        float uvL = srcX / (float)texture.width;
-        float uvT = srcY / (float)texture.height;
-        float uvR = (srcX + srcW) / (float)texture.width;
-        float uvB = (srcY + srcH) / (float)texture.height;
+        float[] vertData = new float[20 * 1]; //quadList_.size()];
+        for (int i = 0; i < 1; ++i) // quadList_.size()
+        {
+            Quad q = quadList_.get(i);
 
-        float[] vertData = {
-            // X, Y, Z, U, V
-            0, 0, 0, uvL, uvT,
-            1, 0, 0, uvR, uvT,
-            1, 1, 0, uvR, uvB,
-            0, 1, 0, uvL, uvB};
+            float uvL = q.srcX / (float)texture.width;
+            float uvT = q.srcY / (float)texture.height;
+            float uvR = (q.srcX + q.srcW) / (float)texture.width;
+            float uvB = (q.srcY + q.srcH) / (float)texture.height;
+            float[] quadVertData = {
+                // X, Y, Z, U, V
+                0, 0, 0, uvL, uvT,
+                1, 0, 0, uvR, uvT,
+                1, 1, 0, uvR, uvB,
+                0, 1, 0, uvL, uvB};
+
+            System.arraycopy(quadVertData, 0, vertData, i * 20, 20);
+        }
+
+        Trace.beginSection("verts.put"); try {
         verts_.position(0);
         verts_.put(vertData);
+        } finally { Trace.endSection(); }
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture.id);
         verts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
@@ -91,6 +149,7 @@ class QuadRenderer implements GLSurfaceView.Renderer
         GLES20.glEnableVertexAttribArray(texHandle_);
         checkGlError("glEnableVertexAttribArray texHandle");
 
+        Trace.beginSection("math"); try {
         float anchorOffsetX = -1 * anchorX * dstW;
         float anchorOffsetY = -1 * anchorY * dstH;
         Matrix.setIdentityM(modelMatrix_, 0);
@@ -100,11 +159,15 @@ class QuadRenderer implements GLSurfaceView.Renderer
         Matrix.scaleM(modelMatrix_, 0, dstW, dstH, 0);
         Matrix.multiplyMM(viewProjMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
         Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, viewProjMatrix_, 0);
+        } finally { Trace.endSection(); }
 
         GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
-        GLES20.glUniform4f(vertColorHandle_, r, g, b, a);
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, indices_);
+        // GLES20.glUniform4f(vertColorHandle_, r, g, b, a);
+        GLES20.glUniform4f(vertColorHandle_, 1, 1, 1, 1);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLE_FAN, 0, 4);
         checkGlError("glDrawArrays");
+
+        } finally { Trace.endSection(); }
     }
 
     public void onSurfaceChanged(GL10 glUnused, int width, int height)
@@ -332,6 +395,8 @@ class QuadRenderer implements GLSurfaceView.Renderer
 
     private int width_;
     private int height_;
+
+    ArrayList<Quad> quadList_;
 
     private Context context_;
     private static String TAG = "QuadRenderer";

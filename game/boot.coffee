@@ -2,8 +2,11 @@ Game = require 'Game'
 
 game_ = null
 
-startup = (app, width, height) ->
-  game_ = new Game(app, Number(width), Number(height))
+startup = (width, height) ->
+  nativeApp =
+    log: nativeLog
+    drawImage: nativeDrawImage
+  game_ = new Game(nativeApp, Number(width), Number(height))
   return
 
 shutdown = ->

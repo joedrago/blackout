@@ -126,42 +126,42 @@ class Game
     textPadding = textHeight / 2
 
     # left side
-    headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
-    @fontRenderer.render {
-      font: LOG_FONT
-      height: textHeight
-      str: headline
-      x: 0
-      y: 0
-      anchor:
-        x: 0
-        y: 0
-      color: @colors.red
-    }
-    for line, i in @blackout.log
-      @fontRenderer.render {
-        font: LOG_FONT
-        height: textHeight
-        str: line
-        x: 0
-        y: (i+1) * (textHeight + textPadding)
-        anchor:
-          x: 0
-          y: 0
-      }
+    # headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
+    # @fontRenderer.render {
+    #   font: LOG_FONT
+    #   height: textHeight
+    #   str: headline
+    #   x: 0
+    #   y: 0
+    #   anchor:
+    #     x: 0
+    #     y: 0
+    #   color: @colors.red
+    # }
+    # for line, i in @blackout.log
+    #   @fontRenderer.render {
+    #     font: LOG_FONT
+    #     height: textHeight
+    #     str: line
+    #     x: 0
+    #     y: (i+1) * (textHeight + textPadding)
+    #     anchor:
+    #       x: 0
+    #       y: 0
+    #   }
 
-    # right side
-    for player, i in @blackout.players
-      @fontRenderer.render {
-        font: LOG_FONT
-        height: textHeight
-        str: player.name
-        x: @width
-        y: i * (textHeight + textPadding)
-        anchor:
-          x: 1
-          y: 0
-      }
+    # # right side
+    # for player, i in @blackout.players
+    #   @fontRenderer.render {
+    #     font: LOG_FONT
+    #     height: textHeight
+    #     str: player.name
+    #     x: @width
+    #     y: i * (textHeight + textPadding)
+    #     anchor:
+    #       x: 1
+    #       y: 0
+    #   }
 
     @hand.render()
 

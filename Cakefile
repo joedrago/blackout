@@ -5,8 +5,8 @@ util = require 'util'
 watch = require 'node-watch'
 {spawn, exec} = require 'child_process'
 
-rhinoLib = 'libs/js.jar'
-outputClassDir = 'bin/classes'
+outputBinDir = 'bin'
+outputResDir = 'res/raw'
 bridgeSrcPath = 'src/com/jdrago/blackout/bridge'
 gameSrcPath = 'game'
 webSrcPath = 'web'
@@ -41,10 +41,10 @@ getCoffeeScriptCmdline = (dir) ->
 buildGameBundle = (exitOnFailure, cb) ->
   cmdline = getCoffeeScriptCmdline(gameSrcPath)
   util.log "Bundling (game): #{cmdline.names}"
-  mkdirp.sync(outputClassDir)
+  # mkdirp.sync(outputBinDir)
   shell exitOnFailure, """
-    browserify -o #{outputClassDir}/Script.js -t coffeeify #{cmdline.sources}
-    coffee -bcp ./#{gameSrcPath}/boot.coffee >> #{outputClassDir}/Script.js
+    browserify -o #{outputResDir}/script.js -t coffeeify #{cmdline.sources}
+    coffee -bcp ./#{gameSrcPath}/boot.coffee >> #{outputResDir}/script.js
   """, ->
     cb() if cb?
 
@@ -52,24 +52,14 @@ buildWebBundle = (exitOnFailure, cb) ->
   gameCmdline = getCoffeeScriptCmdline(gameSrcPath)
   webCmdline = getCoffeeScriptCmdline(webSrcPath)
   util.log "Bundling (web): #{webCmdline.names}"
-  mkdirp.sync(outputClassDir)
+  mkdirp.sync(outputBinDir)
   shell exitOnFailure, """
-    browserify -o #{outputClassDir}/web.js #{gameCmdline.externals} -t coffeeify #{webCmdline.sources}
-  """, ->
-    cb() if cb?
-
-buildJavaClasses = (cb) ->
-  util.log "Generating Java classes"
-  mkdirp.sync(outputClassDir)
-  shell true, """
-    javac -target 1.5 -source 1.5 -d #{outputClassDir} #{bridgeSrcPath}/NativeApp.java #{bridgeSrcPath}/BaseScript.java
-    java -cp #{rhinoLib}:#{outputClassDir} org.mozilla.javascript.tools.jsc.Main -opt -1 -implements com.jdrago.blackout.bridge.BaseScript -package com.jdrago.blackout.bridge #{outputClassDir}/Script.js
+    browserify -o #{outputBinDir}/web.js #{gameCmdline.externals} -t coffeeify #{webCmdline.sources}
   """, ->
     cb() if cb?
 
 task 'build', 'build JS bundle', (options) ->
-  buildGameBundle true, ->
-    buildJavaClasses()
+  buildGameBundle true
 
 task 'web', 'build web version', (options) ->
   buildGameBundle true, ->
