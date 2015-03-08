@@ -29,25 +29,6 @@ class QuadRenderer implements GLSurfaceView.Renderer
         int height;
     };
 
-    class Quad
-    {
-        float srcX;
-        float srcY;
-        float srcW;
-        float srcH;
-        float dstX;
-        float dstY;
-        float dstW;
-        float dstH;
-        float rot;
-        float anchorX;
-        float anchorY;
-        float r;
-        float g;
-        float b;
-        float a;
-    };
-
     // to be implemented by a derived class
     public void loadTextures() {}
     public void onDrawFrame(GL10 glUnused) {}
