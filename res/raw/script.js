@@ -1063,18 +1063,17 @@ FontRenderer = (function() {
     this.game = game;
   }
 
-  FontRenderer.prototype.render = function(args) {
-    var anchorOffsetX, anchorOffsetY, ch, code, currX, glyph, i, j, k, len, len1, metrics, ref, ref1, results, scale, totalHeight, totalWidth;
-    metrics = fontmetrics[args.font];
+  FontRenderer.prototype.render = function(font, height, str, x, y, anchorx, anchory, color, cb) {
+    var anchorOffsetX, anchorOffsetY, ch, code, currX, glyph, i, j, k, len, len1, metrics, results, scale, totalHeight, totalWidth;
+    metrics = fontmetrics[font];
     if (!metrics) {
       return;
     }
-    scale = args.height / metrics.height;
+    scale = height / metrics.height;
     totalWidth = 0;
     totalHeight = metrics.height * scale;
-    ref = args.str;
-    for (i = j = 0, len = ref.length; j < len; i = ++j) {
-      ch = ref[i];
+    for (i = j = 0, len = str.length; j < len; i = ++j) {
+      ch = str[i];
       code = ch.charCodeAt(0);
       glyph = metrics.glyphs[code];
       if (!glyph) {
@@ -1082,19 +1081,26 @@ FontRenderer = (function() {
       }
       totalWidth += glyph.xadvance * scale;
     }
-    anchorOffsetX = -1 * args.anchor.x * totalWidth;
-    anchorOffsetY = -1 * args.anchor.y * totalHeight;
-    currX = args.x;
-    ref1 = args.str;
+    anchorOffsetX = -1 * anchorx * totalWidth;
+    anchorOffsetY = -1 * anchory * totalHeight;
+    currX = x;
+    if (!color) {
+      color = {
+        r: 1,
+        g: 1,
+        b: 1,
+        a: 1
+      };
+    }
     results = [];
-    for (i = k = 0, len1 = ref1.length; k < len1; i = ++k) {
-      ch = ref1[i];
+    for (i = k = 0, len1 = str.length; k < len1; i = ++k) {
+      ch = str[i];
       code = ch.charCodeAt(0);
       glyph = metrics.glyphs[code];
       if (!glyph) {
         continue;
       }
-      this.game.drawImage(args.font, glyph.x, glyph.y, glyph.width, glyph.height, currX + (glyph.xoffset * scale) + anchorOffsetX, args.y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale, 0, 0, 0, 1, 1, 1, 1);
+      this.game.drawImage(font, glyph.x, glyph.y, glyph.width, glyph.height, currX + (glyph.xoffset * scale) + anchorOffsetX, y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale, 0, 0, 0, color.r, color.g, color.b, color.a);
       results.push(currX += glyph.xadvance * scale);
     }
     return results;
@@ -1271,47 +1277,16 @@ Game = (function() {
     textHeight = this.height / 30;
     textPadding = textHeight / 2;
     headline = "State: " + this.blackout.state + ", Turn: " + this.blackout.players[this.blackout.turn].name + " Err: " + this.lastErr;
-    this.fontRenderer.render({
-      font: LOG_FONT,
-      height: textHeight,
-      str: headline,
-      x: 0,
-      y: 0,
-      anchor: {
-        x: 0,
-        y: 0
-      },
-      color: this.colors.red
-    });
+    this.fontRenderer.render(LOG_FONT, textHeight, headline, 0, 0, 0, 0, this.colors.red);
     ref1 = this.blackout.log;
     for (i = j = 0, len = ref1.length; j < len; i = ++j) {
       line = ref1[i];
-      this.fontRenderer.render({
-        font: LOG_FONT,
-        height: textHeight,
-        str: line,
-        x: 0,
-        y: (i + 1) * (textHeight + textPadding),
-        anchor: {
-          x: 0,
-          y: 0
-        }
-      });
+      this.fontRenderer.render(LOG_FONT, textHeight, line, 0, (i + 1) * (textHeight + textPadding), 0, 0, this.colors.white);
     }
     ref2 = this.blackout.players;
     for (i = k = 0, len1 = ref2.length; k < len1; i = ++k) {
       player = ref2[i];
-      this.fontRenderer.render({
-        font: LOG_FONT,
-        height: textHeight,
-        str: player.name,
-        x: this.width,
-        y: i * (textHeight + textPadding),
-        anchor: {
-          x: 1,
-          y: 0
-        }
-      });
+      this.fontRenderer.render(LOG_FONT, textHeight, player.name, this.width, i * (textHeight + textPadding), 1, 0, this.colors.red);
     }
     this.hand.render();
     return this.renderCommands;

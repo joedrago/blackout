@@ -130,41 +130,13 @@ class Game
 
     # left side
     headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
-    @fontRenderer.render {
-      font: LOG_FONT
-      height: textHeight
-      str: headline
-      x: 0
-      y: 0
-      anchor:
-        x: 0
-        y: 0
-      color: @colors.red
-    }
+    @fontRenderer.render LOG_FONT, textHeight, headline, 0, 0, 0, 0, @colors.red
     for line, i in @blackout.log
-      @fontRenderer.render {
-        font: LOG_FONT
-        height: textHeight
-        str: line
-        x: 0
-        y: (i+1) * (textHeight + textPadding)
-        anchor:
-          x: 0
-          y: 0
-      }
+      @fontRenderer.render LOG_FONT, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0, @colors.white
 
     # right side
     for player, i in @blackout.players
-      @fontRenderer.render {
-        font: LOG_FONT
-        height: textHeight
-        str: player.name
-        x: @width
-        y: i * (textHeight + textPadding)
-        anchor:
-          x: 1
-          y: 0
-      }
+      @fontRenderer.render LOG_FONT, textHeight, player.name, @width, i * (textHeight + textPadding), 1, 0, @colors.white
 
     @hand.render()
 
@@ -175,17 +147,6 @@ class Game
 
   drawImage: (texture, sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a, cb) ->
     @renderCommands.push [texture, sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a]
-    # texture, src.[x,y,w,h], dst.[x,y,w,h], rot, anchor.[x,y], color.[r,g,b,a], cb
-    # color = args.color
-    # if not color
-    #   color = @colors.white
-
-    # @native.drawImage(
-    #   texture,
-    #   sx, sy, sw, sh,
-    #   dx, dy, dw, dh,
-    #   rot, anchorx, anchory,
-    #   1,1,1,1)
 
     if cb?
       # caller wants to remember where this was drawn, and wants to be called back if it is ever touched

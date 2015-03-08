@@ -3,36 +3,35 @@ fontmetrics = require 'fontmetrics'
 class FontRenderer
   constructor:  (@game) ->
 
-  render: (args) ->
-    # font, height, str, x, y, anchor.[xy], cb
-    metrics = fontmetrics[args.font]
+  render: (font, height, str, x, y, anchorx, anchory, color, cb) ->
+    metrics = fontmetrics[font]
     return if not metrics
-    scale = args.height / metrics.height
+    scale = height / metrics.height
 
     totalWidth = 0
     totalHeight = metrics.height * scale
-    for ch, i in args.str
+    for ch, i in str
       code = ch.charCodeAt(0)
       glyph = metrics.glyphs[code]
       continue if not glyph
       totalWidth += glyph.xadvance * scale
 
-    anchorOffsetX = -1 * args.anchor.x * totalWidth
-    anchorOffsetY = -1 * args.anchor.y * totalHeight
-    currX = args.x
+    anchorOffsetX = -1 * anchorx * totalWidth
+    anchorOffsetY = -1 * anchory * totalHeight
+    currX = x
 
-    # if not renderParams.color
-    #   renderParams.color = { r: 1, g: 1, b: 1, a: 1 }
+    if not color
+      color = { r: 1, g: 1, b: 1, a: 1 }
 
-    for ch, i in args.str
+    for ch, i in str
       code = ch.charCodeAt(0)
       glyph = metrics.glyphs[code]
       continue if not glyph
-      @game.drawImage args.font,
+      @game.drawImage font,
       glyph.x, glyph.y, glyph.width, glyph.height,
-      currX + (glyph.xoffset * scale) + anchorOffsetX, args.y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale,
+      currX + (glyph.xoffset * scale) + anchorOffsetX, y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale,
       0, 0, 0,
-      1,1,1,1
+      color.r, color.g, color.b, color.a
       currX += glyph.xadvance * scale
 
 module.exports = FontRenderer
