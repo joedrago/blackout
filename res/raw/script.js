@@ -3370,16 +3370,15 @@ game_ = null;
 startup = function(width, height) {
   var nativeApp;
   nativeApp = {
-    log: nativeLog,
-    drawImage: nativeDrawImage
+    log: nativeLog
   };
-  game_ = new Game(nativeApp, Number(width), Number(height));
+  game_ = new Game(nativeApp, width, height);
 };
 
 shutdown = function() {};
 
 update = function(dt) {
-  return game_.update(Number(dt));
+  return game_.update(dt);
 };
 
 render = function() {
@@ -3395,13 +3394,13 @@ save = function() {
 };
 
 touchDown = function(x, y) {
-  game_.touchDown(Number(x), Number(y));
+  game_.touchDown(x, y);
 };
 
 touchMove = function(x, y) {
-  game_.touchMove(Number(x), Number(y));
+  game_.touchMove(x, y);
 };
 
 touchUp = function(x, y) {
-  game_.touchUp(Number(x), Number(y));
+  game_.touchUp(x, y);
 };

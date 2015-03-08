@@ -5,15 +5,14 @@ game_ = null
 startup = (width, height) ->
   nativeApp =
     log: nativeLog
-    drawImage: nativeDrawImage
-  game_ = new Game(nativeApp, Number(width), Number(height))
+  game_ = new Game(nativeApp, width, height)
   return
 
 shutdown = ->
   return
 
 update = (dt) ->
-  return game_.update(Number(dt))
+  return game_.update(dt)
 
 render = ->
   return game_.render()
@@ -26,13 +25,13 @@ save = ->
   return game_.save()
 
 touchDown = (x, y) ->
-  game_.touchDown(Number(x), Number(y))
+  game_.touchDown(x, y)
   return
 
 touchMove = (x, y) ->
-  game_.touchMove(Number(x), Number(y))
+  game_.touchMove(x, y)
   return
 
 touchUp = (x, y) ->
-  game_.touchUp(Number(x), Number(y))
+  game_.touchUp(x, y)
   return
