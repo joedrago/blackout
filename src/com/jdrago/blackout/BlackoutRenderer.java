@@ -102,7 +102,7 @@ public class BlackoutRenderer extends QuadRenderer //implements NativeApp
         // to get back in this function and taking a break before rendering again
         long now = System.currentTimeMillis();
         long dt = now - lastTime_;
-/*
+
         // Comment out this block to disable frame limiting
         {
             if(dt < MIN_MS_PER_FRAME)
@@ -119,7 +119,7 @@ public class BlackoutRenderer extends QuadRenderer //implements NativeApp
             now = System.currentTimeMillis();
             dt = now - lastTime_;
         }
-*/
+
         lastTime_ = now;
 
         jsUpdate((double)dt);
@@ -186,10 +186,10 @@ public class BlackoutRenderer extends QuadRenderer //implements NativeApp
             needsRender = true;
         } finally { Trace.endSection(); }
 
-        // if(needsRender) {
+        if(needsRender) {
             // Log.d(TAG, "needsRender from onDrawFrame");
             view_.requestRender();
-        // }
+        }
     }
 
     public void jsStartup()
@@ -249,18 +249,21 @@ public class BlackoutRenderer extends QuadRenderer //implements NativeApp
     {
         Touch touch = new Touch(TouchType.DOWN, x, y);
         inputQueue_.offer(touch);
+        view_.requestRender();
     }
 
     public void jsTouchMove(double x, double y)
     {
         Touch touch = new Touch(TouchType.MOVE, x, y);
         inputQueue_.offer(touch);
+        view_.requestRender();
     }
 
     public void jsTouchUp(double x, double y)
     {
         Touch touch = new Touch(TouchType.UP, x, y);
         inputQueue_.offer(touch);
+        view_.requestRender();
     }
 
     // --------------------------------------------------------------------------------------------
