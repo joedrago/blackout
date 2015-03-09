@@ -43,7 +43,7 @@ buildGameBundle = (exitOnFailure, cb) ->
   util.log "Bundling (game): #{cmdline.names}"
   # mkdirp.sync(outputBinDir)
   shell exitOnFailure, """
-    browserify -o #{outputResDir}/script.js -t coffeeify #{cmdline.sources}
+    browserify -d -o #{outputResDir}/script.js -t coffeeify #{cmdline.sources}
     coffee -bcp ./#{gameSrcPath}/boot.coffee >> #{outputResDir}/script.js
   """, ->
     cb() if cb?
