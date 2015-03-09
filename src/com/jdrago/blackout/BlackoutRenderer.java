@@ -37,6 +37,7 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
 
     static private final int MAX_FPS = 30;
     static private final int MIN_MS_PER_FRAME = 1000 / MAX_FPS;
+    static private final int FRAME_COUNTER_INTERVAL_MS = 10 * 1000;
 
     private static final int FLOAT_SIZE_BYTES = 4;
     private static final int INT_SIZE_BYTES = 4;
@@ -131,6 +132,7 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
     private int texHandle_;
     private int vertColorHandle_;
     private long frameCounter_;
+    private long frameCounterLastTime_;
 
     // --------------------------------------------------------------------------------------------
     // Constructor
@@ -153,6 +155,7 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
         indices_ = ByteBuffer.allocateDirect(QUAD_INDICES.length * INT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asIntBuffer();
         indices_.put(QUAD_INDICES).position(0);
         frameCounter_ = 0;
+        frameCounterLastTime_ = FRAME_COUNTER_INTERVAL_MS;
 
         Log.d(TAG, "Renderer MaxFPS: "+MAX_FPS+", MinMSPerFrame: "+MIN_MS_PER_FRAME);
     }
@@ -170,9 +173,6 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
 
     public void onDrawFrame(GL10 glUnused)
     {
-        frameCounter_++;
-        // Log.d(TAG, "onDrawFrame: "+frameCounter_);
-
         // Cap our framerate to MAX_FPS by measuring the time it took
         // to get back in this function and taking a break before rendering again
         long now = System.currentTimeMillis();
@@ -198,6 +198,17 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
         }
 
         lastTime_ = now;
+
+        frameCounter_++;
+        frameCounterLastTime_ -= dt;
+        if(frameCounterLastTime_ <= 0)
+        {
+            if(frameCounter_ > 2 * (FRAME_COUNTER_INTERVAL_MS / 1000))
+                Log.d(TAG, "Rendered "+frameCounter_+" frames in last "+(FRAME_COUNTER_INTERVAL_MS + frameCounterLastTime_) + "ms");
+
+            frameCounter_ = 0;
+            frameCounterLastTime_ = FRAME_COUNTER_INTERVAL_MS;
+        }
 
         jsUpdate((double)dt);
 
