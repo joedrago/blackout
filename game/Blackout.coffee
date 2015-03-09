@@ -516,7 +516,8 @@ class Blackout
     bid = 0
     partialSpades = 0
     partialFaces = 0 # non spade face cards
-    for card, i in currentPlayer.hand
+    for v, i in currentPlayer.hand
+      card = new Card(v)
       if card.suit == Suit.SPADES
         if cr > 40 # Almost all cards in play
           if card.value >= 6 # 8S or higher
