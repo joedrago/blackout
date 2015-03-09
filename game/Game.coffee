@@ -1,6 +1,7 @@
 Animation = require 'Animation'
 FontRenderer = require 'FontRenderer'
 Hand = require 'Hand'
+Pile = require 'Pile'
 {Blackout, State, OK} = require 'Blackout'
 
 AI_TICK_RATE_MS = 1000
@@ -31,6 +32,8 @@ class Game
     @renderCommands = []
 
     @hand = new Hand this, @width, @height
+    @pile = new Pile this, @width, @height, @hand
+
     @hand.set @blackout.players[0].hand
 
   # -----------------------------------------------------------------------------------------------------
@@ -78,11 +81,12 @@ class Game
     @log "(game) playing card #{cardToPlay}"
 
     if @blackout.state == State.BID
-      @blackout.bid {
-        id: 1
-        bid: 0
-        ai: false
-      }
+      if @blackout.turn == 0
+        @blackout.bid {
+          id: 1
+          bid: 0
+          ai: false
+        }
 
     if @blackout.state == State.TRICK
       ret = @blackout.play {
@@ -117,8 +121,12 @@ class Game
       @nextAITick = AI_TICK_RATE_MS
       if @blackout.aiTick()
         updated = true
+    if @pile.update(dt)
+      updated = true
     if @hand.update(dt)
       updated = true
+
+    @pile.set @blackout.pile, @blackout.prev
 
     return updated
 
@@ -126,7 +134,7 @@ class Game
     @renderCommands.length = 0
 
     textHeight = @height / 30
-    textPadding = textHeight / 2
+    textPadding = textHeight / 5
 
     # left side
     headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
@@ -138,6 +146,7 @@ class Game
     for player, i in @blackout.players
       @fontRenderer.render LOG_FONT, textHeight, player.name, @width, i * (textHeight + textPadding), 1, 0, @colors.white
 
+    @pile.render()
     @hand.render()
 
     return @renderCommands
