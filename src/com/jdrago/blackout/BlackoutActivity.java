@@ -1,6 +1,7 @@
 package com.jdrago.blackout;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
@@ -100,6 +101,14 @@ public class BlackoutActivity extends Activity
         view_.onResume();
         immerse();
         paused_ = false;
+    }
+
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // stomp any request to resize view to exactly what I want
+        view_.getLayoutParams().width = displaySize_.x;
+        view_.getLayoutParams().height = displaySize_.y;
     }
 
     protected void onSaveInstanceState(Bundle savedInstanceState)
