@@ -19,7 +19,7 @@ class Game
     @blackout = new Blackout this, {
       rounds: "13|13|13|13"
       players: [
-        { id: 1, name: 'joe' }
+        { id: 1, name: 'Player' }
       ]
     }
     @blackout.addAI()
