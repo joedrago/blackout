@@ -31,7 +31,7 @@ class FontRenderer
       glyph.x, glyph.y, glyph.width, glyph.height,
       currX + (glyph.xoffset * scale) + anchorOffsetX, y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale,
       0, 0, 0,
-      color.r, color.g, color.b, color.a
+      color.r, color.g, color.b, color.a, cb
       currX += glyph.xadvance * scale
 
 module.exports = FontRenderer
