@@ -1286,7 +1286,7 @@ Game = (function() {
     ref2 = this.blackout.players;
     for (i = k = 0, len1 = ref2.length; k < len1; i = ++k) {
       player = ref2[i];
-      this.fontRenderer.render(LOG_FONT, textHeight, player.name, this.width, i * (textHeight + textPadding), 1, 0, this.colors.red);
+      this.fontRenderer.render(LOG_FONT, textHeight, player.name, this.width, i * (textHeight + textPadding), 1, 0, this.colors.white);
     }
     this.hand.render();
     return this.renderCommands;

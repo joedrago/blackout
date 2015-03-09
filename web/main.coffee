@@ -73,7 +73,9 @@ class NativeApp
 
     @context.clearRect(0, 0, @width, @height)
     @game.update(dt)
-    @game.render()
+    renderCommands = @game.render()
+    for cmd in renderCommands
+      @drawImage.apply(this, cmd)
 
     requestAnimationFrame => @update()
 
