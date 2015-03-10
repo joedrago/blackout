@@ -150,7 +150,10 @@ class Game
 
     # Log
     # @spriteRenderer.render "solid", 0, 0, @width * 0.4, (textHeight + textPadding) * 8, 0, 0, 0, @colors.logbg
-    headline = "State: `ffff00`#{@blackout.state}``, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
+    errText = ""
+    if (@lastErr.length > 0) and (@lastErr != OK)
+      errText = "ERROR: `ff0000`#{@lastErr}"
+    headline = "State: `ffff00`#{@blackout.state}``, Turn: `ffff00`#{@blackout.players[@blackout.turn].name}`` #{errText}"
     @fontRenderer.render LOG_FONT, textHeight, headline, 0, 0, 0, 0, @colors.lightgray
     for line, i in @blackout.log
       @fontRenderer.render LOG_FONT, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0, @colors.white
@@ -197,7 +200,13 @@ class Game
     if player.bid == -1
       scoreString = "[ -- ]"
     else
-      scoreString = "[ #{player.tricks}/#{player.bid} ]"
+      if player.tricks < player.bid
+        trickColor = "ffff33"
+      else if player.tricks == player.bid
+        trickColor = "33ff33"
+      else
+        trickColor = "ff3333"
+      scoreString = "[ `#{trickColor}`#{player.tricks}``/#{player.bid} ]"
 
     nameSize = @fontRenderer.size(LOG_FONT, scoreHeight, nameString)
     scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
