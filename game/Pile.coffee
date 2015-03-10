@@ -14,26 +14,27 @@ class Pile
     @settleTimer = 0
     @trickColor = { r: 1, g: 1, b: 0, a: 1}
     @playerCount = 2
+    @scale = 0.6
 
     centerX = (@width / 2)
     centerY = (@height / 2)
-    halfCardX = @hand.cardWidth
-    halfCardY = @hand.cardHeight / 2
+    offsetX = @hand.cardWidth * @scale
+    offsetY = (@hand.cardHeight / 2) * @scale
     @pileLocations =
       2: [
-        { x: centerX, y: centerY + halfCardY } # bottom
-        { x: centerX, y: centerY - halfCardY } # top
+        { x: centerX, y: centerY + offsetY } # bottom
+        { x: centerX, y: centerY - offsetY } # top
       ]
       3: [
-        { x: centerX, y: centerY + halfCardY } # bottom
-        { x: centerX - halfCardX, y: centerY } # left
-        { x: centerX + halfCardX, y: centerY } # right
+        { x: centerX, y: centerY + offsetY } # bottom
+        { x: centerX - offsetX, y: centerY } # left
+        { x: centerX + offsetX, y: centerY } # right
       ]
       4: [
-        { x: centerX, y: centerY + halfCardY } # bottom
-        { x: centerX - halfCardX, y: centerY } # left
-        { x: centerX, y: centerY - halfCardY } # top
-        { x: centerX + halfCardX, y: centerY } # right
+        { x: centerX, y: centerY + offsetY } # bottom
+        { x: centerX - offsetX, y: centerY } # left
+        { x: centerX, y: centerY - offsetY } # top
+        { x: centerX + offsetX, y: centerY } # right
       ]
     @throwLocations =
       2: [
@@ -42,14 +43,14 @@ class Pile
       ]
       3: [
         { x: centerX, y: @height } # bottom
-        { x: 0, y: centerY + halfCardY } # left
-        { x: @width, y: centerY + halfCardY } # right
+        { x: 0, y: centerY + offsetY } # left
+        { x: @width, y: centerY + offsetY } # right
       ]
       4: [
         { x: centerX, y: @height } # bottom
-        { x: 0, y: centerY + halfCardY } # left
+        { x: 0, y: centerY + offsetY } # left
         { x: centerX, y: 0 } # top
-        { x: @width, y: centerY + halfCardY } # right
+        { x: @width, y: centerY + offsetY } # right
       ]
 
   set: (pileID, pile, pileWho, trick, trickWho, trickTaker, @playerCount, firstThrow) ->
@@ -75,6 +76,7 @@ class Pile
       x: x
       y: y
       r: r
+      s: 1
     }
 
   syncAnims: ->
@@ -90,6 +92,7 @@ class Pile
           x: location.x # -1 * (@hand.cardWidth / 2)
           y: location.y # -1 * (@hand.cardWidth / 2)
           r: -1 * Math.PI / 4
+          s: @scale
         }
     for card in @trick
       seen[card]++
@@ -99,6 +102,7 @@ class Pile
           x: -1 * (@hand.cardWidth / 2)
           y: -1 * (@hand.cardWidth / 2)
           r: -1 * Math.PI / 2
+          s: 1
         }
     toRemove = []
     for card,anim of @anims
@@ -115,9 +119,10 @@ class Pile
     for v, index in @pile
       anim = @anims[v]
       loc = @pileWho[index]
-      anim.req.x = locations[loc].x # (@width / 2) + (index * (@hand.cardWidth / 3))
-      anim.req.y = locations[loc].y # @hand.cardHeight / 2
+      anim.req.x = locations[loc].x
+      anim.req.y = locations[loc].y
       anim.req.r = 0
+      anim.req.s = @scale
 
     for _, index in @trick
       i = @trick.length - index - 1
@@ -126,6 +131,7 @@ class Pile
       anim.req.x = (@width + (@hand.cardWidth / 2)) - ((index+1) * (@hand.cardWidth / 5))
       anim.req.y = @hand.cardHeight / 2
       anim.req.r = 0
+      anim.req.s = 1
 
   readyForNextTrick: ->
     return (@settleTimer == 0)
@@ -148,11 +154,11 @@ class Pile
   render: ->
     for v, index in @pile
       anim = @anims[v]
-      @hand.renderCard v, anim.cur.x, anim.cur.y, anim.cur.r
+      @hand.renderCard v, anim.cur.x, anim.cur.y, anim.cur.r, anim.cur.s
 
     for v in @trick
       anim = @anims[v]
-      @hand.renderCard v, anim.cur.x, anim.cur.y, anim.cur.r
+      @hand.renderCard v, anim.cur.x, anim.cur.y, anim.cur.r, anim.cur.s
 
     if (@trick.length > 0) and (@trickTaker.length > 0)
       anim = @anims[@trick[0]]

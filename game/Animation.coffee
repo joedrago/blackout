@@ -19,6 +19,8 @@ class Animation
   warp: ->
     if @cur.r?
       @cur.r = @req.r
+    if @cur.s?
+      @cur.s = @req.s
     if @cur.x? and @cur.y?
       @cur.x = @req.x
       @cur.y = @req.y
@@ -26,6 +28,9 @@ class Animation
   animating: ->
     if @cur.r?
       if @req.r != @cur.r
+        return true
+    if @cur.s?
+      if @req.s != @cur.s
         return true
     if @cur.x? and @cur.y?
       if (@req.x != @cur.x) or (@req.y != @cur.y)
@@ -58,7 +63,20 @@ class Animation
         else
           @cur.r += maxDist * sign
 
-    # scale (NYI)
+    # scale
+    if @cur.s?
+      if @req.s != @cur.s
+        updated = true
+        # pick a direction and turn
+        ds = @req.s - @cur.s
+        dist = Math.abs(ds)
+        sign = calcSign(ds)
+        maxDist = dt * @speed.s / 1000
+        if dist < maxDist
+          # we can finish this frame
+          @cur.s = @req.s
+        else
+          @cur.s += maxDist * sign
 
     # translation
     if @cur.x? and @cur.y?

@@ -42,7 +42,7 @@ class Hand
     # render / anim metrics
     @cardSpeed =
       r: Math.PI * 2
-      s: 0.5
+      s: 2.5
       t: 2 * @screenWidth
     @playCeiling = CARD_PLAY_CEILING * @screenHeight
     @cardHeight = Math.floor(@screenHeight * CARD_RENDER_SCALE)
@@ -187,17 +187,17 @@ class Hand
       continue if v == NO_CARD
       anim = @anims[v]
       do (anim, index) =>
-        @renderCard v, anim.cur.x, anim.cur.y, anim.cur.r, (clickX, clickY) =>
+        @renderCard v, anim.cur.x, anim.cur.y, anim.cur.r, 1, (clickX, clickY) =>
           @down(clickX, clickY, index)
 
-  renderCard: (v, x, y, rot, cb) ->
+  renderCard: (v, x, y, rot, scale, cb) ->
     rot = 0 if not rot
     rank = Math.floor(v % 13)
     suit = Math.floor(v / 13)
 
     @game.drawImage "cards",
     CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank), CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit), CARD_IMAGE_W, CARD_IMAGE_H,
-    x, y, @cardWidth, @cardHeight,
+    x, y, @cardWidth * scale, @cardHeight * scale,
     rot, 0.5, 0.5, 1,1,1,1, cb
 
   calcPositions: (handSize) ->
@@ -228,7 +228,7 @@ class Hand
     return if @hand.length == 0
     for v,index in @hand
       do (index) =>
-        @renderCard v, x, y, currentAngle, (clickX, clickY) =>
+        @renderCard v, x, y, currentAngle, 1, (clickX, clickY) =>
           @down(clickX, clickY, index)
 
 module.exports = Hand

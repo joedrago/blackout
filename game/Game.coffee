@@ -171,23 +171,23 @@ class Game
     if aiPlayers[0] != null
       characterWidth = @spriteRenderer.calcWidth(aiPlayers[0].character.sprite, characterHeight)
       @spriteRenderer.render aiPlayers[0].character.sprite, characterMargin, @hand.playCeiling, 0, characterHeight, 0, 0, 1, @colors.white
-      @renderScore aiPlayers[0], scoreHeight, characterMargin + (characterWidth / 2), @hand.playCeiling - textPadding, 0.5, 1
+      @renderScore aiPlayers[0], scoreHeight, characterMargin + (characterWidth / 2), @hand.playCeiling - textPadding, 0.5, 0
     # top side
     if aiPlayers[1] != null
       @spriteRenderer.render aiPlayers[1].character.sprite, @width / 2, 0, 0, characterHeight, 0, 0.5, 0, @colors.white
-      @renderScore aiPlayers[1], scoreHeight, @width / 2, characterHeight, 0.5, 1
+      @renderScore aiPlayers[1], scoreHeight, @width / 2, characterHeight, 0.5, 0
     # right side
     if aiPlayers[2] != null
       characterWidth = @spriteRenderer.calcWidth(aiPlayers[0].character.sprite, characterHeight)
       @spriteRenderer.render aiPlayers[2].character.sprite, @width - characterMargin, @hand.playCeiling, 0, characterHeight, 0, 1, 1, @colors.white
-      @renderScore aiPlayers[2], scoreHeight, @width - (characterMargin + (characterWidth / 2)), @hand.playCeiling - textPadding, 0.5, 1
+      @renderScore aiPlayers[2], scoreHeight, @width - (characterMargin + (characterWidth / 2)), @hand.playCeiling - textPadding, 0.5, 0
 
     @pile.render()
 
     # card area
-    @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea
+    # @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea
     @hand.render()
-    @renderScore @blackout.players[0], scoreHeight, @width / 2, @height, 0.5, 1
+    @renderScore @blackout.players[0], scoreHeight, @width / 2, @height, 0.5, 0
 
     return @renderCommands
 
@@ -203,8 +203,8 @@ class Game
     if nameSize.w > scoreSize.w
       scoreSize.w = nameSize.w
     @spriteRenderer.render "solid", x, y, scoreSize.w, scoreSize.h * 2, 0, anchorx, anchory, @colors.overlay
-    @fontRenderer.render LOG_FONT, scoreHeight, nameString, x, y - scoreHeight, anchorx, anchory, @colors.white
-    @fontRenderer.render LOG_FONT, scoreHeight, scoreString, x, y, anchorx, anchory, @colors.white
+    @fontRenderer.render LOG_FONT, scoreHeight, nameString, x, y, anchorx, anchory, @colors.white
+    @fontRenderer.render LOG_FONT, scoreHeight, scoreString, x, y + scoreHeight, anchorx, anchory, @colors.white
 
   # -----------------------------------------------------------------------------------------------------
   # rendering and zones
