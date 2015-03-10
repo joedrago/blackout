@@ -29,7 +29,7 @@ aiCharacters = [
   { name: "Yoshi",      sprite: "yoshi"    }
   { name: "Toad",       sprite: "toad"     }
   { name: "Bowser",     sprite: "bowser"   }
-  { name: "Bowser Jr.", sprite: "bowserjr" }
+  { name: "Bowser Jr",  sprite: "bowserjr" }
   { name: "Koopa",      sprite: "koopa"    }
   { name: "Rosalina",   sprite: "rosalina" }
   { name: "Shyguy",     sprite: "shyguy"   }

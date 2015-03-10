@@ -142,8 +142,10 @@ class Game
     # background
     @spriteRenderer.render "solid", 0, 0, @width, @height, 0, 0, 0, @colors.background
 
-    textHeight = @height / 30
+    textHeight = @height / 35
     textPadding = textHeight / 5
+    characterHeight = @height / 5
+    scoreHeight = @height / 35
 
     # Log
     # @spriteRenderer.render "solid", 0, 0, @width * 0.4, (textHeight + textPadding) * 8, 0, 0, 0, @colors.logbg
@@ -163,56 +165,46 @@ class Game
       aiPlayers[1] = @blackout.players[2]
       aiPlayers[2] = @blackout.players[3]
 
-    characterHeight = @height / 5
-    scoreHeight = @height / 30
+    characterMargin = characterHeight / 2
 
     # left side
     if aiPlayers[0] != null
-      # (font, height, str, x, y, anchorx, anchory, color, cb)
-      @spriteRenderer.render aiPlayers[0].character.sprite, 0, @hand.playCeiling, 0, characterHeight, 0, 0, 1, @colors.white
-      scoreString = @calcScoreString(aiPlayers[0])
-      scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
-      @spriteRenderer.render "solid", 0, @hand.playCeiling - textPadding, scoreSize.w, scoreSize.h, 0, 0, 1, @colors.overlay
-      @fontRenderer.render LOG_FONT, scoreHeight, scoreString, 0, @hand.playCeiling - textPadding, 0, 1, @colors.white
+      characterWidth = @spriteRenderer.calcWidth(aiPlayers[0].character.sprite, characterHeight)
+      @spriteRenderer.render aiPlayers[0].character.sprite, characterMargin, @hand.playCeiling, 0, characterHeight, 0, 0, 1, @colors.white
+      @renderScore aiPlayers[0], scoreHeight, characterMargin + (characterWidth / 2), @hand.playCeiling - textPadding, 0.5, 1
     # top side
     if aiPlayers[1] != null
       @spriteRenderer.render aiPlayers[1].character.sprite, @width / 2, 0, 0, characterHeight, 0, 0.5, 0, @colors.white
-      scoreString = @calcScoreString(aiPlayers[1])
-      scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
-      @spriteRenderer.render "solid", @width / 2, characterHeight, scoreSize.w, scoreSize.h, 0, 0.5, 1, @colors.overlay
-      @fontRenderer.render LOG_FONT, scoreHeight, scoreString, @width / 2, characterHeight, 0.5, 1, @colors.white
+      @renderScore aiPlayers[1], scoreHeight, @width / 2, characterHeight, 0.5, 1
     # right side
     if aiPlayers[2] != null
-      @spriteRenderer.render aiPlayers[2].character.sprite, @width, @hand.playCeiling, 0, characterHeight, 0, 1, 1, @colors.white
-      scoreString = @calcScoreString(aiPlayers[2])
-      scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
-      @spriteRenderer.render "solid", @width, @hand.playCeiling - textPadding, scoreSize.w, scoreSize.h, 0, 1, 1, @colors.overlay
-      @fontRenderer.render LOG_FONT, scoreHeight, scoreString, @width, @hand.playCeiling - textPadding, 1, 1, @colors.white
-
-    # # right side
-    # for player, i in @blackout.players
-    #   @fontRenderer.render LOG_FONT, textHeight, player.name, @width, i * (textHeight + textPadding), 1, 0, @colors.white
+      characterWidth = @spriteRenderer.calcWidth(aiPlayers[0].character.sprite, characterHeight)
+      @spriteRenderer.render aiPlayers[2].character.sprite, @width - characterMargin, @hand.playCeiling, 0, characterHeight, 0, 1, 1, @colors.white
+      @renderScore aiPlayers[2], scoreHeight, @width - (characterMargin + (characterWidth / 2)), @hand.playCeiling - textPadding, 0.5, 1
 
     @pile.render()
 
     # card area
     @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea
     @hand.render()
-
-    scoreX = @width / 2
-    scoreY = @height
-
-    scoreString = @calcScoreString(@blackout.players[0])
-    scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
-    @spriteRenderer.render "solid", @width / 2, @height, scoreSize.w, scoreSize.h, 0, 0.5, 1, @colors.overlay
-    @fontRenderer.render LOG_FONT, scoreHeight, scoreString, @width / 2, @height, 0.5, 1, @colors.white
+    @renderScore @blackout.players[0], scoreHeight, @width / 2, @height, 0.5, 1
 
     return @renderCommands
 
-  calcScoreString: (player) ->
+  renderScore: (player, scoreHeight, x, y, anchorx, anchory) ->
+    nameString = "#{player.name}: #{player.score}"
     if player.bid == -1
-      return " #{player.name} [ -- ] "
-    return " #{player.name} [ #{player.tricks}/#{player.bid} ] "
+      scoreString = "[ -- ]"
+    else
+      scoreString = "[ #{player.tricks}/#{player.bid} ]"
+
+    nameSize = @fontRenderer.size(LOG_FONT, scoreHeight, nameString)
+    scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
+    if nameSize.w > scoreSize.w
+      scoreSize.w = nameSize.w
+    @spriteRenderer.render "solid", x, y, scoreSize.w, scoreSize.h * 2, 0, anchorx, anchory, @colors.overlay
+    @fontRenderer.render LOG_FONT, scoreHeight, nameString, x, y - scoreHeight, anchorx, anchory, @colors.white
+    @fontRenderer.render LOG_FONT, scoreHeight, scoreString, x, y, anchorx, anchory, @colors.white
 
   # -----------------------------------------------------------------------------------------------------
   # rendering and zones

@@ -18,6 +18,11 @@ class SpriteRenderer
       shyguy:   { texture: "chars", x: 691, y: 322, w: 154, h: 308 }
       toadette: { texture: "chars", x: 847, y: 322, w: 158, h: 308 }
 
+  calcWidth: (spriteName, height) ->
+    sprite = @sprites[spriteName]
+    return 1 if not sprite
+    return height * sprite.w / sprite.h
+
   render: (spriteName, dx, dy, dw, dh, rot, anchorx, anchory, color, cb) ->
     sprite = @sprites[spriteName]
     return if not sprite
