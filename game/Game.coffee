@@ -1,5 +1,6 @@
 Animation = require 'Animation'
 FontRenderer = require 'FontRenderer'
+SpriteRenderer = require 'SpriteRenderer'
 Hand = require 'Hand'
 Pile = require 'Pile'
 {Blackout, State, OK} = require 'Blackout'
@@ -11,14 +12,20 @@ class Game
   constructor: (@native, @width, @height) ->
     @log("Game constructed: #{@width}x#{@height}")
     @fontRenderer = new FontRenderer this
+    @spriteRenderer = new SpriteRenderer this
     @zones = []
     @nextAITick = AI_TICK_RATE_MS
     @colors =
-      red:   { r: 1, g: 0, b: 0, a: 1 }
-      white: { r: 1, g: 1, b: 1, a: 1 }
+      red:        { r:   1, g:   0, b:   0, a:   1 }
+      white:      { r:   1, g:   1, b:   1, a:   1 }
+      background: { r:   0, g: 0.2, b:   0, a:   1 }
+      logbg:      { r: 0.1, g:   0, b:   0, a:   1 }
+      facebg:     { r:   0, g:   0, b:   0, a: 0.3 }
+      handarea:   { r:   0, g: 0.1, b:   0, a: 1.0 }
+      overlay:    { r:   0, g:   0, b:   0, a: 0.7 }
 
     @blackout = new Blackout this, {
-      rounds: "13|13|13|13"
+      rounds: "13|13"
       players: [
         { id: 1, name: 'Player' }
       ]
@@ -124,7 +131,7 @@ class Game
     trickTakerName = ""
     if @blackout.prevTrickTaker != -1
       trickTakerName = @blackout.players[@blackout.prevTrickTaker].name
-    @pile.set @blackout.trickID, @blackout.pile, @blackout.prev, trickTakerName
+    @pile.set @blackout.trickID, @blackout.pile, @blackout.pileWho, @blackout.prev, @blackout.prevWho, trickTakerName, @blackout.players.length, @blackout.turn
 
     return updated
 
@@ -132,23 +139,80 @@ class Game
     # Reset render commands
     @renderCommands.length = 0
 
+    # background
+    @spriteRenderer.render "solid", 0, 0, @width, @height, 0, 0, 0, @colors.background
+
     textHeight = @height / 30
     textPadding = textHeight / 5
 
-    # left side
+    # Log
+    # @spriteRenderer.render "solid", 0, 0, @width * 0.4, (textHeight + textPadding) * 8, 0, 0, 0, @colors.logbg
     headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
     @fontRenderer.render LOG_FONT, textHeight, headline, 0, 0, 0, 0, @colors.red
     for line, i in @blackout.log
       @fontRenderer.render LOG_FONT, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0, @colors.white
 
+    aiPlayers = [null, null, null]
+    if @blackout.players.length == 2
+      aiPlayers[1] = @blackout.players[1]
+    else if @blackout.players.length == 3
+      aiPlayers[0] = @blackout.players[1]
+      aiPlayers[2] = @blackout.players[2]
+    else # 4 player
+      aiPlayers[0] = @blackout.players[1]
+      aiPlayers[1] = @blackout.players[2]
+      aiPlayers[2] = @blackout.players[3]
+
+    characterHeight = @height / 5
+    scoreHeight = @height / 30
+
+    # left side
+    if aiPlayers[0] != null
+      # (font, height, str, x, y, anchorx, anchory, color, cb)
+      @spriteRenderer.render aiPlayers[0].character.sprite, 0, @hand.playCeiling, 0, characterHeight, 0, 0, 1, @colors.white
+      scoreString = @calcScoreString(aiPlayers[0])
+      scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
+      @spriteRenderer.render "solid", 0, @hand.playCeiling - textPadding, scoreSize.w, scoreSize.h, 0, 0, 1, @colors.overlay
+      @fontRenderer.render LOG_FONT, scoreHeight, scoreString, 0, @hand.playCeiling - textPadding, 0, 1, @colors.white
+    # top side
+    if aiPlayers[1] != null
+      @spriteRenderer.render aiPlayers[1].character.sprite, @width / 2, 0, 0, characterHeight, 0, 0.5, 0, @colors.white
+      scoreString = @calcScoreString(aiPlayers[1])
+      scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
+      @spriteRenderer.render "solid", @width / 2, characterHeight, scoreSize.w, scoreSize.h, 0, 0.5, 1, @colors.overlay
+      @fontRenderer.render LOG_FONT, scoreHeight, scoreString, @width / 2, characterHeight, 0.5, 1, @colors.white
     # right side
-    for player, i in @blackout.players
-      @fontRenderer.render LOG_FONT, textHeight, player.name, @width, i * (textHeight + textPadding), 1, 0, @colors.white
+    if aiPlayers[2] != null
+      @spriteRenderer.render aiPlayers[2].character.sprite, @width, @hand.playCeiling, 0, characterHeight, 0, 1, 1, @colors.white
+      scoreString = @calcScoreString(aiPlayers[2])
+      scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
+      @spriteRenderer.render "solid", @width, @hand.playCeiling - textPadding, scoreSize.w, scoreSize.h, 0, 1, 1, @colors.overlay
+      @fontRenderer.render LOG_FONT, scoreHeight, scoreString, @width, @hand.playCeiling - textPadding, 1, 1, @colors.white
+
+    # # right side
+    # for player, i in @blackout.players
+    #   @fontRenderer.render LOG_FONT, textHeight, player.name, @width, i * (textHeight + textPadding), 1, 0, @colors.white
 
     @pile.render()
+
+    # card area
+    @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea
     @hand.render()
 
+    scoreX = @width / 2
+    scoreY = @height
+
+    scoreString = @calcScoreString(@blackout.players[0])
+    scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
+    @spriteRenderer.render "solid", @width / 2, @height, scoreSize.w, scoreSize.h, 0, 0.5, 1, @colors.overlay
+    @fontRenderer.render LOG_FONT, scoreHeight, scoreString, @width / 2, @height, 0.5, 1, @colors.white
+
     return @renderCommands
+
+  calcScoreString: (player) ->
+    if player.bid == -1
+      return " #{player.name} [ -- ] "
+    return " #{player.name} [ #{player.tricks}/#{player.bid} ] "
 
   # -----------------------------------------------------------------------------------------------------
   # rendering and zones

@@ -4,7 +4,7 @@ Game = require 'Game'
 
 # taken from http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
 componentToHex = (c) ->
-  hex = (c * 255).toString(16)
+  hex = Math.floor(c * 255).toString(16)
   return if hex.length == 1 then "0" + hex else hex
 rgbToHex = (r, g, b) ->
   return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b)
@@ -20,6 +20,7 @@ class NativeApp
       cards: "../res/raw/cards.png"
       unispace: "../res/raw/unispace.png"
       square: "../res/raw/square.png"
+      chars: "../res/raw/chars.png"
 
     @game = new Game(this, @width, @height)
 

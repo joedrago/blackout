@@ -5,24 +5,50 @@ SETTLE_MS = 1500
 class Pile
   constructor: (@game, @width, @height, @hand) ->
     @pile = []
+    @pileWho = []
     @trick = []
+    @trickWho = []
     @anims = {}
     @pileID = -1
     @trickTaker = ""
     @settleTimer = 0
     @trickColor = { r: 1, g: 1, b: 0, a: 1}
+    @playerCount = 2
 
-  set: (pileID, pile, trick, trickTaker) ->
+    centerX = (@width / 2)
+    centerY = (@height / 2)
+    halfCardX = @hand.cardWidth
+    halfCardY = @hand.cardHeight / 2
+    @pileLocations =
+      2: [
+        { x: centerX, y: centerY + halfCardY } # bottom
+        { x: centerX, y: centerY - halfCardY } # top
+      ]
+      3: [
+        { x: centerX, y: centerY + halfCardY } # bottom
+        { x: centerX - halfCardX, y: centerY } # left
+        { x: centerX + halfCardX, y: centerY } # right
+      ]
+      4: [
+        { x: centerX, y: centerY + halfCardY } # bottom
+        { x: centerX - halfCardX, y: centerY } # left
+        { x: centerX, y: centerY - halfCardY } # top
+        { x: centerX + halfCardX, y: centerY } # right
+      ]
+
+  set: (pileID, pile, pileWho, trick, trickWho, trickTaker, @playerCount, firstThrow) ->
     if (@pileID != pileID) and (trick.length > 0)
-      # @game.log "Pile.set #{pileID} #{JSON.stringify(pile)} #{JSON.stringify(trick)} #{trickTaker}"
       @pile = trick.slice(0) # the pile has become the trick, stash it off one last time
+      @pileWho = trickWho.slice(0)
       @pileID = pileID
       @settleTimer = SETTLE_MS
 
     # don't stomp the pile we're drawing until it is done settling and can fly off the screen
     if @settleTimer == 0
       @pile = pile.slice(0)
+      @pileWho = pileWho.slice(0)
       @trick = trick.slice(0)
+      @trickWho = trickWho.slice(0)
       @trickTaker = trickTaker
 
     @syncAnims()
@@ -66,10 +92,12 @@ class Pile
     @updatePositions()
 
   updatePositions: ->
+    locations = @pileLocations[@playerCount]
     for v, index in @pile
       anim = @anims[v]
-      anim.req.x = (@width / 2) + (index * (@hand.cardWidth / 3))
-      anim.req.y = @hand.cardHeight / 2
+      loc = @pileWho[index]
+      anim.req.x = locations[loc].x # (@width / 2) + (index * (@hand.cardWidth / 3))
+      anim.req.y = locations[loc].y # @hand.cardHeight / 2
       anim.req.r = 0
 
     for _, index in @trick

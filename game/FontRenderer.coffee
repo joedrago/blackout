@@ -3,6 +3,24 @@ fontmetrics = require 'fontmetrics'
 class FontRenderer
   constructor:  (@game) ->
 
+  size: (font, height, str) ->
+    metrics = fontmetrics[font]
+    return if not metrics
+    scale = height / metrics.height
+
+    totalWidth = 0
+    totalHeight = metrics.height * scale
+    for ch, i in str
+      code = ch.charCodeAt(0)
+      glyph = metrics.glyphs[code]
+      continue if not glyph
+      totalWidth += glyph.xadvance * scale
+
+    return {
+      w: totalWidth
+      h: totalHeight
+    }
+
   render: (font, height, str, x, y, anchorx, anchory, color, cb) ->
     metrics = fontmetrics[font]
     return if not metrics

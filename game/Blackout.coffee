@@ -21,16 +21,24 @@ ShortSuitName = ['C', 'D', 'H', 'S']
 # ---------------------------------------------------------------------------------------------------------------------------
 # AI Name Generator
 
-aiNames = [
-  "Mario"
-  "Luigi"
-  "Toad"
-  "Peach"
+aiCharacters = [
+  { name: "Mario",      sprite: "mario"    }
+  { name: "Luigi",      sprite: "luigi"    }
+  { name: "Peach",      sprite: "peach"    }
+  { name: "Daisy",      sprite: "daisy"    }
+  { name: "Yoshi",      sprite: "yoshi"    }
+  { name: "Toad",       sprite: "toad"     }
+  { name: "Bowser",     sprite: "bowser"   }
+  { name: "Bowser Jr.", sprite: "bowserjr" }
+  { name: "Koopa",      sprite: "koopa"    }
+  { name: "Rosalina",   sprite: "rosalina" }
+  { name: "Shyguy",     sprite: "shyguy"   }
+  { name: "Toadette",   sprite: "toadette" }
 ]
 
-randomName = ->
-  r = Math.floor(Math.random() * aiNames.length)
-  return aiNames[r]
+randomCharacter = ->
+  r = Math.floor(Math.random() * aiCharacters.length)
+  return aiCharacters[r]
 
 # ---------------------------------------------------------------------------------------------------------------------------
 # Card
@@ -195,6 +203,8 @@ class Blackout
     @trumpBroken = false
     @prev = []
     @pile = []
+    @pileWho = []
+    @prevWho = []
     @output('Blackout reset. (' + @players.length + ' players, ' + @rounds.length + ' rounds)')
 
     @startBid()
@@ -226,8 +236,10 @@ class Blackout
     @state = State.BID
     @turn = @playerAfter(@dealer)
     @bids = 0
-    @prev = []
     @pile = []
+    @pileWho = []
+    @prev = []
+    @prevWho = []
     @prevTrickTaker = -1
 
     @output('Round ' + @nextRound + ' begins ' + @players[@turn].name + ' bids first')
@@ -265,7 +277,9 @@ class Blackout
     @prevTrickTaker = @trickTaker
     @turn = @trickTaker
     @prev = @pile
+    @prevWho = @pileWho
     @pile = []
+    @pileWho = []
     @trickID++
 
     if @players[0].hand.length > 0
@@ -363,12 +377,13 @@ class Blackout
       return 'tooManyPlayers'
 
     loop
-      name = randomName()
-      if not @namePresent(name)
+      character = randomCharacter()
+      if not @namePresent(character.name)
         break
 
     ai =
-      name: name
+      character: character
+      name: character.name
       id: 'ai' + String(@players.length)
       ai: true
 
@@ -439,6 +454,7 @@ class Blackout
 
     # Throw the card on the pile, advance the turn
     @pile.push(currentPlayer.hand[params.index])
+    @pileWho.push(@turn)
     currentPlayer.hand.splice(params.index, 1)
 
     # Recalculate best index
