@@ -18,7 +18,7 @@ class Game
       white: { r: 1, g: 1, b: 1, a: 1 }
 
     @blackout = new Blackout this, {
-      rounds: "2|2|2|2"
+      rounds: "13|13|13|13"
       players: [
         { id: 1, name: 'Player' }
       ]
