@@ -18,6 +18,7 @@ class Game
     @colors =
       red:        { r:   1, g:   0, b:   0, a:   1 }
       white:      { r:   1, g:   1, b:   1, a:   1 }
+      lightgray:  { r: 0.5, g: 0.5, b: 0.5, a:   1 }
       background: { r:   0, g: 0.2, b:   0, a:   1 }
       logbg:      { r: 0.1, g:   0, b:   0, a:   1 }
       facebg:     { r:   0, g:   0, b:   0, a: 0.3 }
@@ -149,8 +150,8 @@ class Game
 
     # Log
     # @spriteRenderer.render "solid", 0, 0, @width * 0.4, (textHeight + textPadding) * 8, 0, 0, 0, @colors.logbg
-    headline = "State: #{@blackout.state}, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
-    @fontRenderer.render LOG_FONT, textHeight, headline, 0, 0, 0, 0, @colors.red
+    headline = "State: `ffff00`#{@blackout.state}``, Turn: #{@blackout.players[@blackout.turn].name} Err: #{@lastErr}"
+    @fontRenderer.render LOG_FONT, textHeight, headline, 0, 0, 0, 0, @colors.lightgray
     for line, i in @blackout.log
       @fontRenderer.render LOG_FONT, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0, @colors.white
 
