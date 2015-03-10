@@ -188,7 +188,7 @@ class Game
     # card area
     # @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea
     @hand.render()
-    @renderScore @blackout.players[0], scoreHeight, @width / 2, @height, 0.5, 0
+    @renderScore @blackout.players[0], scoreHeight, @width / 2, @height, 0.5, 1
 
     return @renderCommands
 
@@ -203,9 +203,15 @@ class Game
     scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
     if nameSize.w > scoreSize.w
       scoreSize.w = nameSize.w
+    nameY = y
+    scoreY = y
+    if anchory > 0
+      nameY -= scoreHeight
+    else
+      scoreY += scoreHeight
     @spriteRenderer.render "solid", x, y, scoreSize.w, scoreSize.h * 2, 0, anchorx, anchory, @colors.overlay
-    @fontRenderer.render LOG_FONT, scoreHeight, nameString, x, y, anchorx, anchory, @colors.white
-    @fontRenderer.render LOG_FONT, scoreHeight, scoreString, x, y + scoreHeight, anchorx, anchory, @colors.white
+    @fontRenderer.render LOG_FONT, scoreHeight, nameString, x, nameY, anchorx, anchory, @colors.white
+    @fontRenderer.render LOG_FONT, scoreHeight, scoreString, x, scoreY, anchorx, anchory, @colors.white
 
   # -----------------------------------------------------------------------------------------------------
   # rendering and zones
