@@ -35,6 +35,22 @@ class Pile
         { x: centerX, y: centerY - halfCardY } # top
         { x: centerX + halfCardX, y: centerY } # right
       ]
+    @throwLocations =
+      2: [
+        { x: centerX, y: @height } # bottom
+        { x: centerX, y: 0 } # top
+      ]
+      3: [
+        { x: centerX, y: @height } # bottom
+        { x: 0, y: centerY + halfCardY } # left
+        { x: @width, y: centerY + halfCardY } # right
+      ]
+      4: [
+        { x: centerX, y: @height } # bottom
+        { x: 0, y: centerY + halfCardY } # left
+        { x: centerX, y: 0 } # top
+        { x: @width, y: centerY + halfCardY } # right
+      ]
 
   set: (pileID, pile, pileWho, trick, trickWho, trickTaker, @playerCount, firstThrow) ->
     if (@pileID != pileID) and (trick.length > 0)
@@ -63,14 +79,17 @@ class Pile
 
   syncAnims: ->
     seen = {}
-    for card in @pile
+    locations = @throwLocations[@playerCount]
+    for card, index in @pile
       seen[card]++
       if not @anims[card]
+        who = @pileWho[index]
+        location = locations[who]
         @anims[card] = new Animation {
           speed: @hand.cardSpeed
-          x: -1 * (@hand.cardWidth / 2)
-          y: -1 * (@hand.cardWidth / 2)
-          r: -1 * Math.PI / 2
+          x: location.x # -1 * (@hand.cardWidth / 2)
+          y: location.y # -1 * (@hand.cardWidth / 2)
+          r: -1 * Math.PI / 4
         }
     for card in @trick
       seen[card]++
