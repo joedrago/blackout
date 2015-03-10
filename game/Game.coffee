@@ -18,7 +18,7 @@ class Game
       white: { r: 1, g: 1, b: 1, a: 1 }
 
     @blackout = new Blackout this, {
-      rounds: "13|13|13|13"
+      rounds: "2|2|2|2"
       players: [
         { id: 1, name: 'Player' }
       ]
@@ -68,6 +68,10 @@ class Game
     @log "touchDown (CS) #{x},#{y}"
     @checkZones(x, y)
 
+    # probably want to remove this
+    if @blackout.next() == OK
+      @hand.set @blackout.players[0].hand
+
   touchMove: (x, y) ->
     @hand.move(x, y)
 
@@ -77,14 +81,15 @@ class Game
   # -----------------------------------------------------------------------------------------------------
   # card handling
 
-  play: (cardToPlay, x, y, r) ->
+  play: (cardToPlay, x, y, r, cardIndex) ->
     @log "(game) playing card #{cardToPlay}"
 
     if @blackout.state == State.BID
       if @blackout.turn == 0
-        @blackout.bid {
+        @log "bidding #{cardIndex}"
+        @lastErr = @blackout.bid {
           id: 1
-          bid: 0
+          bid: cardIndex
           ai: false
         }
 
@@ -96,18 +101,7 @@ class Game
       @lastErr = ret
       if ret == OK
         @hand.set @blackout.players[0].hand
-
-
-    if 0 # you are allowed to play this card
-      # this should be replaced with the actual blackout engine giving you a new hand
-      newCards = []
-      for card in @hand.cards
-        if card != cardToPlay
-          newCards.push card
-
-      if newCards.length == 0
-        newCards = (v for v in [30..42])
-      @hand.set newCards
+        @pile.hint cardToPlay, x, y, r
 
   # -----------------------------------------------------------------------------------------------------
   # main loop
@@ -116,21 +110,26 @@ class Game
     @zones.length = 0 # forget about zones from the last frame. we're about to make some new ones!
 
     updated = false
-    @nextAITick -= dt
-    if @nextAITick <= 0
-      @nextAITick = AI_TICK_RATE_MS
-      if @blackout.aiTick()
-        updated = true
     if @pile.update(dt)
       updated = true
+    if @pile.readyForNextTrick()
+      @nextAITick -= dt
+      if @nextAITick <= 0
+        @nextAITick = AI_TICK_RATE_MS
+        if @blackout.aiTick()
+          updated = true
     if @hand.update(dt)
       updated = true
 
-    @pile.set @blackout.pile, @blackout.prev
+    trickTakerName = ""
+    if @blackout.prevTrickTaker != -1
+      trickTakerName = @blackout.players[@blackout.prevTrickTaker].name
+    @pile.set @blackout.trickID, @blackout.pile, @blackout.prev, trickTakerName
 
     return updated
 
   render: ->
+    # Reset render commands
     @renderCommands.length = 0
 
     textHeight = @height / 30

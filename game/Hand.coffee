@@ -159,11 +159,12 @@ class Hand
     @reorder()
     if @wantsToPlayDraggedCard()
       @game.log "trying to play a #{@cards[@dragIndexStart]} from index #{@dragIndexStart}"
-      card = @cards[@dragIndexStart]
+      cardIndex = @dragIndexStart
+      card = @cards[cardIndex]
       anim = @anims[card]
       @dragIndexStart = NO_CARD
       @dragIndexCurrent = NO_CARD
-      @game.play card, anim.cur.x, anim.cur.y, anim.cur.r
+      @game.play card, anim.cur.x, anim.cur.y, anim.cur.r, cardIndex
     else
       @game.log "trying to reorder #{@cards[@dragIndexStart]} into index #{@dragIndexCurrent}"
       @cards = @calcDrawnHand() # is this right?

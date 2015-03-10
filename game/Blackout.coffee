@@ -193,6 +193,8 @@ class Blackout
     @counter = 0
     @nextRound = 0
     @trumpBroken = false
+    @prev = []
+    @pile = []
     @output('Blackout reset. (' + @players.length + ' players, ' + @rounds.length + ' rounds)')
 
     @startBid()
@@ -207,9 +209,11 @@ class Blackout
     @nextRound++
 
     deck = new ShuffledDeck()
-    for player in @players
+    for player, i in @players
       player.bid = -1
       player.tricks = 0
+
+      @game.log "dealing #{@tricks} cards to player #{i}"
 
       player.hand = []
       for j in [0...@tricks]
@@ -222,9 +226,9 @@ class Blackout
     @state = State.BID
     @turn = @playerAfter(@dealer)
     @bids = 0
-    @pile = []
     @prev = []
-    @lastTrickTaker = -1
+    @pile = []
+    @prevTrickTaker = -1
 
     @output('Round ' + @nextRound + ' begins ' + @players[@turn].name + ' bids first')
 
@@ -242,13 +246,12 @@ class Blackout
     @lowestRequired = true # Next player is obligated to throw the lowest card
     @turn = lowestPlayer
     @trumpBroken = false
+    @trickID = 0
     @startTrick({})
 
   startTrick: (params) ->
     # @turn should already be correct, either from endBid (lowest club) or endTrick (last trickTaker)
 
-    @prev = @pile
-    @pile = []
     @trickTaker = -1
     @state = State.TRICK
 
@@ -259,8 +262,11 @@ class Blackout
     taker.tricks++
 
     @output(taker.name + ' pockets the trick [' + taker.tricks + ']')
-    @lastTrickTaker = @trickTaker
+    @prevTrickTaker = @trickTaker
     @turn = @trickTaker
+    @prev = @pile
+    @pile = []
+    @trickID++
 
     if @players[0].hand.length > 0
       @startTrick()
@@ -282,8 +288,6 @@ class Blackout
 
         player.lastWent = String(player.tricks) + '/' + String(player.bid)
         player.lastPoints = penaltyPoints
-
-      # TODO: Penalty points here (with logging)
 
       if @nextRound >= @rounds.length
         @state = State.POSTGAMESUMMARY
