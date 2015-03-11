@@ -6,7 +6,6 @@ Hand = require 'Hand'
 Pile = require 'Pile'
 {Blackout, State, OK} = require 'Blackout'
 
-AI_TICK_RATE_MS = 1000
 LOG_FONT = "unispace"
 
 class Game
@@ -15,10 +14,12 @@ class Game
     @fontRenderer = new FontRenderer this
     @spriteRenderer = new SpriteRenderer this
     @zones = []
-    @nextAITick = AI_TICK_RATE_MS
+    @aiTickRate = 1000 # will be set by options
+    @nextAITick = @aiTickRate
     @center =
       x: @width / 2
       y: @height / 2
+    @pauseButtonSize = @height / 15
     @colors =
       red:        { r:   1, g:   0, b:   0, a:   1 }
       white:      { r:   1, g:   1, b:   1, a:   1 }
@@ -37,13 +38,20 @@ class Game
 
     @options =
       players: 4
-      roundIndex: 0
       rounds: [
         { text: "8 rounds of 13", data: "13|13|13|13|13|13|13|13" }
         { text: "4 rounds of 13", data: "13|13|13|13" }
         { text: "3 to 13", data: "3|4|5|6|7|8|9|10|11|12|13" }
         { text: "3 to 13 by odds", data: "3|5|7|9|11|13" }
       ]
+      roundIndex: 0
+      speeds: [
+        { text: "AI Speed: Slow", speed: 2000 }
+        { text: "AI Speed: Medium", speed: 1000 }
+        { text: "AI Speed: Fast", speed: 500 }
+        { text: "AI Speed: Ultra", speed: 250 }
+      ]
+      speedIndex: 1
 
     @mainMenu = new Menu this, "mainmenu", [
       { text: @options.rounds[@options.roundIndex].text, cb: =>
@@ -55,6 +63,10 @@ class Game
         if @options.players > 4
           @options.players = 3
         return "#{@options.players} Players"
+      }
+      { text: @options.speeds[@options.speedIndex].text, cb: =>
+        @options.speedIndex = (@options.speedIndex + 1) % @options.speeds.length
+        return @options.speeds[@options.speedIndex].text
       }
       { text: "Start", cb: =>
         @newGame()
@@ -93,6 +105,7 @@ class Game
   # -----------------------------------------------------------------------------------------------------
 
   newGame: ->
+    @aiTickRate = @options.speeds[@options.speedIndex].speed
     @blackout = new Blackout this, {
       rounds: @options.rounds[@options.roundIndex].data
       players: [
@@ -191,7 +204,7 @@ class Game
     if @pile.readyForNextTrick()
       @nextAITick -= dt
       if @nextAITick <= 0
-        @nextAITick = AI_TICK_RATE_MS
+        @nextAITick = @aiTickRate
         if @blackout.aiTick()
           updated = true
     if @hand.update(dt)
@@ -276,7 +289,7 @@ class Game
     @hand.render()
     @renderScore @blackout.players[0], 0 == @blackout.turn, scoreHeight, @width / 2, @height, 0.5, 1
 
-    @spriteRenderer.render "pause", @width, 0, 0, @height / 15, 0, 1, 0, @colors.white, =>
+    @spriteRenderer.render "pause", @width, 0, 0, @pauseButtonSize, 0, 1, 0, @colors.white, =>
       @paused = true
 
     if @paused

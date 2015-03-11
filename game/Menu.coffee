@@ -4,8 +4,10 @@ class Menu
   constructor: (@game, @background, @actions) ->
     @buttons = []
 
-    slice = @game.center.y / (@actions.length + 1)
-    currY = @game.center.y + slice
+    buttonStartY = @game.height / 3
+
+    slice = (@game.height - buttonStartY) / (@actions.length + 1)
+    currY = buttonStartY + slice
     for action in @actions
       button = new Button(@game, "unispace", @game.height / 15, @game.center.x, currY, action.text, action.cb)
       @buttons.push button

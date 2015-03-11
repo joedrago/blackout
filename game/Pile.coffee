@@ -1,6 +1,6 @@
 Animation = require 'Animation'
 
-SETTLE_MS = 1500
+SETTLE_MS = 1000
 
 class Pile
   constructor: (@game, @width, @height, @hand) ->
@@ -129,7 +129,7 @@ class Pile
       v = @trick[i]
       anim = @anims[v]
       anim.req.x = (@width + (@hand.cardWidth / 2)) - ((index+1) * (@hand.cardWidth / 5))
-      anim.req.y = @hand.cardHeight / 2
+      anim.req.y = (@game.pauseButtonSize * 1.5) + @hand.cardHeight / 2
       anim.req.r = 0
       anim.req.s = 1
 
