@@ -17,6 +17,7 @@ class BlackoutView extends GLSurfaceView
     {
         super(context);
         setEGLContextClientVersion(2);
+        setPreserveEGLContextOnPause(true);
         activity_ = activity;
 
         getHolder().setFixedSize(displaySize.x, displaySize.y);

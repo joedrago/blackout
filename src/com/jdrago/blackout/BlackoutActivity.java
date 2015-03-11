@@ -103,14 +103,6 @@ public class BlackoutActivity extends Activity
         paused_ = false;
     }
 
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        // stomp any request to resize view to exactly what I want
-        view_.getLayoutParams().width = displaySize_.x;
-        view_.getLayoutParams().height = displaySize_.y;
-    }
-
     protected void onSaveInstanceState(Bundle savedInstanceState)
     {
         super.onSaveInstanceState(savedInstanceState);

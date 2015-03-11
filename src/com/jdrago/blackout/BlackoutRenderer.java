@@ -363,6 +363,7 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
 
     public void renderBegin(float r, float g, float b)
     {
+        GLES20.glViewport(0, 0, width_, height_);
         GLES20.glClearColor(r, g, b, 1.0f);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glUseProgram(shaderProgram_);
@@ -481,7 +482,7 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
 
         // Ignore the passed-in GL10 interface, and use the GLES20
         // class's static methods instead.
-        GLES20.glViewport(0, 0, width, height);
+        GLES20.glViewport(0, 0, width_, height_);
 
         float left = 0.0f;
         float right = width;
