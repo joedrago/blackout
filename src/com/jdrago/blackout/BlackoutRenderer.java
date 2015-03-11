@@ -1,11 +1,12 @@
 package com.jdrago.blackout;
 
+import com.jdrago.blackout.GLTextureView;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 import android.os.Trace;
@@ -28,7 +29,7 @@ import java.util.HashMap;
 
 import javax.microedition.khronos.opengles.GL10;
 
-public class BlackoutRenderer implements GLSurfaceView.Renderer
+public class BlackoutRenderer implements GLTextureView.Renderer
 {
     // --------------------------------------------------------------------------------------------
     // Constants
@@ -36,7 +37,7 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
     static private final String TAG = "Blackout";
 
     static private final int MAX_FPS = 30;
-    static private final int MIN_MS_PER_FRAME = 1000 / MAX_FPS;
+    static public  final int MIN_MS_PER_FRAME = 1000 / MAX_FPS;
     static private final int FRAME_COUNTER_INTERVAL_MS = 10 * 1000;
 
     private static final int FLOAT_SIZE_BYTES = 4;
@@ -133,6 +134,7 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
     private int vertColorHandle_;
     private long frameCounter_;
     private long frameCounterLastTime_;
+    private boolean needsRender_;
 
     // --------------------------------------------------------------------------------------------
     // Constructor
@@ -156,6 +158,7 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
         indices_.put(QUAD_INDICES).position(0);
         frameCounter_ = 0;
         frameCounterLastTime_ = FRAME_COUNTER_INTERVAL_MS;
+        needsRender_ = true;
 
         Log.d(TAG, "Renderer MaxFPS: "+MAX_FPS+", MinMSPerFrame: "+MIN_MS_PER_FRAME);
     }
@@ -205,7 +208,7 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
         frameCounterLastTime_ -= dt;
         if(frameCounterLastTime_ <= 0)
         {
-            if(frameCounter_ > 2 * (FRAME_COUNTER_INTERVAL_MS / 1000))
+            // if(frameCounter_ > 2 * (FRAME_COUNTER_INTERVAL_MS / 1000))
                 Log.d(TAG, "Rendered "+frameCounter_+" frames in last "+(FRAME_COUNTER_INTERVAL_MS + frameCounterLastTime_) + "ms");
 
             frameCounter_ = 0;
@@ -243,7 +246,8 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
             scriptReady_ = true;
         }
 
-        boolean needsRender = false;
+        needsRender_ = false;
+
         Touch touch;
         while((touch = inputQueue_.poll()) != null)
         {
@@ -263,20 +267,20 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
             v8_.executeVoidFunction(functionName, parameters);
             } finally { Trace.endSection(); }
 
-            needsRender = true;
+            needsRender_ = true;
         }
 
         V8Array parameters = new V8Array(v8_);
         parameters.push(dt);
         Trace.beginSection("update"); try {
         if(v8_.executeBooleanFunction("update", parameters))
-            needsRender = true;
+            needsRender_ = true;
         } finally { Trace.endSection(); }
+    }
 
-        if(needsRender)
-        {
-            view_.requestRender();
-        }
+    public boolean needsRender()
+    {
+        return needsRender_;
     }
 
     public void jsStartup()
@@ -333,21 +337,18 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
     {
         Touch touch = new Touch(TouchType.DOWN, x, y);
         inputQueue_.offer(touch);
-        view_.requestRender();
     }
 
     public void jsTouchMove(double x, double y)
     {
         Touch touch = new Touch(TouchType.MOVE, x, y);
         inputQueue_.offer(touch);
-        view_.requestRender();
     }
 
     public void jsTouchUp(double x, double y)
     {
         Touch touch = new Touch(TouchType.UP, x, y);
         inputQueue_.offer(touch);
-        view_.requestRender();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -470,6 +471,10 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
                 0, 0, 10,         // eye
                 0f, 0f, 0f,       // center
                 0f, 1.0f, 0.0f);  // up
+    }
+
+    public void onSurfaceDestroyed(GL10 glUnused)
+    {
     }
 
     public void onSurfaceChanged(GL10 glUnused, int width, int height)

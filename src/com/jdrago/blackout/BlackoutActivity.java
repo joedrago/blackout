@@ -1,14 +1,19 @@
 package com.jdrago.blackout;
 
+import com.jdrago.blackout.GLTextureView;
+
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,11 +34,14 @@ public class BlackoutActivity extends Activity
     Point displaySize_;
     private double coordinateScale_;
     boolean paused_;
+    Handler uiHandler_ = new Handler(Looper.getMainLooper());
+    Runnable mainLoop_;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
 
         paused_ = true;
 
@@ -42,8 +50,8 @@ public class BlackoutActivity extends Activity
         display.getRealSize(displaySize_);
 
         // Halve the resolution so phones don't choke on the awesome
-        displaySize_.x /= 2;
-        displaySize_.y /= 2;
+        // displaySize_.x /= 2;
+        // displaySize_.y /= 2;
 
         coordinateScale_ = 1;
         Log.d(TAG, "BlackoutActivity::onCreate(): displaySize: "+displaySize_.x+","+displaySize_.y);
@@ -52,34 +60,48 @@ public class BlackoutActivity extends Activity
         setContentView(view_);
         immerse();
 
-        // This block of code ensures that we re-render at least once a second (1 FPS).
-        final Handler handler = new Handler();
-        Timer timer = new Timer(false);
-        TimerTask timerTask = new TimerTask() {
+        mainLoop_ = new Runnable() {
             @Override
             public void run() {
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(!paused_)
-                            view_.requestRender();
-                    }
-                });
+                if (isFinishing()) {
+                    return;
+                }
+                if(paused_)
+                    return;
+
+                view_.requestRender();
+                if(view_.renderer().needsRender())
+                {
+                    uiHandler_.postDelayed(this, BlackoutRenderer.MIN_MS_PER_FRAME);
+                }
+                else
+                {
+                    uiHandler_.postDelayed(this, 1000);
+                }
             }
         };
-        timer.scheduleAtFixedRate(timerTask, 1000, 1000);
+    }
+
+    public void onAttachedToWindow()
+    {
+        Log.d(TAG, "BlackoutActivity::onAttachedToWindow");
     }
 
     @Override
-    public void onWindowFocusChanged (boolean hasFocus)
+    public void onWindowFocusChanged(boolean hasFocus)
     {
         super.onWindowFocusChanged(hasFocus);
 
         View content = getWindow().findViewById(Window.ID_ANDROID_CONTENT);
         double touchWidth = content.getWidth();
         double touchHeight = content.getHeight();
-        coordinateScale_ = displaySize_.x / touchWidth;
-        Log.d(TAG, "touchSize: "+touchWidth+","+touchHeight+" coordinateScale: "+coordinateScale_);
+
+        // This awful hack is because Android loves to pretend I'm in portrait during a lockscreen.
+        double biggestDimension = touchWidth;
+        if(biggestDimension < touchHeight)
+            biggestDimension = touchHeight;
+        coordinateScale_ = displaySize_.x / biggestDimension;
+        Log.d(TAG, "touchSize: "+touchWidth+","+touchHeight+" [biggestDimension: "+biggestDimension+"] coordinateScale: "+coordinateScale_);
     }
 
     @Override
@@ -101,6 +123,19 @@ public class BlackoutActivity extends Activity
         view_.onResume();
         immerse();
         paused_ = false;
+
+        kick();
+    }
+
+    public void onBackPressed()
+    {
+        moveTaskToBack(true);
+    }
+
+    protected void kick()
+    {
+        uiHandler_.removeCallbacks(mainLoop_);
+        uiHandler_.post(mainLoop_);
     }
 
     protected void onSaveInstanceState(Bundle savedInstanceState)
@@ -130,6 +165,7 @@ public class BlackoutActivity extends Activity
         x *= coordinateScale_;
         y *= coordinateScale_;
         view_.renderer().jsTouchDown(x, y);
+        kick();
     }
 
     public void touchMove(double x, double y)
@@ -137,6 +173,7 @@ public class BlackoutActivity extends Activity
         x *= coordinateScale_;
         y *= coordinateScale_;
         view_.renderer().jsTouchMove(x, y);
+        kick();
     }
 
     public void touchUp(double x, double y)
@@ -144,6 +181,7 @@ public class BlackoutActivity extends Activity
         x *= coordinateScale_;
         y *= coordinateScale_;
         view_.renderer().jsTouchUp(x, y);
+        kick();
     }
 
     public String loadScript(int resId)
