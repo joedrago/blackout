@@ -167,6 +167,8 @@ public class BlackoutRenderer implements GLSurfaceView.Renderer
         textures_.put("unispace", loadPNG(R.raw.unispace));
         textures_.put("square", loadPNG(R.raw.square));
         textures_.put("chars", loadPNG(R.raw.chars));
+        textures_.put("mainmenu", loadPNG(R.raw.mainmenu));
+        textures_.put("pausemenu", loadPNG(R.raw.pausemenu));
     }
 
     // --------------------------------------------------------------------------------------------
