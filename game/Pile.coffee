@@ -163,7 +163,7 @@ class Pile
     if (@trick.length > 0) and (@trickTaker.length > 0)
       anim = @anims[@trick[0]]
       if anim?
-        @game.fontRenderer.render "square", @height / 30, @trickTaker, @width, anim.cur.y + (@hand.cardHeight / 2), 1, 0, @trickColor
+        @game.fontRenderer.render @game.font, @height / 30, @trickTaker, @width, anim.cur.y + (@hand.cardHeight / 2), 1, 0, @trickColor
 
 
 module.exports = Pile
