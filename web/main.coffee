@@ -21,6 +21,8 @@ class NativeApp
       unispace: "../res/raw/unispace.png"
       square: "../res/raw/square.png"
       chars: "../res/raw/chars.png"
+      mainmenu: "../res/raw/mainmenu.png"
+      pausemenu: "../res/raw/pausemenu.png"
 
     @game = new Game(this, @width, @height)
 

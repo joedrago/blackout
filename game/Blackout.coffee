@@ -119,6 +119,7 @@ class Blackout
       @players[0].bid = 0
       @players[0].tricks = 0
       @players[0].score = 0
+      @players[0].index = 0
 
       @output(@players[0].name + ' creates game')
 
@@ -363,6 +364,7 @@ class Blackout
       player.ai = false
 
     @players.push player
+    player.index = @players.length - 1
     @output(player.name + " joins game (" + @players.length + ")")
 
   namePresent: (name) ->
