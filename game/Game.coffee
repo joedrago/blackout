@@ -6,13 +6,12 @@ Hand = require 'Hand'
 Pile = require 'Pile'
 {Blackout, State, OK} = require 'Blackout'
 
-LOG_FONT = "unispace"
-
 class Game
   constructor: (@native, @width, @height) ->
     @log("Game constructed: #{@width}x#{@height}")
     @fontRenderer = new FontRenderer this
     @spriteRenderer = new SpriteRenderer this
+    @font = "darkforest"
     @zones = []
     @aiTickRate = 1000 # will be set by options
     @nextAITick = @aiTickRate
@@ -29,7 +28,7 @@ class Game
       logbg:      { r: 0.1, g:   0, b:   0, a:   1 }
       facebg:     { r:   0, g:   0, b:   0, a: 0.3 }
       handarea:   { r:   0, g: 0.1, b:   0, a: 1.0 }
-      overlay:    { r:   0, g:   0, b:   0, a: 0.7 }
+      overlay:    { r:   0, g:   0, b:   0, a: 0.6 }
 
     @blackout = null # don't start in a game
     @lastErr = ''
@@ -239,10 +238,10 @@ class Game
     # background
     @spriteRenderer.render "solid", 0, 0, @width, @height, 0, 0, 0, @colors.background
 
-    textHeight = @height / 35
+    textHeight = @height / 30
     textPadding = textHeight / 5
     characterHeight = @height / 5
-    scoreHeight = @height / 35
+    scoreHeight = textHeight
 
     # Log
     # @spriteRenderer.render "solid", 0, 0, @width * 0.4, (textHeight + textPadding) * 8, 0, 0, 0, @colors.logbg
@@ -250,9 +249,9 @@ class Game
     if (@lastErr.length > 0) and (@lastErr != OK)
       errText = "ERROR: `ff0000`#{@lastErr}"
     headline = "State: `ffff00`#{@blackout.state}``, Turn: `ffff00`#{@blackout.players[@blackout.turn].name}`` #{errText}"
-    @fontRenderer.render LOG_FONT, textHeight, headline, 0, 0, 0, 0, @colors.lightgray
+    @fontRenderer.render @font, textHeight, headline, 0, 0, 0, 0, @colors.lightgray
     for line, i in @blackout.log
-      @fontRenderer.render LOG_FONT, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0, @colors.white
+      @fontRenderer.render @font, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0, @colors.white
 
     aiPlayers = [null, null, null]
     if @blackout.players.length == 2
@@ -298,7 +297,11 @@ class Game
     return
 
   renderScore: (player, myTurn, scoreHeight, x, y, anchorx, anchory) ->
-    nameString = "#{player.name}: #{player.score}"
+    if myTurn
+      nameColor = "`ff7700`"
+    else
+      nameColor = ""
+    nameString = " #{nameColor}#{player.name}``: #{player.score} "
     if player.bid == -1
       scoreString = "[ -- ]"
     else
@@ -310,8 +313,8 @@ class Game
         trickColor = "ff3333"
       scoreString = "[ `#{trickColor}`#{player.tricks}``/#{player.bid} ]"
 
-    nameSize = @fontRenderer.size(LOG_FONT, scoreHeight, nameString)
-    scoreSize = @fontRenderer.size(LOG_FONT, scoreHeight, scoreString)
+    nameSize = @fontRenderer.size(@font, scoreHeight, nameString)
+    scoreSize = @fontRenderer.size(@font, scoreHeight, scoreString)
     if nameSize.w > scoreSize.w
       scoreSize.w = nameSize.w
     nameY = y
@@ -321,8 +324,8 @@ class Game
     else
       scoreY += scoreHeight
     @spriteRenderer.render "solid", x, y, scoreSize.w, scoreSize.h * 2, 0, anchorx, anchory, @colors.overlay
-    @fontRenderer.render LOG_FONT, scoreHeight, nameString, x, nameY, anchorx, anchory, @colors.white
-    @fontRenderer.render LOG_FONT, scoreHeight, scoreString, x, scoreY, anchorx, anchory, @colors.white
+    @fontRenderer.render @font, scoreHeight, nameString, x, nameY, anchorx, anchory, @colors.white
+    @fontRenderer.render @font, scoreHeight, scoreString, x, scoreY, anchorx, anchory, @colors.white
 
   # -----------------------------------------------------------------------------------------------------
   # rendering and zones
