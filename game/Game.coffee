@@ -13,8 +13,7 @@ class Game
     @spriteRenderer = new SpriteRenderer this
     @font = "darkforest"
     @zones = []
-    @aiTickRate = 1000 # will be set by options
-    @nextAITick = @aiTickRate
+    @nextAITick = 1000 # will be set by options
     @center =
       x: @width / 2
       y: @height / 2
@@ -84,6 +83,10 @@ class Game
         @paused = false
         return
       }
+      { text: @optionMenus.speeds[@options.speedIndex].text, cb: =>
+        @options.speedIndex = (@options.speedIndex + 1) % @optionMenus.speeds.length
+        return @optionMenus.speeds[@options.speedIndex].text
+      }
       { text: "Sound: #{if @options.sound then "Enabled" else "Disabled"}", cb: =>
         @options.sound = !@options.sound
         return "Sound: #{if @options.sound then "Enabled" else "Disabled"}"
@@ -133,8 +136,10 @@ class Game
 
   # -----------------------------------------------------------------------------------------------------
 
+  aiTickRate: ->
+    return @optionMenus.speeds[@options.speedIndex].speed
+
   newGame: ->
-    @aiTickRate = @optionMenus.speeds[@options.speedIndex].speed
     @blackout = new Blackout this, {
       rounds: @optionMenus.rounds[@options.roundIndex].data
       players: [
@@ -234,7 +239,7 @@ class Game
     if @pile.readyForNextTrick()
       @nextAITick -= dt
       if @nextAITick <= 0
-        @nextAITick = @aiTickRate
+        @nextAITick = @aiTickRate()
         if @blackout.aiTick()
           updated = true
     if @hand.update(dt)
