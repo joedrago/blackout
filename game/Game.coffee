@@ -1,4 +1,5 @@
 Animation = require 'Animation'
+Button = require 'Button'
 FontRenderer = require 'FontRenderer'
 SpriteRenderer = require 'SpriteRenderer'
 Menu = require 'Menu'
@@ -19,8 +20,9 @@ class Game
       y: @height / 2
     @pauseButtonSize = @height / 15
     @colors =
-      red:        { r:   1, g:   0, b:   0, a:   1 }
       white:      { r:   1, g:   1, b:   1, a:   1 }
+      red:        { r:   1, g:   0, b:   0, a:   1 }
+      orange:     { r:   1, g: 0.5, b:   0, a:   1 }
       buttontext: { r:   1, g:   1, b:   1, a:   1 }
       lightgray:  { r: 0.5, g: 0.5, b: 0.5, a:   1 }
       background: { r:   0, g: 0.2, b:   0, a:   1 }
@@ -33,6 +35,15 @@ class Game
     @lastErr = ''
     @paused = false
     @renderCommands = []
+
+    @bid = 0
+    @bidButtonSize = @height / 8
+    @bidTextSize = @height / 6
+    bidButtonDistance = @bidButtonSize * 3.5
+    @bidButtonY = @center.y - (@bidButtonSize)
+    @bidUI = #(@game, @spriteNames, @font, @textHeight, @x, @y, @text, @cb)
+      minus: new Button this, ['minus0', 'minus1'], @font, @bidButtonSize, @center.x - bidButtonDistance, @bidButtonY, '', => @adjustBid(-1)
+      plus:  new Button this, ['plus0', 'plus1'],   @font, @bidButtonSize, @center.x + bidButtonDistance, @bidButtonY, '', => @adjustBid(1)
 
     @optionMenus =
       rounds: [
@@ -169,13 +180,7 @@ class Game
   # input handling
 
   touchDown: (x, y) ->
-    # @log "touchDown (CS) #{x},#{y}"
     @checkZones(x, y)
-
-    # probably want to remove this
-    if @blackout != null
-      if @blackout.next() == OK
-        @hand.set @blackout.players[0].hand
 
   touchMove: (x, y) ->
     if @blackout != null
@@ -186,21 +191,55 @@ class Game
       @hand.up(x, y)
 
   # -----------------------------------------------------------------------------------------------------
-  # card handling
+  # bid handling
 
-  play: (cardToPlay, x, y, r, cardIndex) ->
-    @log "(game) playing card #{cardToPlay}"
+  adjustBid: (amount) ->
+    return if @blackout == null
+    @bid = @bid + amount
+    if @bid < 0
+      @bid = 0
+    if @bid > @blackout.tricks
+      @bid = @blackout.tricks
 
+  attemptBid: ->
+    return if @blackout == null
+    @adjustBid(0)
     if @blackout.state == State.BID
       if @blackout.turn == 0
-        @log "bidding #{cardIndex}"
+        @log "bidding #{@bid}"
         @lastErr = @blackout.bid {
           id: 1
-          bid: cardIndex
+          bid: @bid
           ai: false
         }
 
+  # -----------------------------------------------------------------------------------------------------
+  # game over information
+
+  gameOverText: ->
+    return "Game Over!" if @blackout == null
+
+    lowestScore = @blackout.players[0].score
+    for player in @blackout.players
+      if lowestScore > player.score
+        lowestScore = player.score
+
+    winners = []
+    for player in @blackout.players
+      if player.score == lowestScore
+        winners.push player.name
+
+    if winners.length == 1
+      return "#{winners[0]} wins!"
+
+    return "Tie: #{winners.join(',')}"
+
+  # -----------------------------------------------------------------------------------------------------
+  # card handling
+
+  play: (cardToPlay, x, y, r, cardIndex) ->
     if @blackout.state == State.TRICK
+      @log "(game) playing card #{cardToPlay}"
       ret = @blackout.play {
         id: 1
         which: cardToPlay
@@ -251,6 +290,12 @@ class Game
     @pile.set @blackout.trickID, @blackout.pile, @blackout.pileWho, @blackout.prev, @blackout.prevWho, trickTakerName, @blackout.players.length, @blackout.turn
 
     if @pauseMenu.update(dt)
+      updated = true
+
+    @adjustBid(0)
+    if @bidUI.minus.update(dt)
+      updated = true
+    if @bidUI.plus.update(dt)
       updated = true
 
     return updated
@@ -318,6 +363,19 @@ class Game
       @renderScore aiPlayers[2], aiPlayers[2].index == @blackout.turn, scoreHeight, @width - (characterMargin + (characterWidth / 2)), @hand.playCeiling - textPadding, 0.5, 0
 
     @pile.render()
+
+    if (@blackout != null)
+      if @blackout.state == State.POSTGAMESUMMARY
+        @fontRenderer.render @font, @height / 8, @gameOverText(), @center.x, @center.y, 0.5, 0.5, @colors.orange
+      if @blackout.state == State.ROUNDSUMMARY
+        @fontRenderer.render @font, @height / 8, "Tap for next round ...", @center.x, @center.y, 0.5, 0.5, @colors.orange, =>
+          if @blackout.next() == OK
+            @hand.set @blackout.players[0].hand
+      if (@blackout.state == State.BID) and (@blackout.turn == 0)
+        @bidUI.minus.render()
+        @bidUI.plus.render()
+        @fontRenderer.render @font, @bidTextSize, "#{@bid}", @center.x, @bidButtonY, 0.5, 0.5, @colors.white, =>
+          @attemptBid()
 
     # card area
     # @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea

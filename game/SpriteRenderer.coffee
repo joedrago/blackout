@@ -3,9 +3,13 @@ class SpriteRenderer
     @sprites =
       # generic sprites
       solid:     { texture: "chars", x:  55, y: 723, w:  10, h:  10 }
+      pause:     { texture: "chars", x: 602, y: 707, w: 122, h: 125 }
       button0:   { texture: "chars", x: 140, y: 777, w: 422, h:  65 }
       button1:   { texture: "chars", x: 140, y: 698, w: 422, h:  65 }
-      pause:     { texture: "chars", x: 602, y: 707, w: 122, h: 125 }
+      plus0:     { texture: "chars", x: 745, y: 664, w: 116, h: 118 }
+      plus1:     { texture: "chars", x: 745, y: 820, w: 116, h: 118 }
+      minus0:    { texture: "chars", x: 895, y: 664, w: 116, h: 118 }
+      minus1:    { texture: "chars", x: 895, y: 820, w: 116, h: 118 }
 
       # menu backgrounds
       mainmenu:  { texture: "mainmenu",  x: 0, y: 0, w: 1280, h: 720 }

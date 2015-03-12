@@ -3,6 +3,7 @@ Button = require 'Button'
 class Menu
   constructor: (@game, @background, @actions) ->
     @buttons = []
+    @buttonNames = ["button0", "button1"]
 
     buttonSize = @game.height / 20
     buttonStartY = @game.height / 3
@@ -10,7 +11,7 @@ class Menu
     slice = (@game.height - buttonStartY) / (@actions.length + 1)
     currY = buttonStartY + slice
     for action in @actions
-      button = new Button(@game, @game.font, buttonSize, @game.center.x, currY, action.text, action.cb)
+      button = new Button(@game, @buttonNames, @game.font, buttonSize, @game.center.x, currY, action.text, action.cb)
       @buttons.push button
       currY += slice
 

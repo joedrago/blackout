@@ -54,7 +54,7 @@ class Hand
     bottomLeft  = { x: arcMargin,                y: arcVerticalBias + @screenHeight }
     bottomRight = { x: @screenWidth - arcMargin, y: arcVerticalBias + @screenHeight }
     @handCenter = { x: @screenWidth / 2,         y: arcVerticalBias + @screenHeight + (CARD_HAND_CURVE_DIST_FACTOR * @screenHeight) }
-    @handAngle = findAngle(bottomLeft, @handCenter  , bottomRight) # * (180 / Math.PI)
+    @handAngle = findAngle(bottomLeft, @handCenter, bottomRight)
     @handDistance = calcDistance(bottomLeft, @handCenter)
     @handAngleAdvance = @handAngle / 13
     @game.log "Hand distance #{@handDistance}, angle #{@handAngle} (screen height #{@screenHeight})"
@@ -220,7 +220,7 @@ class Hand
       positions.push {
         x: x
         y: y
-        r: currentAngle
+        r: currentAngle - @handAngleAdvance
       }
 
     @positionCache[handSize] = positions

@@ -101,7 +101,7 @@ class Blackout
       @state = State.LOBBY
       @players = params.players
       @log = []
-      @rounds = params.rounds.split("|")
+      @rounds = (Number(v) for v in params.rounds.split("|"))
 
       @players[0].bid = 0
       @players[0].tricks = 0
