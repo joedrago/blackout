@@ -92,28 +92,16 @@ class Blackout
   constructor: (@game, params) ->
     return if not params
 
-    if params.json
-      try
-        data = JSON.parse(params.json)
-      catch err
-        @game.log("JSON parse error: " + err)
-
-      if data
-        for k,v of data
-          if data.hasOwnProperty(k)
-            this[k] = data[k]
+    if params.state
+      for k,v of params.state
+        if params.state.hasOwnProperty(k)
+          this[k] = params.state[k]
     else
       # new game
       @state = State.LOBBY
       @players = params.players
-      @counter = 0
       @log = []
       @rounds = params.rounds.split("|")
-      @maxPlayers = 5
-      for i in [0...@rounds.length]
-        @rounds[i] = Number(@rounds[i])
-        if @rounds[i] > 10
-          @maxPlayers = 4
 
       @players[0].bid = 0
       @players[0].tricks = 0
@@ -124,6 +112,13 @@ class Blackout
 
   # ---------------------------------------------------------------------------------------------------------------------------
   # Blackout methods
+
+  save: ->
+    names = "bids dealer log lowestRequired nextRound pile pileWho players prev prevTrickTaker prevWho rounds state trickID trickTaker tricks trumpBroken turn".split(" ")
+    state = {}
+    for name in names
+      state[name] = this[name]
+    return state
 
   findPlayer: (id) ->
     for player in @players
@@ -198,7 +193,6 @@ class Blackout
       player.score = 0
       player.hand = []
 
-    @counter = 0
     @nextRound = 0
     @trumpBroken = false
     @prev = []
@@ -259,9 +253,9 @@ class Blackout
     @turn = lowestPlayer
     @trumpBroken = false
     @trickID = 0
-    @startTrick({})
+    @startTrick()
 
-  startTrick: (params) ->
+  startTrick: () ->
     # @turn should already be correct, either from endBid (lowest club) or endTrick (last trickTaker)
 
     @trickTaker = -1
@@ -374,9 +368,6 @@ class Blackout
     return false
 
   addAI: ->
-    if @players.length >= @maxPlayers
-      return 'tooManyPlayers'
-
     loop
       character = randomCharacter()
       if not @namePresent(character.name)
@@ -486,27 +477,6 @@ class Blackout
     return OK
 
   # ---------------------------------------------------------------------------------------------------------------------------
-  # Action dispatch
-
-  action: (params) ->
-    if((params.action != 'quit') &&                     # the only action everyone can do
-    (@state != State.BID) && (@state != State.TRICK) && # the only states where non-owners get a say in things
-    (params.id != @findOwner().id))                     # test to see if you're the owner
-      return 'ownerOnly'
-
-    if not this[params.action]
-      return 'unknownAction'
-
-    if @counter != params.counter
-      return 'staleCounter'
-
-    reply = this[params.action](params)
-    if reply == OK
-      @counter++
-
-    return reply
-
-  # ---------------------------------------------------------------------------------------------------------------------------
   # AI
 
   aiLogBid: (i, why) ->
@@ -584,7 +554,7 @@ class Blackout
     return bid
 
   aiBid: (currentPlayer, i) ->
-    reply = @action({'counter': @counter, 'id':currentPlayer.id, 'action': 'bid', 'bid':i})
+    reply = @bid({'id':currentPlayer.id, 'bid':i})
     if reply == OK
       @game.log("AI: " + currentPlayer.name + " bids " + String(i))
       return true
@@ -592,7 +562,7 @@ class Blackout
 
   aiPlay: (currentPlayer, i) ->
     card = new Card(currentPlayer.hand[i])
-    reply = @action({'counter': @counter, 'id':currentPlayer.id, 'action': 'play', 'index':i})
+    reply = @play({'id':currentPlayer.id, 'index':i})
     if reply == OK
       @game.log("AI: " + currentPlayer.name + " plays " + card.name)
       return true

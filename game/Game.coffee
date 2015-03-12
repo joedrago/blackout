@@ -115,11 +115,20 @@ class Game
       for k, v of state.options
         @options[k] = v
 
+    if state.blackout
+      @log "recreating game from savedata"
+      @blackout = new Blackout this, {
+        state: state.blackout
+      }
+      @prepareGame()
+
   save: ->
     @log "(CS) saving state"
     state = {
       options: @options
     }
+    if @blackout?
+      state.blackout = @blackout.save()
     return JSON.stringify state
 
   # -----------------------------------------------------------------------------------------------------
@@ -137,6 +146,9 @@ class Game
     @log "next: " + @blackout.next()
     @log "player 0's hand: " + JSON.stringify(@blackout.players[0].hand)
 
+    @prepareGame()
+
+  prepareGame: ->
     @hand = new Hand this, @width, @height
     @pile = new Pile this, @width, @height, @hand
     @hand.set @blackout.players[0].hand
