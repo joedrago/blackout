@@ -35,27 +35,29 @@ class Game
     @paused = false
     @renderCommands = []
 
-    @options =
-      players: 4
+    @optionMenus =
       rounds: [
         { text: "8 rounds of 13", data: "13|13|13|13|13|13|13|13" }
         { text: "4 rounds of 13", data: "13|13|13|13" }
         { text: "3 to 13", data: "3|4|5|6|7|8|9|10|11|12|13" }
         { text: "3 to 13 by odds", data: "3|5|7|9|11|13" }
       ]
-      roundIndex: 0
       speeds: [
         { text: "AI Speed: Slow", speed: 2000 }
         { text: "AI Speed: Medium", speed: 1000 }
         { text: "AI Speed: Fast", speed: 500 }
         { text: "AI Speed: Ultra", speed: 250 }
       ]
+    @options =
+      players: 4
+      roundIndex: 0
       speedIndex: 1
+      sound: true
 
     @mainMenu = new Menu this, "mainmenu", [
-      { text: @options.rounds[@options.roundIndex].text, cb: =>
-        @options.roundIndex = (@options.roundIndex + 1) % @options.rounds.length
-        return @options.rounds[@options.roundIndex].text
+      { text: @optionMenus.rounds[@options.roundIndex].text, cb: =>
+        @options.roundIndex = (@options.roundIndex + 1) % @optionMenus.rounds.length
+        return @optionMenus.rounds[@options.roundIndex].text
       }
       { text: "#{@options.players} Players", cb: =>
         @options.players++
@@ -63,9 +65,13 @@ class Game
           @options.players = 3
         return "#{@options.players} Players"
       }
-      { text: @options.speeds[@options.speedIndex].text, cb: =>
-        @options.speedIndex = (@options.speedIndex + 1) % @options.speeds.length
-        return @options.speeds[@options.speedIndex].text
+      { text: @optionMenus.speeds[@options.speedIndex].text, cb: =>
+        @options.speedIndex = (@options.speedIndex + 1) % @optionMenus.speeds.length
+        return @optionMenus.speeds[@options.speedIndex].text
+      }
+      { text: "Sound: #{if @options.sound then "Enabled" else "Disabled"}", cb: =>
+        @options.sound = !@options.sound
+        return "Sound: #{if @options.sound then "Enabled" else "Disabled"}"
       }
       { text: "Start", cb: =>
         @newGame()
@@ -77,6 +83,10 @@ class Game
       { text: "Resume Game", cb: =>
         @paused = false
         return
+      }
+      { text: "Sound: #{if @options.sound then "Enabled" else "Disabled"}", cb: =>
+        @options.sound = !@options.sound
+        return "Sound: #{if @options.sound then "Enabled" else "Disabled"}"
       }
       { text: "Quit Game", cb: =>
         @blackout = null
@@ -94,19 +104,30 @@ class Game
   # -----------------------------------------------------------------------------------------------------
   # load / save
 
-  load: (data) ->
-    @log "load: #{data}"
+  load: (json) ->
+    @log "(CS) loading state"
+    try
+      state = JSON.parse json
+    catch
+      @log "load failed to parse state: #{json}"
+      return
+    if state.options
+      for k, v of state.options
+        @options[k] = v
 
   save: ->
-    @log "save"
-    return "{}"
+    @log "(CS) saving state"
+    state = {
+      options: @options
+    }
+    return JSON.stringify state
 
   # -----------------------------------------------------------------------------------------------------
 
   newGame: ->
-    @aiTickRate = @options.speeds[@options.speedIndex].speed
+    @aiTickRate = @optionMenus.speeds[@options.speedIndex].speed
     @blackout = new Blackout this, {
-      rounds: @options.rounds[@options.roundIndex].data
+      rounds: @optionMenus.rounds[@options.roundIndex].data
       players: [
         { id: 1, name: 'Player' }
       ]
@@ -179,10 +200,8 @@ class Game
     @zones.length = 0 # forget about zones from the last frame. we're about to make some new ones!
 
     updated = false
-
     if @updateMainMenu(dt)
       updated = true
-
     if @updateGame(dt)
       updated = true
 

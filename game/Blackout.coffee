@@ -104,7 +104,6 @@ class Blackout
             this[k] = data[k]
     else
       # new game
-      @id = params.id
       @state = State.LOBBY
       @players = params.players
       @counter = 0

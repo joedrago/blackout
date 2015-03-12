@@ -115,7 +115,6 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
     // Javascript engine internals
     private V8 v8_;
-    private boolean scriptReady_;
     ConcurrentLinkedQueue<Touch> inputQueue_;
     private long lastTime_;
 
@@ -148,9 +147,11 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         width_ = displaySize.x;
         height_ = displaySize.y;
 
-        scriptReady_ = false;
         inputQueue_ = new ConcurrentLinkedQueue<Touch>();
         lastTime_ = System.currentTimeMillis();
+
+        initializeV8(context_, script_);
+        jsStartup();
 
         textures_ = new HashMap<String, Texture>();
         verts_ = ByteBuffer.allocateDirect(20 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
@@ -239,13 +240,6 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
     public void jsUpdate(double dt)
     {
-        if(!scriptReady_)
-        {
-            initializeV8(context_, script_);
-            jsStartup();
-            scriptReady_ = true;
-        }
-
         needsRender_ = false;
 
         Touch touch;

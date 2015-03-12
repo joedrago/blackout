@@ -1,9 +1,7 @@
 package com.jdrago.blackout;
 
-import com.jdrago.blackout.GLTextureView;
-
 import android.app.Activity;
-import android.content.res.Configuration;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Handler;
@@ -12,18 +10,11 @@ import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
-import java.util.Timer;
-import java.util.TimerTask;
-
-import com.jdrago.blackout.BlackoutView;
+import java.io.IOException;
 
 public class BlackoutActivity extends Activity
 {
@@ -100,9 +91,17 @@ public class BlackoutActivity extends Activity
     @Override
     protected void onPause()
     {
-        Log.d(TAG, "onPause (native)");
-
         super.onPause();
+        Log.d(TAG, "onPause");
+
+        String state = view_.renderer().jsSave();
+        Log.d(TAG, "save state: "+state.length()+" bytes");
+        Log.d(TAG, "save state: "+state);
+
+        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        editor.putString("state", state);
+        editor.apply();
+
         view_.onPause();
         paused_ = true;
     }
@@ -110,9 +109,15 @@ public class BlackoutActivity extends Activity
     @Override
     protected void onResume()
     {
-        Log.d(TAG, "onResume (native)");
-
         super.onResume();
+        Log.d(TAG, "onResume");
+
+        String state = getPreferences(MODE_PRIVATE).getString("state", "");
+        Log.d(TAG, "load state: "+state.length()+" bytes");
+        Log.d(TAG, "load state: "+state);
+
+        view_.renderer().jsLoad(state);
+
         view_.onResume();
         paused_ = false;
         immerse();
@@ -130,16 +135,6 @@ public class BlackoutActivity extends Activity
         // Makes the mainLoop_ runnable immediately fire (instead of waiting up to a second for it)
         uiHandler_.removeCallbacks(mainLoop_);
         uiHandler_.post(mainLoop_);
-    }
-
-    protected void onSaveInstanceState(Bundle savedInstanceState)
-    {
-        super.onSaveInstanceState(savedInstanceState);
-
-        Log.d(TAG, "onSaveInstanceState (native)");
-
-        String state = view_.renderer().jsSave();
-        savedInstanceState.putString("state", state);
     }
 
     void immerse()

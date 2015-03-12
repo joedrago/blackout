@@ -19,7 +19,7 @@ class Menu
     for button in @buttons
       if button.update(dt)
         updated = true
-    return false
+    return updated
 
   render: ->
     @game.spriteRenderer.render @background, 0, 0, @game.width, @game.height, 0, 0, 0, @game.colors.white
