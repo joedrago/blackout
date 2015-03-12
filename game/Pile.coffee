@@ -16,10 +16,10 @@ class Pile
     @playerCount = 2
     @scale = 0.6
 
-    centerX = (@width / 2)
-    centerY = (@height / 2)
+    centerX = @game.center.x
+    centerY = @game.center.y
     offsetX = @hand.cardWidth * @scale
-    offsetY = (@hand.cardHeight / 2) * @scale
+    offsetY = @hand.halfCardHeight * @scale
     @pileLocations =
       2: [
         { x: centerX, y: centerY + offsetY } # bottom
@@ -89,8 +89,8 @@ class Pile
         location = locations[who]
         @anims[card] = new Animation {
           speed: @hand.cardSpeed
-          x: location.x # -1 * (@hand.cardWidth / 2)
-          y: location.y # -1 * (@hand.cardWidth / 2)
+          x: location.x
+          y: location.y
           r: -1 * Math.PI / 4
           s: @scale
         }
@@ -99,8 +99,8 @@ class Pile
       if not @anims[card]
         @anims[card] = new Animation {
           speed: @hand.cardSpeed
-          x: -1 * (@hand.cardWidth / 2)
-          y: -1 * (@hand.cardWidth / 2)
+          x: -1 * @hand.halfCardWidth
+          y: -1 * @hand.halfCardWidth
           r: -1 * Math.PI / 2
           s: 1
         }
@@ -128,8 +128,8 @@ class Pile
       i = @trick.length - index - 1
       v = @trick[i]
       anim = @anims[v]
-      anim.req.x = (@width + (@hand.cardWidth / 2)) - ((index+1) * (@hand.cardWidth / 5))
-      anim.req.y = (@game.pauseButtonSize * 1.5) + @hand.cardHeight / 2
+      anim.req.x = (@width + @hand.halfCardWidth) - ((index+1) * (@hand.cardWidth / 5))
+      anim.req.y = (@game.pauseButtonSize * 1.5) + @hand.halfCardHeight
       anim.req.r = 0
       anim.req.s = 1
 
@@ -163,7 +163,6 @@ class Pile
     if (@trick.length > 0) and (@trickTaker.length > 0)
       anim = @anims[@trick[0]]
       if anim?
-        @game.fontRenderer.render @game.font, @height / 30, @trickTaker, @width, anim.cur.y + (@hand.cardHeight / 2), 1, 0, @trickColor
-
+        @game.fontRenderer.render @game.font, @height / 30, @trickTaker, @width, anim.cur.y + @hand.halfCardHeight, 1, 0, @trickColor
 
 module.exports = Pile

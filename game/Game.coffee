@@ -273,8 +273,8 @@ class Game
       @renderScore aiPlayers[0], aiPlayers[0].index == @blackout.turn, scoreHeight, characterMargin + (characterWidth / 2), @hand.playCeiling - textPadding, 0.5, 0
     # top side
     if aiPlayers[1] != null
-      @spriteRenderer.render aiPlayers[1].character.sprite, @width / 2, 0, 0, characterHeight, 0, 0.5, 0, @colors.white
-      @renderScore aiPlayers[1], aiPlayers[1].index == @blackout.turn, scoreHeight, @width / 2, characterHeight, 0.5, 0
+      @spriteRenderer.render aiPlayers[1].character.sprite, @center.x, 0, 0, characterHeight, 0, 0.5, 0, @colors.white
+      @renderScore aiPlayers[1], aiPlayers[1].index == @blackout.turn, scoreHeight, @center.x, characterHeight, 0.5, 0
     # right side
     if aiPlayers[2] != null
       characterWidth = @spriteRenderer.calcWidth(aiPlayers[0].character.sprite, characterHeight)
@@ -286,7 +286,7 @@ class Game
     # card area
     # @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea
     @hand.render()
-    @renderScore @blackout.players[0], 0 == @blackout.turn, scoreHeight, @width / 2, @height, 0.5, 1
+    @renderScore @blackout.players[0], 0 == @blackout.turn, scoreHeight, @center.x, @height, 0.5, 1
 
     @spriteRenderer.render "pause", @width, 0, 0, @pauseButtonSize, 0, 1, 0, @colors.white, =>
       @paused = true

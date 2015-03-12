@@ -1,3 +1,5 @@
+# This file provides the rendering engine for the web version. None of this code is included in the Java version.
+
 console.log 'web startup'
 
 Game = require 'Game'

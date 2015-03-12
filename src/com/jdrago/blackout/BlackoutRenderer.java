@@ -208,7 +208,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         frameCounterLastTime_ -= dt;
         if(frameCounterLastTime_ <= 0)
         {
-            // if(frameCounter_ > 2 * (FRAME_COUNTER_INTERVAL_MS / 1000))
+            if(frameCounter_ > 2 * (FRAME_COUNTER_INTERVAL_MS / 1000))
                 Log.d(TAG, "Rendered "+frameCounter_+" frames in last "+(FRAME_COUNTER_INTERVAL_MS + frameCounterLastTime_) + "ms");
 
             frameCounter_ = 0;
@@ -272,10 +272,10 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
         V8Array parameters = new V8Array(v8_);
         parameters.push(dt);
-        Trace.beginSection("update"); try {
+        Trace.beginSection("update");
         if(v8_.executeBooleanFunction("update", parameters))
             needsRender_ = true;
-        } finally { Trace.endSection(); }
+        Trace.endSection();
     }
 
     public boolean needsRender()
@@ -320,16 +320,16 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
     public void jsLoad(String s)
     {
-        // V8Array parameters = new V8Array(v8_);
-        // parameters.push(s);
-        // v8_.executeVoidFunction("load", parameters);
+        V8Array parameters = new V8Array(v8_);
+        parameters.push(s);
+        v8_.executeVoidFunction("load", parameters);
     }
 
     public String jsSave()
     {
         String s = "";
-        // V8Array parameters = new V8Array(v8_);
-        // s = v8_.executeStringFunction("save", parameters);
+        V8Array parameters = new V8Array(v8_);
+        s = v8_.executeStringFunction("save", parameters);
         return s;
     }
 

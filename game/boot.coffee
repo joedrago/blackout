@@ -1,3 +1,6 @@
+# This provides all global variables (functions) to both the web and the Java versions of the game.
+# Anything function cited in this file prefixed with "native" is assumed to already exist as a global.
+
 Game = require 'Game'
 
 game_ = null

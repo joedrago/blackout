@@ -47,6 +47,8 @@ class Hand
     @playCeiling = CARD_PLAY_CEILING * @screenHeight
     @cardHeight = Math.floor(@screenHeight * CARD_RENDER_SCALE)
     @cardWidth  = Math.floor(@cardHeight * CARD_IMAGE_W / CARD_IMAGE_H)
+    @cardHalfHeight = @cardHeight >> 1
+    @cardHalfWidth  = @cardWidth >> 1
     arcMargin = @cardWidth / 1.5
     arcVerticalBias = @cardHeight / 50
     bottomLeft  = { x: arcMargin,                y: arcVerticalBias + @screenHeight }

@@ -23,7 +23,6 @@ import java.io.InputStreamReader;
 import java.util.Timer;
 import java.util.TimerTask;
 
-// import com.jdrago.blackout.bridge.*;
 import com.jdrago.blackout.BlackoutView;
 
 public class BlackoutActivity extends Activity
@@ -34,32 +33,28 @@ public class BlackoutActivity extends Activity
     Point displaySize_;
     private double coordinateScale_;
     boolean paused_;
-    Handler uiHandler_ = new Handler(Looper.getMainLooper());
+    Handler uiHandler_;
     Runnable mainLoop_;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
-
+        coordinateScale_ = 1;
         paused_ = true;
 
         Display display = getWindowManager().getDefaultDisplay();
         displaySize_ = new Point();
         display.getRealSize(displaySize_);
 
-        // Halve the resolution so phones don't choke on the awesome
-        // displaySize_.x /= 2;
-        // displaySize_.y /= 2;
-
-        coordinateScale_ = 1;
         Log.d(TAG, "BlackoutActivity::onCreate(): displaySize: "+displaySize_.x+","+displaySize_.y);
-
         view_ = new BlackoutView(getApplication(), this, displaySize_, loadScript(R.raw.script));
         setContentView(view_);
         immerse();
 
+        // The main loop is implemented as a Runnable that either runs once a second when idling,
+        // or runs at BlackoutRenderer.MAX_FPS if in the middle of an animation or a drag.
+        uiHandler_ = new Handler(Looper.getMainLooper());
         mainLoop_ = new Runnable() {
             @Override
             public void run() {
@@ -69,7 +64,9 @@ public class BlackoutActivity extends Activity
                 if(paused_)
                     return;
 
+                // Update and render happen in this call
                 view_.requestRender();
+
                 if(view_.renderer().needsRender())
                 {
                     uiHandler_.postDelayed(this, BlackoutRenderer.MIN_MS_PER_FRAME);
@@ -80,11 +77,6 @@ public class BlackoutActivity extends Activity
                 }
             }
         };
-    }
-
-    public void onAttachedToWindow()
-    {
-        Log.d(TAG, "BlackoutActivity::onAttachedToWindow");
     }
 
     @Override
@@ -100,6 +92,7 @@ public class BlackoutActivity extends Activity
         double biggestDimension = touchWidth;
         if(biggestDimension < touchHeight)
             biggestDimension = touchHeight;
+
         coordinateScale_ = displaySize_.x / biggestDimension;
         Log.d(TAG, "touchSize: "+touchWidth+","+touchHeight+" [biggestDimension: "+biggestDimension+"] coordinateScale: "+coordinateScale_);
     }
@@ -121,19 +114,20 @@ public class BlackoutActivity extends Activity
 
         super.onResume();
         view_.onResume();
-        immerse();
         paused_ = false;
-
+        immerse();
         kick();
     }
 
     public void onBackPressed()
     {
+        // This stops the back button from destroying this Activity
         moveTaskToBack(true);
     }
 
     protected void kick()
     {
+        // Makes the mainLoop_ runnable immediately fire (instead of waiting up to a second for it)
         uiHandler_.removeCallbacks(mainLoop_);
         uiHandler_.post(mainLoop_);
     }
@@ -144,8 +138,8 @@ public class BlackoutActivity extends Activity
 
         Log.d(TAG, "onSaveInstanceState (native)");
 
-        // String state = jsSave();
-        // savedInstanceState.putString("state", state);
+        String state = view_.renderer().jsSave();
+        savedInstanceState.putString("state", state);
     }
 
     void immerse()

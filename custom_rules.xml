@@ -16,4 +16,10 @@
             <arg value="com.jdrago.blackout/.BlackoutActivity"/>
         </exec>
     </target>
+    <target name="uninstall">
+        <exec executable="adb">
+            <arg value="uninstall"/>
+            <arg value="com.jdrago.blackout"/>
+        </exec>
+    </target>
 </project>

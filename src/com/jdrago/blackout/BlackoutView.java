@@ -18,22 +18,10 @@ class BlackoutView extends GLTextureView
         super(context);
         setVersion(GLESVersion.OpenGLES20);
         setRenderingThreadType(RenderingThreadType.RequestThread);
-/*
-        setEGLContextClientVersion(2);
-        setPreserveEGLContextOnPause(true);
-        */
         activity_ = activity;
 
-        // getHolder().setFixedSize(displaySize.x, displaySize.y);
         renderer_ = new BlackoutRenderer(context, activity, this, displaySize, script);
         setRenderer(renderer_);
-        // setRenderMode(RENDERMODE_WHEN_DIRTY);
-    }
-
-    public void onAttachedToWindow()
-    {
-        super.onAttachedToWindow();
-        Log.d(TAG, "BlackoutView::onAttachedToWindow");
     }
 
     public boolean onTouchEvent(MotionEvent event)
