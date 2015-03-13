@@ -42,31 +42,34 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
     private static final int FLOAT_SIZE_BYTES = 4;
     private static final int INT_SIZE_BYTES = 4;
-    private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
+    private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 9 * FLOAT_SIZE_BYTES;
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
     private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
+    private static final int TRIANGLE_VERTICES_DATA_COLOR_OFFSET = 5;
     private static final int TEXTURE_COUNT = 5;
 
     private static final String VERTEX_SHADER =
-            "uniform mat4 uMVPMatrix;\n" +
-                    "attribute vec4 aPosition;\n" +
-                    "attribute vec2 aTextureCoord;\n" +
-                    "uniform vec4 u_color;\n" +
-                    "varying vec2 vTextureCoord;\n" +
-                    "void main() {\n" +
-                    "  gl_Position = uMVPMatrix * aPosition;\n" +
-                    "  vTextureCoord = aTextureCoord;\n" +
-                    "}\n";
+        "uniform mat4 uMVPMatrix;\n" +
+        "attribute vec4 aPosition;\n" +
+        "attribute vec2 aTextureCoord;\n" +
+        "attribute vec4 aColor;\n" +
+        "varying vec2 vTextureCoord;\n" +
+        "varying vec4 vColor;\n" +
+        "void main() {\n" +
+        "  gl_Position = uMVPMatrix * aPosition;\n" +
+        "  vTextureCoord = aTextureCoord;\n" +
+        "  vColor = aColor;\n" +
+        "}\n";
 
     private static final String FRAGMENT_SHADER =
-            "precision mediump float;\n" +
-                    "varying vec2 vTextureCoord;\n" +
-                    "uniform sampler2D sTexture;\n" +
-                    "uniform vec4 u_color;\n" +
-                    "void main() {\n" +
-                    "vec4 t = texture2D(sTexture, vTextureCoord);" +
-                    "gl_FragColor.rgba = u_color.rgba * t.rgba;\n" +
-                    "}\n";
+        "precision mediump float;\n" +
+        "varying vec2 vTextureCoord;\n" +
+        "varying vec4 vColor;\n" +
+        "uniform sampler2D sTexture;\n" +
+        "void main() {\n" +
+        "vec4 t = texture2D(sTexture, vTextureCoord);" +
+        "gl_FragColor.rgba = vColor.rgba * t.rgba;\n" +
+        "}\n";
 
 
     // --------------------------------------------------------------------------------------------
@@ -154,7 +157,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         initializeV8(context_, script_);
         jsStartup();
 
-        verts_ = ByteBuffer.allocateDirect(30 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        verts_ = ByteBuffer.allocateDirect(9 * 6 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
         frameCounter_ = 0;
         frameCounterLastTime_ = FRAME_COUNTER_INTERVAL_MS;
         renderDataSize_ = 0;
@@ -366,30 +369,40 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             float uvT = (float)(renderData_[qi+2] / texture.height);
             float uvR = (float)((renderData_[qi+1] + renderData_[qi+3]) / texture.width);
             float uvB = (float)((renderData_[qi+2] + renderData_[qi+4]) / texture.height);
+            float fR = (float)renderData_[qi+12];
+            float fG = (float)renderData_[qi+13];
+            float fB = (float)renderData_[qi+14];
+            float fA = (float)renderData_[qi+15];
 
             float[] vertData = {
                 // X, Y, Z, U, V
-                0, 0, 0, uvL, uvT,
-                1, 0, 0, uvR, uvT,
-                1, 1, 0, uvR, uvB,
-
-                1, 1, 0, uvR, uvB,
-                0, 1, 0, uvL, uvB,
-                0, 0, 0, uvL, uvT
+                0, 0, 0, uvL, uvT, fR, fG, fB, fA,
+                1, 0, 0, uvR, uvT, fR, fG, fB, fA,
+                1, 1, 0, uvR, uvB, fR, fG, fB, fA,
+                1, 1, 0, uvR, uvB, fR, fG, fB, fA,
+                0, 1, 0, uvL, uvB, fR, fG, fB, fA,
+                0, 0, 0, uvL, uvT, fR, fG, fB, fA
             };
             verts_.position(0);
             verts_.put(vertData);
 
             verts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
             GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
-            checkGlError("glVertexAttribPointer maPosition");
-            verts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+            checkGlError("glVertexAttribPointer posHandle_");
             GLES20.glEnableVertexAttribArray(posHandle_);
-            checkGlError("glEnableVertexAttribArray posHandle");
+            checkGlError("glEnableVertexAttribArray posHandle_");
+
+            verts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
             GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
-            checkGlError("glVertexAttribPointer texHandle");
+            checkGlError("glVertexAttribPointer texHandle_");
             GLES20.glEnableVertexAttribArray(texHandle_);
-            checkGlError("glEnableVertexAttribArray texHandle");
+            checkGlError("glEnableVertexAttribArray texHandle_");
+
+            verts_.position(TRIANGLE_VERTICES_DATA_COLOR_OFFSET);
+            GLES20.glVertexAttribPointer(vertColorHandle_, 4, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
+            checkGlError("glVertexAttribPointer vertColorHandle_");
+            GLES20.glEnableVertexAttribArray(vertColorHandle_);
+            checkGlError("glEnableVertexAttribArray vertColorHandle_");
 
             float anchorOffsetX = (float)(-1 * renderData_[qi+10] * renderData_[qi+7]);
             float anchorOffsetY = (float)(-1 * renderData_[qi+11] * renderData_[qi+8]);
@@ -404,7 +417,6 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, viewProjMatrix_, 0);
 
             GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
-            GLES20.glUniform4f(vertColorHandle_, (float)renderData_[qi+12], (float)renderData_[qi+13], (float)renderData_[qi+14], (float)renderData_[qi+15]);
             GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
             checkGlError("glDrawElements");
 
@@ -495,18 +507,18 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             throw new RuntimeException("Could not get attrib location for aTextureCoord");
         }
 
+        vertColorHandle_ = GLES20.glGetAttribLocation(shaderProgram_, "aColor");
+        checkGlError("glGetAttribLocation vertColorHandle");
+        if (vertColorHandle_ == -1)
+        {
+            throw new RuntimeException("Could not get attrib location for vertColorHandle");
+        }
+
         viewProjMatrixHandle_ = GLES20.glGetUniformLocation(shaderProgram_, "uMVPMatrix");
         checkGlError("glGetUniformLocation uMVPMatrix");
         if (viewProjMatrixHandle_ == -1)
         {
             throw new RuntimeException("Could not get attrib location for uMVPMatrix");
-        }
-
-        vertColorHandle_ = GLES20.glGetUniformLocation(shaderProgram_, "u_color");
-        checkGlError("glGetUniformLocation vertColorHandle");
-        if (vertColorHandle_ == -1)
-        {
-            throw new RuntimeException("Could not get attrib location for vertColorHandle");
         }
 
         loadTextures();
