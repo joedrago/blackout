@@ -73,48 +73,48 @@ class Game
       sound: true
 
     @mainMenu = new Menu this, "mainmenu", [
-      { text: @optionMenus.rounds[@options.roundIndex].text, cb: =>
-        @options.roundIndex = (@options.roundIndex + 1) % @optionMenus.rounds.length
+      (click) =>
+        if click
+          @options.roundIndex = (@options.roundIndex + 1) % @optionMenus.rounds.length
         return @optionMenus.rounds[@options.roundIndex].text
-      }
-      { text: "#{@options.players} Players", cb: =>
-        @options.players++
-        if @options.players > 4
-          @options.players = 3
+      (click) =>
+        if click
+          @options.players++
+          if @options.players > 4
+            @options.players = 3
         return "#{@options.players} Players"
-      }
-      { text: @optionMenus.speeds[@options.speedIndex].text, cb: =>
-        @options.speedIndex = (@options.speedIndex + 1) % @optionMenus.speeds.length
+      (click) =>
+        if click
+          @options.speedIndex = (@options.speedIndex + 1) % @optionMenus.speeds.length
         return @optionMenus.speeds[@options.speedIndex].text
-      }
-      { text: "Sound: #{if @options.sound then "Enabled" else "Disabled"}", cb: =>
-        @options.sound = !@options.sound
+      (click) =>
+        if click
+          @options.sound = !@options.sound
         return "Sound: #{if @options.sound then "Enabled" else "Disabled"}"
-      }
-      { text: "Start", cb: =>
-        @newGame()
-        return
-      }
+      (click) =>
+        if click
+          @newGame()
+        return "Start"
     ]
 
     @pauseMenu = new Menu this, "pausemenu", [
-      { text: "Resume Game", cb: =>
-        @paused = false
-        return
-      }
-      { text: @optionMenus.speeds[@options.speedIndex].text, cb: =>
-        @options.speedIndex = (@options.speedIndex + 1) % @optionMenus.speeds.length
+      (click) =>
+        if click
+          @paused = false
+        return "Resume Game"
+      (click) =>
+        if click
+          @options.speedIndex = (@options.speedIndex + 1) % @optionMenus.speeds.length
         return @optionMenus.speeds[@options.speedIndex].text
-      }
-      { text: "Sound: #{if @options.sound then "Enabled" else "Disabled"}", cb: =>
-        @options.sound = !@options.sound
+      (click) =>
+        if click
+          @options.sound = !@options.sound
         return "Sound: #{if @options.sound then "Enabled" else "Disabled"}"
-      }
-      { text: "Quit Game", cb: =>
-        @blackout = null
-        @paused = false
-        return
-      }
+      (click) =>
+        if click
+          @blackout = null
+          @paused = false
+        return "Quit Game"
     ]
 
   # -----------------------------------------------------------------------------------------------------

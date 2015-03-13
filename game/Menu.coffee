@@ -11,7 +11,7 @@ class Menu
     slice = (@game.height - buttonStartY) / (@actions.length + 1)
     currY = buttonStartY + slice
     for action in @actions
-      button = new Button(@game, @buttonNames, @game.font, buttonSize, @game.center.x, currY, action.text, action.cb)
+      button = new Button(@game, @buttonNames, @game.font, buttonSize, @game.center.x, currY, action)
       @buttons.push button
       currY += slice
 

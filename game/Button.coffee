@@ -1,7 +1,7 @@
 Animation = require 'Animation'
 
 class Button
-  constructor: (@game, @spriteNames, @font, @textHeight, @x, @y, @text, @cb) ->
+  constructor: (@game, @spriteNames, @font, @textHeight, @x, @y, @cb) ->
     @anim = new Animation {
       speed: { s: 3 }
       s: 0
@@ -19,12 +19,9 @@ class Button
       @anim.req.s = 0
       # then call callback
       newText = null
-      if @cb
-        newText = @cb()
-      if (@text.length > 0) and newText
-        @text = newText
+      @cb(true)
     @game.spriteRenderer.render @spriteNames[1], @x, @y, 0, @textHeight * 1.5, 0, 0.5, 0.5, @color
-    if @text.length > 0
-      @game.fontRenderer.render @font, @textHeight, @text, @x, @y, 0.5, 0.5, @game.colors.buttontext
+    text = @cb(false)
+    @game.fontRenderer.render @font, @textHeight, text, @x, @y, 0.5, 0.5, @game.colors.buttontext
 
 module.exports = Button

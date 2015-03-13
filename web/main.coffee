@@ -11,6 +11,8 @@ componentToHex = (c) ->
 rgbToHex = (r, g, b) ->
   return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b)
 
+SAVE_TIMER_MS = 3000
+
 class NativeApp
   constructor: (@screen, @width, @height) ->
     @rgbkCache = []
@@ -34,6 +36,12 @@ class NativeApp
 
     @game = new Game(this, @width, @height)
 
+    if typeof Storage != "undefined"
+      state = localStorage.getItem "state"
+      if state
+        # console.log "loading state: #{state}"
+        @game.load state
+
     @pendingImages = 0
     loadedTextures = []
     for imageUrl in @textures
@@ -45,6 +53,8 @@ class NativeApp
       loadedTextures.push img
     @textures = loadedTextures
 
+    @saveTimer = SAVE_TIMER_MS 
+
   onImageLoaded: (info) ->
     @pendingImages--
     if @pendingImages == 0
@@ -53,6 +63,15 @@ class NativeApp
 
   log: (s) ->
     console.log "NativeApp.log(): #{s}"
+
+  updateSave: (dt) ->
+    return if typeof Storage == "undefined"
+    @saveTimer -= dt
+    if @saveTimer <= 0
+      @saveTimer = SAVE_TIMER_MS
+      state = @game.save()
+      # console.log "saving: #{state}"
+      localStorage.setItem "state", state
 
   # from http://www.playmycode.com/blog/2011/06/realtime-image-tinting-on-html5-canvas/
   generateRGBKs: (img) ->
@@ -163,6 +182,8 @@ class NativeApp
     while (i < n)
       drawCall = renderCommands.slice(i, i += 16)
       @drawImage.apply(this, drawCall)
+
+    @updateSave(dt)
 
     requestAnimationFrame => @update()
 

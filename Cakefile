@@ -27,7 +27,7 @@ getCoffeeScriptCmdline = (dir) ->
   names = []
   externals = ''
   for filename in fs.readdirSync(dir)
-    if matches = filename.match(/(\S+).coffee/)
+    if matches = filename.match(/(\S+).coffee$/)
       continue if matches[1] == 'boot'
       names.push matches[1]
       sources += "-r ./#{dir}/#{filename}:#{matches[1]} "
