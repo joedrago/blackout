@@ -18,7 +18,6 @@ class Button
       @anim.cur.s = 1
       @anim.req.s = 0
       # then call callback
-      newText = null
       @cb(true)
     @game.spriteRenderer.render @spriteNames[1], @x, @y, 0, @textHeight * 1.5, 0, 0.5, 0.5, @color
     text = @cb(false)

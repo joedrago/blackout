@@ -49,8 +49,14 @@ class Game
     bidButtonDistance = @bidButtonSize * 3.5
     @bidButtonY = @center.y - (@bidButtonSize)
     @bidUI = #(@game, @spriteNames, @font, @textHeight, @x, @y, @text, @cb)
-      minus: new Button this, ['minus0', 'minus1'], @font, @bidButtonSize, @center.x - bidButtonDistance, @bidButtonY, '', => @adjustBid(-1)
-      plus:  new Button this, ['plus0', 'plus1'],   @font, @bidButtonSize, @center.x + bidButtonDistance, @bidButtonY, '', => @adjustBid(1)
+      minus: new Button this, ['minus0', 'minus1'], @font, @bidButtonSize, @center.x - bidButtonDistance, @bidButtonY, (click) =>
+        if click
+          @adjustBid(-1)
+        return ''
+      plus:  new Button this, ['plus0', 'plus1'],   @font, @bidButtonSize, @center.x + bidButtonDistance, @bidButtonY, (click) =>
+        if click
+          @adjustBid(1)
+        return ''
 
     @optionMenus =
       rounds: [
