@@ -45,7 +45,6 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
     private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
-    private static final int[] QUAD_INDICES = {0, 1, 2, 2, 3, 0};
     private static final int TEXTURE_COUNT = 5;
 
     private static final String VERTEX_SHADER =
@@ -126,7 +125,6 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     private float[] modelMatrix_ = new float[16];
     private float[] viewMatrix_ = new float[16];
     private FloatBuffer verts_;
-    private IntBuffer indices_;
     private int shaderProgram_;
     private int viewProjMatrixHandle_;
     private int posHandle_;
@@ -156,9 +154,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         initializeV8(context_, script_);
         jsStartup();
 
-        verts_ = ByteBuffer.allocateDirect(20 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
-        indices_ = ByteBuffer.allocateDirect(QUAD_INDICES.length * INT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asIntBuffer();
-        indices_.put(QUAD_INDICES).position(0);
+        verts_ = ByteBuffer.allocateDirect(30 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
         frameCounter_ = 0;
         frameCounterLastTime_ = FRAME_COUNTER_INTERVAL_MS;
         renderDataSize_ = 0;
@@ -376,7 +372,11 @@ public class BlackoutRenderer implements GLTextureView.Renderer
                 0, 0, 0, uvL, uvT,
                 1, 0, 0, uvR, uvT,
                 1, 1, 0, uvR, uvB,
-                0, 1, 0, uvL, uvB};
+
+                1, 1, 0, uvR, uvB,
+                0, 1, 0, uvL, uvB,
+                0, 0, 0, uvL, uvT
+            };
             verts_.position(0);
             verts_.put(vertData);
 
@@ -405,7 +405,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
             GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
             GLES20.glUniform4f(vertColorHandle_, (float)renderData_[qi+12], (float)renderData_[qi+13], (float)renderData_[qi+14], (float)renderData_[qi+15]);
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, indices_);
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
             checkGlError("glDrawElements");
 
             Trace.endSection();
