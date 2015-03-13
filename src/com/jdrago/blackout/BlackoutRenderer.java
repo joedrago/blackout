@@ -42,21 +42,22 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
     private static final int FLOAT_SIZE_BYTES = 4;
     private static final int INT_SIZE_BYTES = 4;
-    private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 9 * FLOAT_SIZE_BYTES;
+    private static final int FLOATS_PER_VERT = 10;
+    private static final int VERTS_PER_QUAD = 6;
+    private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = FLOATS_PER_VERT * FLOAT_SIZE_BYTES;
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
-    private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
-    private static final int TRIANGLE_VERTICES_DATA_COLOR_OFFSET = 5;
+    private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 4;
+    private static final int TRIANGLE_VERTICES_DATA_COLOR_OFFSET = 6;
     private static final int TEXTURE_COUNT = 5;
 
     private static final String VERTEX_SHADER =
-        "uniform mat4 uMVPMatrix;\n" +
         "attribute vec4 aPosition;\n" +
         "attribute vec2 aTextureCoord;\n" +
         "attribute vec4 aColor;\n" +
         "varying vec2 vTextureCoord;\n" +
         "varying vec4 vColor;\n" +
         "void main() {\n" +
-        "  gl_Position = uMVPMatrix * aPosition;\n" +
+        "  gl_Position = aPosition;\n" +
         "  vTextureCoord = aTextureCoord;\n" +
         "  vColor = aColor;\n" +
         "}\n";
@@ -77,9 +78,32 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
     public class Texture
     {
+        String name;
         int id;
         double width;
         double height;
+
+        int quadCount;
+        float[] vertData_;
+        int vertDataSize_;
+        private FloatBuffer verts_;
+
+        public void prepare()
+        {
+            if(quadCount == 0)
+                return;
+
+            int floatsNeeded = quadCount * FLOATS_PER_VERT * VERTS_PER_QUAD;
+            if(vertDataSize_ < floatsNeeded)
+            {
+                // resize vertex buffers to accomodate
+                Log.d(TAG, "Texture '"+name+"' reserving "+quadCount+" quads worth");
+                vertDataSize_ = floatsNeeded;
+                vertData_ = new float[vertDataSize_];
+                verts_ = ByteBuffer.allocateDirect(vertDataSize_ * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+            }
+            verts_.position(0);
+        }
     };
 
     // --------------------------------------------------------------------------------------------
@@ -127,9 +151,9 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     private float[] projMatrix_ = new float[16];
     private float[] modelMatrix_ = new float[16];
     private float[] viewMatrix_ = new float[16];
-    private FloatBuffer verts_;
+    // private FloatBuffer verts_;
     private int shaderProgram_;
-    private int viewProjMatrixHandle_;
+    // private int viewProjMatrixHandle_;
     private int posHandle_;
     private int texHandle_;
     private int vertColorHandle_;
@@ -157,7 +181,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         initializeV8(context_, script_);
         jsStartup();
 
-        verts_ = ByteBuffer.allocateDirect(9 * 6 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+        // verts_ = ByteBuffer.allocateDirect(FLOATS_PER_VERT * VERTS_PER_QUAD * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
         frameCounter_ = 0;
         frameCounterLastTime_ = FRAME_COUNTER_INTERVAL_MS;
         renderDataSize_ = 0;
@@ -170,11 +194,11 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     public void loadTextures()
     {
         textures_ = new Texture[TEXTURE_COUNT];
-        textures_[0] = loadPNG(R.raw.cards);
-        textures_[1] = loadPNG(R.raw.darkforest);
-        textures_[2] = loadPNG(R.raw.chars);
-        textures_[3] = loadPNG(R.raw.mainmenu);
-        textures_[4] = loadPNG(R.raw.pausemenu);
+        textures_[0] = loadPNG("cards", R.raw.cards);
+        textures_[1] = loadPNG("darkforest", R.raw.darkforest);
+        textures_[2] = loadPNG("chars", R.raw.chars);
+        textures_[3] = loadPNG("mainmenu", R.raw.mainmenu);
+        textures_[4] = loadPNG("pausemenu", R.raw.pausemenu);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -315,9 +339,37 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         GLES20.glEnable(GLES20.GL_BLEND);
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glDepthFunc(GLES20.GL_LEQUAL);
+        GLES20.glDepthMask(true);
+
+        for(int i = 0; i < TEXTURE_COUNT; i++)
+        {
+            textures_[i].quadCount = 0;
+        }
+
+        int qi = 0; // quad index
+        for(int i = 0; i < quadCount; i++, qi += 16)
+        {
+            int textureIndex = (int)renderData_[qi+0];
+            if(textureIndex < 0)
+                textureIndex = 0;
+            if(textureIndex >= TEXTURE_COUNT)
+                textureIndex = TEXTURE_COUNT - 1;
+            textures_[textureIndex].quadCount++;
+        }
+
+        // Log.d(TAG, "Quads by texture:");
+        for(int i = 0; i < TEXTURE_COUNT; i++)
+        {
+            // Log.d(TAG, "** "+textures_[i].name+": "+textures_[i].quadCount);
+            textures_[i].prepare();
+            textures_[i].quadCount = 0;
+        }
 
         int currentTextureID = -1;
-        int qi = 0; // quad index
+        qi = 0; // quad index
+        float nextZ = -30;
         for(int i = 0; i < quadCount; i++, qi += 16)
         {
             // Indices:
@@ -338,19 +390,6 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             // 14: blue
             // 15: alpha
 
-            // switch to vertex colors (stop using uniform color)
-            //
-            // give each Texture class:
-            // verts_
-            // vertData_
-            // vertDataSize_
-            // tempCount
-            //
-            // then scan the incoming double array, counting up the quads per texture
-            // resize all texture vertData_ accordingly
-            // walk double array, populating vert buffers
-            // for each texture do a single verts_.put(),
-
             Trace.beginSection("drawImage");
 
             int textureIndex = (int)renderData_[qi+0];
@@ -359,11 +398,6 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             if(textureIndex >= TEXTURE_COUNT)
                 textureIndex = TEXTURE_COUNT - 1;
             Texture texture = textures_[textureIndex];
-            if(currentTextureID != texture.id)
-            {
-                currentTextureID = texture.id;
-                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, currentTextureID);
-            }
 
             float uvL = (float)(renderData_[qi+1] / texture.width);
             float uvT = (float)(renderData_[qi+2] / texture.height);
@@ -373,36 +407,15 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             float fG = (float)renderData_[qi+13];
             float fB = (float)renderData_[qi+14];
             float fA = (float)renderData_[qi+15];
-
             float[] vertData = {
-                // X, Y, Z, U, V
-                0, 0, 0, uvL, uvT, fR, fG, fB, fA,
-                1, 0, 0, uvR, uvT, fR, fG, fB, fA,
-                1, 1, 0, uvR, uvB, fR, fG, fB, fA,
-                1, 1, 0, uvR, uvB, fR, fG, fB, fA,
-                0, 1, 0, uvL, uvB, fR, fG, fB, fA,
-                0, 0, 0, uvL, uvT, fR, fG, fB, fA
+                // X, Y, Z, W, U, V, R, G, B, A
+                0, 0, nextZ, 1, uvL, uvT, fR, fG, fB, fA,
+                1, 0, nextZ, 1, uvR, uvT, fR, fG, fB, fA,
+                1, 1, nextZ, 1, uvR, uvB, fR, fG, fB, fA,
+                1, 1, nextZ, 1, uvR, uvB, fR, fG, fB, fA,
+                0, 1, nextZ, 1, uvL, uvB, fR, fG, fB, fA,
+                0, 0, nextZ, 1, uvL, uvT, fR, fG, fB, fA
             };
-            verts_.position(0);
-            verts_.put(vertData);
-
-            verts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
-            GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
-            checkGlError("glVertexAttribPointer posHandle_");
-            GLES20.glEnableVertexAttribArray(posHandle_);
-            checkGlError("glEnableVertexAttribArray posHandle_");
-
-            verts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
-            GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
-            checkGlError("glVertexAttribPointer texHandle_");
-            GLES20.glEnableVertexAttribArray(texHandle_);
-            checkGlError("glEnableVertexAttribArray texHandle_");
-
-            verts_.position(TRIANGLE_VERTICES_DATA_COLOR_OFFSET);
-            GLES20.glVertexAttribPointer(vertColorHandle_, 4, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
-            checkGlError("glVertexAttribPointer vertColorHandle_");
-            GLES20.glEnableVertexAttribArray(vertColorHandle_);
-            checkGlError("glEnableVertexAttribArray vertColorHandle_");
 
             float anchorOffsetX = (float)(-1 * renderData_[qi+10] * renderData_[qi+7]);
             float anchorOffsetY = (float)(-1 * renderData_[qi+11] * renderData_[qi+8]);
@@ -416,11 +429,56 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             Matrix.multiplyMM(viewProjMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
             Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, viewProjMatrix_, 0);
 
-            GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
-            checkGlError("glDrawElements");
+            int vertexOffset = 0;
+            Matrix.multiplyMV(vertData, vertexOffset, viewProjMatrix_, 0, vertData, vertexOffset);
+            vertexOffset += FLOATS_PER_VERT;
+            Matrix.multiplyMV(vertData, vertexOffset, viewProjMatrix_, 0, vertData, vertexOffset);
+            vertexOffset += FLOATS_PER_VERT;
+            Matrix.multiplyMV(vertData, vertexOffset, viewProjMatrix_, 0, vertData, vertexOffset);
+            vertexOffset += FLOATS_PER_VERT;
+            Matrix.multiplyMV(vertData, vertexOffset, viewProjMatrix_, 0, vertData, vertexOffset);
+            vertexOffset += FLOATS_PER_VERT;
+            Matrix.multiplyMV(vertData, vertexOffset, viewProjMatrix_, 0, vertData, vertexOffset);
+            vertexOffset += FLOATS_PER_VERT;
+            Matrix.multiplyMV(vertData, vertexOffset, viewProjMatrix_, 0, vertData, vertexOffset);
+
+            texture.verts_.put(vertData);
+            texture.quadCount++;
+            nextZ += 1;
 
             Trace.endSection();
+        }
+
+        for(int i = 0; i < TEXTURE_COUNT; i++)
+        {
+            Texture texture = textures_[i];
+            if(texture.quadCount == 0)
+                continue;
+
+            // Log.d(TAG, "rendering "+texture.quadCount+" quads with texture "+texture.name);
+
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture.id);
+
+            texture.verts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+            GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, texture.verts_);
+            checkGlError("glVertexAttribPointer posHandle_");
+            GLES20.glEnableVertexAttribArray(posHandle_);
+            checkGlError("glEnableVertexAttribArray posHandle_");
+
+            texture.verts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+            GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, texture.verts_);
+            checkGlError("glVertexAttribPointer texHandle_");
+            GLES20.glEnableVertexAttribArray(texHandle_);
+            checkGlError("glEnableVertexAttribArray texHandle_");
+
+            texture.verts_.position(TRIANGLE_VERTICES_DATA_COLOR_OFFSET);
+            GLES20.glVertexAttribPointer(vertColorHandle_, 4, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, texture.verts_);
+            checkGlError("glVertexAttribPointer vertColorHandle_");
+            GLES20.glEnableVertexAttribArray(vertColorHandle_);
+            checkGlError("glEnableVertexAttribArray vertColorHandle_");
+
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, texture.quadCount * VERTS_PER_QUAD);
+            checkGlError("glDrawArrays");
         }
 
         Trace.endSection();
@@ -476,6 +534,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     {
         GLES20.glViewport(0, 0, width_, height_);
         GLES20.glClearColor(r, g, b, 1.0f);
+        GLES20.glClearDepthf(1.0f);
         GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glUseProgram(shaderProgram_);
         checkGlError("glUseProgram");
@@ -514,12 +573,12 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             throw new RuntimeException("Could not get attrib location for vertColorHandle");
         }
 
-        viewProjMatrixHandle_ = GLES20.glGetUniformLocation(shaderProgram_, "uMVPMatrix");
-        checkGlError("glGetUniformLocation uMVPMatrix");
-        if (viewProjMatrixHandle_ == -1)
-        {
-            throw new RuntimeException("Could not get attrib location for uMVPMatrix");
-        }
+        // viewProjMatrixHandle_ = GLES20.glGetUniformLocation(shaderProgram_, "uMVPMatrix");
+        // checkGlError("glGetUniformLocation uMVPMatrix");
+        // if (viewProjMatrixHandle_ == -1)
+        // {
+        //     throw new RuntimeException("Could not get attrib location for uMVPMatrix");
+        // }
 
         loadTextures();
 
@@ -549,7 +608,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         float right = width;
         float bottom = height;
         float top = 0.0f;
-        float near = 0.0f;
+        float near = -20.0f;
         float far = 20.0f;
         Matrix.orthoM(projMatrix_, 0, left, right, bottom, top, near, far);
     }
@@ -622,7 +681,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         }
     }
 
-    public Texture loadPNG(int res)
+    public Texture loadPNG(String name, int res)
     {
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
@@ -655,9 +714,11 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
 
         Texture texture = new Texture();
+        texture.name = name;
         texture.id = id;
         texture.width = (double)bitmap.getWidth();
         texture.height = (double)bitmap.getHeight();
+        texture.vertDataSize_ = 0;
         bitmap.recycle();
         return texture;
     }

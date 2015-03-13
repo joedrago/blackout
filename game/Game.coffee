@@ -325,7 +325,7 @@ class Game
   renderGame: ->
 
     # background
-    @spriteRenderer.render "solid", 0, 0, @width, @height, 0, 0, 0, @colors.background
+    # @spriteRenderer.render "solid", 0, 0, @width, @height, 0, 0, 0, @colors.background
 
     textHeight = @height / 30
     textPadding = textHeight / 5
@@ -386,7 +386,6 @@ class Game
           @attemptBid()
 
     # card area
-    # @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea
     @hand.render()
     @renderScore @blackout.players[0], 0 == @blackout.turn, scoreHeight, @center.x, @height, 0.5, 1
 

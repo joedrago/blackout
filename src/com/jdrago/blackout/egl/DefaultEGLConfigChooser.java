@@ -10,6 +10,8 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import com.jdrago.blackout.GLTextureView.EGLConfigChooser;
 import com.jdrago.blackout.GLTextureView.GLESVersion;
 
+import android.util.Log;
+
 public class DefaultEGLConfigChooser implements EGLConfigChooser {
 
     /**
@@ -130,6 +132,8 @@ public class DefaultEGLConfigChooser implements EGLConfigChooser {
             result.add(EGL10.EGL_STENCIL_SIZE);
             result.add(stencilSize);
         }
+
+        Log.d("Blackout", "depthSize:"+depthSize);
 
         // End
         result.add(EGL10.EGL_NONE);
