@@ -31,6 +31,13 @@ class Game
       handarea:   { r:   0, g: 0.1, b:   0, a: 1.0 }
       overlay:    { r:   0, g:   0, b:   0, a: 0.6 }
 
+    @textures =
+      "cards": 0
+      "darkforest": 1
+      "chars": 2
+      "mainmenu": 3
+      "pausemenu": 4
+
     @blackout = null # don't start in a game
     @lastErr = ''
     @paused = false
@@ -180,6 +187,7 @@ class Game
   # input handling
 
   touchDown: (x, y) ->
+    @log("touchDown #{x},#{y}")
     @checkZones(x, y)
 
   touchMove: (x, y) ->
@@ -425,7 +433,7 @@ class Game
   # rendering and zones
 
   drawImage: (texture, sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a, cb) ->
-    @renderCommands.push [texture, sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a]
+    @renderCommands.push @textures[texture], sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a
 
     if cb?
       # caller wants to remember where this was drawn, and wants to be called back if it is ever touched

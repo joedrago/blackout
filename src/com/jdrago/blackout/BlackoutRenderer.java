@@ -46,6 +46,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
     private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
     private static final int[] QUAD_INDICES = {0, 1, 2, 2, 3, 0};
+    private static final int TEXTURE_COUNT = 5;
 
     private static final String VERTEX_SHADER =
             "uniform mat4 uMVPMatrix;\n" +
@@ -75,8 +76,8 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     public class Texture
     {
         int id;
-        int width;
-        int height;
+        double width;
+        double height;
     };
 
     // --------------------------------------------------------------------------------------------
@@ -119,7 +120,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     private long lastTime_;
 
     // Render internals
-    private HashMap<String, Texture> textures_;
+    private Texture textures_[];
     private float[] viewProjMatrix_ = new float[16];
     private float[] projMatrix_ = new float[16];
     private float[] modelMatrix_ = new float[16];
@@ -134,6 +135,8 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     private long frameCounter_;
     private long frameCounterLastTime_;
     private boolean needsRender_;
+    private double[] renderData_;
+    private int renderDataSize_;
 
     // --------------------------------------------------------------------------------------------
     // Constructor
@@ -153,12 +156,12 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         initializeV8(context_, script_);
         jsStartup();
 
-        textures_ = new HashMap<String, Texture>();
         verts_ = ByteBuffer.allocateDirect(20 * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
         indices_ = ByteBuffer.allocateDirect(QUAD_INDICES.length * INT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asIntBuffer();
         indices_.put(QUAD_INDICES).position(0);
         frameCounter_ = 0;
         frameCounterLastTime_ = FRAME_COUNTER_INTERVAL_MS;
+        renderDataSize_ = 0;
         needsRender_ = true;
 
         Log.d(TAG, "Renderer MaxFPS: "+MAX_FPS+", MinMSPerFrame: "+MIN_MS_PER_FRAME);
@@ -167,11 +170,12 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     // called after surface creation, but up top as it lists all available textures
     public void loadTextures()
     {
-        textures_.put("cards", loadPNG(R.raw.cards));
-        textures_.put("darkforest", loadPNG(R.raw.darkforest));
-        textures_.put("chars", loadPNG(R.raw.chars));
-        textures_.put("mainmenu", loadPNG(R.raw.mainmenu));
-        textures_.put("pausemenu", loadPNG(R.raw.pausemenu));
+        textures_ = new Texture[TEXTURE_COUNT];
+        textures_[0] = loadPNG(R.raw.cards);
+        textures_[1] = loadPNG(R.raw.darkforest);
+        textures_[2] = loadPNG(R.raw.chars);
+        textures_[3] = loadPNG(R.raw.mainmenu);
+        textures_[4] = loadPNG(R.raw.pausemenu);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -289,24 +293,124 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     {
         Trace.beginSection("render");
         V8Array parameters = new V8Array(v8_);
+
         Trace.beginSection("js render");
         V8Array renderCommands = v8_.executeArrayFunction("render", parameters);
         Trace.endSection();
-        Trace.beginSection("native render");
-        for(int i = 0; i < renderCommands.length(); i++)
-        {
-            V8Array drawCommand = renderCommands.getArray(i);
-            String textureName = drawCommand.getString(0);
-            double[] d = drawCommand.getDoubles(1, 15);
-            drawCommand.release();
 
-            // I realize this looks really ugly, but it is the fastest so far.
-            drawImage(textureName,
-                (float)d[0], (float)d[1], (float)d[2], (float)d[3],
-                (float)d[4], (float)d[5], (float)d[6], (float)d[7],
-                (float)d[8], (float)d[9], (float)d[10],
-                (float)d[11], (float)d[12], (float)d[13], (float)d[14]);
+        Trace.beginSection("native render");
+
+        if(renderDataSize_ < renderCommands.length())
+        {
+            renderDataSize_ = renderCommands.length();
+            renderData_ = new double[renderDataSize_];
         }
+
+        int quadCount = renderCommands.length() >> 4; // 16 doubles per quad
+        // Log.d(TAG, "drawing "+quadCount+" quads");
+
+        Trace.beginSection("get doubles");
+        renderCommands.getDoubles(0, renderCommands.length(), renderData_);
+        Trace.endSection();
+
+        GLES20.glEnable(GLES20.GL_BLEND);
+        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+
+        int currentTextureID = -1;
+        int qi = 0; // quad index
+        for(int i = 0; i < quadCount; i++, qi += 16)
+        {
+            // Indices:
+            //  0: texture ID
+            //  1: srcX
+            //  2: srcY
+            //  3: srcW
+            //  4: srcH
+            //  5: dstX
+            //  6: dstY
+            //  7: dstW
+            //  8: dstH
+            //  9: rot
+            // 10: anchorX
+            // 11: anchorY
+            // 12: red
+            // 13: green
+            // 14: blue
+            // 15: alpha
+
+            // switch to vertex colors (stop using uniform color)
+            //
+            // give each Texture class:
+            // verts_
+            // vertData_
+            // vertDataSize_
+            // tempCount
+            //
+            // then scan the incoming double array, counting up the quads per texture
+            // resize all texture vertData_ accordingly
+            // walk double array, populating vert buffers
+            // for each texture do a single verts_.put(),
+
+            Trace.beginSection("drawImage");
+
+            int textureIndex = (int)renderData_[qi+0];
+            if(textureIndex < 0)
+                textureIndex = 0;
+            if(textureIndex >= TEXTURE_COUNT)
+                textureIndex = TEXTURE_COUNT - 1;
+            Texture texture = textures_[textureIndex];
+            if(currentTextureID != texture.id)
+            {
+                currentTextureID = texture.id;
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, currentTextureID);
+            }
+
+            float uvL = (float)(renderData_[qi+1] / texture.width);
+            float uvT = (float)(renderData_[qi+2] / texture.height);
+            float uvR = (float)((renderData_[qi+1] + renderData_[qi+3]) / texture.width);
+            float uvB = (float)((renderData_[qi+2] + renderData_[qi+4]) / texture.height);
+
+            float[] vertData = {
+                // X, Y, Z, U, V
+                0, 0, 0, uvL, uvT,
+                1, 0, 0, uvR, uvT,
+                1, 1, 0, uvR, uvB,
+                0, 1, 0, uvL, uvB};
+            verts_.position(0);
+            verts_.put(vertData);
+
+            verts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+            GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
+            checkGlError("glVertexAttribPointer maPosition");
+            verts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+            GLES20.glEnableVertexAttribArray(posHandle_);
+            checkGlError("glEnableVertexAttribArray posHandle");
+            GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
+            checkGlError("glVertexAttribPointer texHandle");
+            GLES20.glEnableVertexAttribArray(texHandle_);
+            checkGlError("glEnableVertexAttribArray texHandle");
+
+            float anchorOffsetX = (float)(-1 * renderData_[qi+10] * renderData_[qi+7]);
+            float anchorOffsetY = (float)(-1 * renderData_[qi+11] * renderData_[qi+8]);
+            float degrees = (float)(renderData_[qi+9] * 180.0f / Math.PI);
+
+            Matrix.setIdentityM(modelMatrix_, 0);
+            Matrix.translateM(modelMatrix_, 0, (float)renderData_[qi+5], (float)renderData_[qi+6], 0);
+            Matrix.rotateM(modelMatrix_, 0, degrees, 0, 0, 1);
+            Matrix.translateM(modelMatrix_, 0, anchorOffsetX, anchorOffsetY, 0);
+            Matrix.scaleM(modelMatrix_, 0, (float)renderData_[qi+7], (float)renderData_[qi+8], 0);
+            Matrix.multiplyMM(viewProjMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
+            Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, viewProjMatrix_, 0);
+
+            GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
+            GLES20.glUniform4f(vertColorHandle_, (float)renderData_[qi+12], (float)renderData_[qi+13], (float)renderData_[qi+14], (float)renderData_[qi+15]);
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, indices_);
+            checkGlError("glDrawElements");
+
+            Trace.endSection();
+        }
+
         Trace.endSection();
         renderCommands.release();
         Trace.endSection();
@@ -367,60 +471,6 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
     public void renderEnd()
     {
-    }
-
-    public void drawImage(String textureName, float srcX, float srcY, float srcW, float srcH, float dstX, float dstY, float dstW, float dstH, float rot, float anchorX, float anchorY, float r, float g, float b, float a)
-    {
-        Trace.beginSection("drawImage");
-
-        Texture texture = textures_.get(textureName);
-
-        GLES20.glEnable(GLES20.GL_BLEND);
-        GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-
-        float uvL = srcX / (float)texture.width;
-        float uvT = srcY / (float)texture.height;
-        float uvR = (srcX + srcW) / (float)texture.width;
-        float uvB = (srcY + srcH) / (float)texture.height;
-
-        float[] vertData = {
-            // X, Y, Z, U, V
-            0, 0, 0, uvL, uvT,
-            1, 0, 0, uvR, uvT,
-            1, 1, 0, uvR, uvB,
-            0, 1, 0, uvL, uvB};
-        verts_.position(0);
-        verts_.put(vertData);
-
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture.id);
-        verts_.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
-        GLES20.glVertexAttribPointer(posHandle_, 3, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
-        checkGlError("glVertexAttribPointer maPosition");
-        verts_.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
-        GLES20.glEnableVertexAttribArray(posHandle_);
-        checkGlError("glEnableVertexAttribArray posHandle");
-        GLES20.glVertexAttribPointer(texHandle_, 2, GLES20.GL_FLOAT, false, TRIANGLE_VERTICES_DATA_STRIDE_BYTES, verts_);
-        checkGlError("glVertexAttribPointer texHandle");
-        GLES20.glEnableVertexAttribArray(texHandle_);
-        checkGlError("glEnableVertexAttribArray texHandle");
-
-        float anchorOffsetX = -1 * anchorX * dstW;
-        float anchorOffsetY = -1 * anchorY * dstH;
-        Matrix.setIdentityM(modelMatrix_, 0);
-        Matrix.translateM(modelMatrix_, 0, dstX, dstY, 0);
-        Matrix.rotateM(modelMatrix_, 0, rot * 180.0f / (float)Math.PI, 0, 0, 1);
-        Matrix.translateM(modelMatrix_, 0, anchorOffsetX, anchorOffsetY, 0);
-        Matrix.scaleM(modelMatrix_, 0, dstW, dstH, 0);
-        Matrix.multiplyMM(viewProjMatrix_, 0, viewMatrix_, 0, modelMatrix_, 0);
-        Matrix.multiplyMM(viewProjMatrix_, 0, projMatrix_, 0, viewProjMatrix_, 0);
-
-        GLES20.glUniformMatrix4fv(viewProjMatrixHandle_, 1, false, viewProjMatrix_, 0);
-        GLES20.glUniform4f(vertColorHandle_, r, g, b, a);
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES, 6, GLES20.GL_UNSIGNED_INT, indices_);
-        checkGlError("glDrawElements");
-
-        Trace.endSection();
     }
 
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config)
@@ -594,8 +644,8 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
         Texture texture = new Texture();
         texture.id = id;
-        texture.width = bitmap.getWidth();
-        texture.height = bitmap.getHeight();
+        texture.width = (double)bitmap.getWidth();
+        texture.height = (double)bitmap.getHeight();
         bitmap.recycle();
         return texture;
     }
