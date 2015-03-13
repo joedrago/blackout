@@ -58,6 +58,7 @@ class Game
         { text: "4 rounds of 13", data: "13|13|13|13" }
         { text: "3 to 13", data: "3|4|5|6|7|8|9|10|11|12|13" }
         { text: "3 to 13 by odds", data: "3|5|7|9|11|13" }
+        { text: "Marathon", data: "M" }
       ]
       speeds: [
         { text: "AI Speed: Slow", speed: 2000 }
@@ -222,10 +223,38 @@ class Game
         }
 
   # -----------------------------------------------------------------------------------------------------
+  # headline (game state in top left)
+
+  calcHeadline: ->
+    return "" if @blackout == null
+
+    headline = ""
+    switch @blackout.state
+      when State.BID
+        headline = "Waiting for `ff7700`#{@blackout.players[@blackout.turn].name}`` to `ffff00`bid``"
+      when State.TRICK
+        headline = "Waiting for `ff7700`#{@blackout.players[@blackout.turn].name}`` to `ffff00`play``"
+      when State.ROUNDSUMMARY
+        headline = "Waiting for next round..."
+      when State.POSTGAMESUMMARY
+        headline = "Game over!"
+
+    errText = ""
+    if (@lastErr.length > 0) and (@lastErr != OK)
+      errText = "  ERROR: `ff0000`#{@lastErr}"
+      headline += errText
+
+    # headline = "State: `ffff00`#{@blackout.state}``, Turn: `ffff00`#{@blackout.players[@blackout.turn].name}`` #{errText}"
+    return headline
+
+  # -----------------------------------------------------------------------------------------------------
   # game over information
 
   gameOverText: ->
-    return "Game Over!" if @blackout == null
+    return ["Game Over!"] if @blackout == null
+
+    if @blackout.marathonMode()
+      return ["Marathon over!", "Survived #{@blackout.nextRound - 1} rounds"]
 
     lowestScore = @blackout.players[0].score
     for player in @blackout.players
@@ -238,9 +267,9 @@ class Game
         winners.push player.name
 
     if winners.length == 1
-      return "#{winners[0]} wins!"
+      return ["#{winners[0]} wins!"]
 
-    return "Tie: #{winners.join(',')}"
+    return ["Tie: #{winners.join(',')}"]
 
   # -----------------------------------------------------------------------------------------------------
   # card handling
@@ -333,14 +362,12 @@ class Game
     scoreHeight = textHeight
 
     # Log
-    # @spriteRenderer.render "solid", 0, 0, @width * 0.4, (textHeight + textPadding) * 8, 0, 0, 0, @colors.logbg
-    errText = ""
-    if (@lastErr.length > 0) and (@lastErr != OK)
-      errText = "ERROR: `ff0000`#{@lastErr}"
-    headline = "State: `ffff00`#{@blackout.state}``, Turn: `ffff00`#{@blackout.players[@blackout.turn].name}`` #{errText}"
-    @fontRenderer.render @font, textHeight, headline, 0, 0, 0, 0, @colors.lightgray
+    @fontRenderer.render @font, textHeight, @calcHeadline(), 0, 0, 0, 0, @colors.lightgray
     for line, i in @blackout.log
       @fontRenderer.render @font, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0, @colors.white
+
+    if @blackout.marathonMode()
+      @fontRenderer.render @font, textHeight, "MARATHON MODE", @width - @pauseButtonSize, 0, 1, 0, @colors.orange
 
     aiPlayers = [null, null, null]
     if @blackout.players.length == 2
@@ -374,7 +401,15 @@ class Game
 
     if (@blackout != null)
       if @blackout.state == State.POSTGAMESUMMARY
-        @fontRenderer.render @font, @height / 8, @gameOverText(), @center.x, @center.y, 0.5, 0.5, @colors.orange
+        lines = @gameOverText()
+        gameOverSize = @height / 8
+        gameOverY = @center.y
+        if lines.length > 1
+          gameOverY -= (gameOverSize >> 1)
+        @fontRenderer.render @font, gameOverSize, lines[0], @center.x, gameOverY, 0.5, 0.5, @colors.orange
+        if lines.length > 1
+          gameOverY += gameOverSize
+          @fontRenderer.render @font, gameOverSize, lines[1], @center.x, gameOverY, 0.5, 0.5, @colors.orange
       if @blackout.state == State.ROUNDSUMMARY
         @fontRenderer.render @font, @height / 8, "Tap for next round ...", @center.x, @center.y, 0.5, 0.5, @colors.orange, =>
           if @blackout.next() == OK

@@ -101,7 +101,11 @@ class Blackout
       @state = State.LOBBY
       @players = params.players
       @log = []
-      @rounds = (Number(v) for v in params.rounds.split("|"))
+      if params.rounds == 'M'
+        # marathon mode!
+        @rounds = ['M']
+      else
+        @rounds = (Number(v) for v in params.rounds.split("|"))
 
       @players[0].bid = 0
       @players[0].tricks = 0
@@ -112,6 +116,9 @@ class Blackout
 
   # ---------------------------------------------------------------------------------------------------------------------------
   # Blackout methods
+
+  marathonMode: ->
+    return (@rounds[0] == 'M')
 
   save: ->
     names = "bids dealer log lowestRequired nextRound pile pileWho players prev prevTrickTaker prevWho rounds state trickID trickTaker tricks trumpBroken turn".split(" ")
@@ -199,17 +206,27 @@ class Blackout
     @pile = []
     @pileWho = []
     @prevWho = []
-    @output('Blackout reset. (' + @players.length + ' players, ' + @rounds.length + ' rounds)')
+
+    if @marathonMode()
+      roundCount = "Marathon mode"
+    else
+      roundCount = "#{@rounds.length} rounds"
+    @output("New game! (#{@players.length} players, #{roundCount})")
 
     @startBid()
 
     return OK
 
   startBid: (params) ->
-    if(@nextRound >= @rounds.length)
-      return 'gameOver'
+    if @marathonMode()
+      if @players[0].score > 0
+        return 'gameOver'
+      @tricks = 1
+    else
+      if(@nextRound >= @rounds.length)
+        return 'gameOver'
+      @tricks = @rounds[@nextRound]
 
-    @tricks = @rounds[@nextRound]
     @nextRound++
 
     deck = new ShuffledDeck()
@@ -279,7 +296,10 @@ class Blackout
     if @players[0].hand.length > 0
       @startTrick()
     else
-      @output('Round ends [' + @nextRound + '/' + @rounds.length + ']')
+      roundCount = @rounds.length
+      if @marathonMode()
+        roundCount = "M"
+      @output('Round ends [' + @nextRound + '/' + roundCount + ']')
 
       for player in @players
         overUnder = player.bid - player.tricks
@@ -297,7 +317,13 @@ class Blackout
         player.lastWent = String(player.tricks) + '/' + String(player.bid)
         player.lastPoints = penaltyPoints
 
-      if @nextRound >= @rounds.length
+      gameEnding = false
+      if @marathonMode()
+        gameEnding = (@players[0].score > 0)
+      else
+        gameEnding = (@nextRound >= @rounds.length)
+
+      if gameEnding
         @state = State.POSTGAMESUMMARY
       else
         @state = State.ROUNDSUMMARY
