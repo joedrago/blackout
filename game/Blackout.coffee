@@ -21,24 +21,28 @@ ShortSuitName = ['C', 'D', 'H', 'S']
 # ---------------------------------------------------------------------------------------------------------------------------
 # AI Name Generator
 
-aiCharacters = [
-  { name: "Mario",      sprite: "mario"    }
-  { name: "Luigi",      sprite: "luigi"    }
-  { name: "Peach",      sprite: "peach"    }
-  { name: "Daisy",      sprite: "daisy"    }
-  { name: "Yoshi",      sprite: "yoshi"    }
-  { name: "Toad",       sprite: "toad"     }
-  { name: "Bowser",     sprite: "bowser"   }
-  { name: "Bowser Jr",  sprite: "bowserjr" }
-  { name: "Koopa",      sprite: "koopa"    }
-  { name: "Rosalina",   sprite: "rosalina" }
-  { name: "Shyguy",     sprite: "shyguy"   }
-  { name: "Toadette",   sprite: "toadette" }
+aiCharacterList = [
+  { id: "mario",    name: "Mario",      sprite: "mario",    brain: "normal" }
+  { id: "luigi",    name: "Luigi",      sprite: "luigi",    brain: "normal" }
+  { id: "peach",    name: "Peach",      sprite: "peach",    brain: "normal" }
+  { id: "daisy",    name: "Daisy",      sprite: "daisy",    brain: "normal" }
+  { id: "yoshi",    name: "Yoshi",      sprite: "yoshi",    brain: "normal" }
+  { id: "toad",     name: "Toad",       sprite: "toad",     brain: "normal" }
+  { id: "bowser",   name: "Bowser",     sprite: "bowser",   brain: "normal" }
+  { id: "bowserjr", name: "Bowser Jr",  sprite: "bowserjr", brain: "normal" }
+  { id: "koopa",    name: "Koopa",      sprite: "koopa",    brain: "normal" }
+  { id: "rosalina", name: "Rosalina",   sprite: "rosalina", brain: "normal" }
+  { id: "shyguy",   name: "Shyguy",     sprite: "shyguy",   brain: "normal" }
+  { id: "toadette", name: "Toadette",   sprite: "toadette", brain: "normal" }
 ]
 
+aiCharacters = {}
+for character in aiCharacterList
+  aiCharacters[character.id] = character
+
 randomCharacter = ->
-  r = Math.floor(Math.random() * aiCharacters.length)
-  return aiCharacters[r]
+  r = Math.floor(Math.random() * aiCharacterList.length)
+  return aiCharacterList[r]
 
 # ---------------------------------------------------------------------------------------------------------------------------
 # Card
@@ -96,6 +100,12 @@ class Blackout
       for k,v of params.state
         if params.state.hasOwnProperty(k)
           this[k] = params.state[k]
+
+      # this can be removed at some point
+      for player in @players
+        if player.character
+          player.charID = player.character.sprite
+          delete player["character"]
     else
       # new game
       @state = State.LOBBY
@@ -400,7 +410,7 @@ class Blackout
         break
 
     ai =
-      character: character
+      charID: character.id
       name: character.name
       id: 'ai' + String(@players.length)
       ai: true
@@ -505,6 +515,7 @@ class Blackout
   # ---------------------------------------------------------------------------------------------------------------------------
   # AI
 
+  # Helper function to bid reasoning for bidding i tricks
   aiLogBid: (i, why) ->
     currentPlayer = @currentPlayer()
     if not currentPlayer.ai
@@ -513,6 +524,7 @@ class Blackout
     card = new Card(currentPlayer.hand[i])
     @aiLog('potential winner: ' + card.name + ' [' + why + ']')
 
+  # Helper function to bid reasoning for playing card index i
   aiLogPlay: (i, why) ->
     if i == -1
       return
@@ -524,61 +536,7 @@ class Blackout
     card = new Card(currentPlayer.hand[i])
     @aiLog('bestPlay: ' + card.name + ' [' + why + ']')
 
-  bestBid: (currentPlayer) ->
-    # Cards Represented (how many out of the deck are in play?)
-    handSize = currentPlayer.hand.length
-    cr = @players.length * handSize
-    #crp = Math.floor((cr * 100) / 52)
-
-    bid = 0
-    partialSpades = 0
-    partialFaces = 0 # non spade face cards
-    for v, i in currentPlayer.hand
-      card = new Card(v)
-      if card.suit == Suit.SPADES
-        if cr > 40 # Almost all cards in play
-          if card.value >= 6 # 8S or higher
-            bid++
-            @aiLogBid(i, '8S or bigger')
-            continue
-          else
-            partialSpades++
-            if partialSpades > 1
-              bid++
-              @aiLogBid(i, 'a couple of low spades')
-              partialSpades = 0
-              continue
-        else
-          bid++
-          @aiLogBid(i, 'spade')
-          continue
-      else
-        if (card.value >= 9) && (card.value <= 11) # JQK of non spade
-          partialFaces++
-          if partialFaces > 2
-            partialFaces = 0
-            @aiLogBid(i, 'a couple JQK non-spades')
-            continue
-
-      if cr > 40
-        # * Aces and Kings are probably winners
-        if((card.value >= 11) &&   # Ace or King
-        (card.suit != Suit.CLUBS)) # Not a club
-          bid++
-          @aiLogBid(i, 'non-club ace or king')
-          continue
-
-    if handSize >= 6
-      # * The Ace of clubs is a winner unless you also have a low club
-      clubValues = valuesOfSuit(currentPlayer.hand, Suit.CLUBS)
-      if clubValues.length > 0 # has clubs
-        if clubValues[clubValues.length - 1] == 12 # has AC
-          if clubValues[0] > 0 # 2C not in hand
-            bid++
-            @aiLogBid(0, 'AC with no 2C')
-
-    return bid
-
+  # Attempts to bid i tricks
   aiBid: (currentPlayer, i) ->
     reply = @bid({'id':currentPlayer.id, 'bid':i})
     if reply == OK
@@ -586,8 +544,12 @@ class Blackout
       return true
     return false
 
+  # Attempts to play card index i
   aiPlay: (currentPlayer, i) ->
+    if i == undefined
+      breakPlease()
     card = new Card(currentPlayer.hand[i])
+    @game.log "aiPlay: #{i}"
     reply = @play({'id':currentPlayer.id, 'index':i})
     if reply == OK
       @game.log("AI: " + currentPlayer.name + " plays " + card.name)
@@ -617,13 +579,16 @@ class Blackout
         return true
     return false
 
+  # Generic logging function; prepends current AI player's guts before printing text
   aiLog: (text) ->
     currentPlayer = @currentPlayer()
     if not currentPlayer.ai
       return false
 
-    @game.log('AI['+currentPlayer.name+' '+currentPlayer.tricks+'/'+currentPlayer.bid+']: hand:'+stringifyCards(currentPlayer.hand)+' pile:'+stringifyCards(@pile)+' '+text)
+    character = aiCharacters[currentPlayer.charID]
+    @game.log('AI['+currentPlayer.name+' '+currentPlayer.tricks+'/'+currentPlayer.bid+' '+character.brain+']: hand:'+stringifyCards(currentPlayer.hand)+' pile:'+stringifyCards(@pile)+' '+text)
 
+  # Detects if the current player is AI during a BID or TRICK phase and acts according to their 'brain'
   aiTick: ->
     if (@state != State.BID) && (@state != State.TRICK)
       return false
@@ -636,19 +601,21 @@ class Blackout
     # Bidding
 
     if @state == State.BID
-      bestBid = @bestBid(currentPlayer)
+      @aiLog("about to call brain.bid")
+      character = aiCharacters[currentPlayer.charID]
+      bid = @brains[character.brain].bid.apply(this, [currentPlayer])
 
       # Try to bid as close as you can to the 'best bid'
-      @aiLog('bestBid:'+String(bestBid))
-      if @aiBid(currentPlayer, bestBid)
+      @aiLog('bid:'+String(bid))
+      if @aiBid(currentPlayer, bid)
         return true
-      if @aiBid(currentPlayer, bestBid-1)
+      if @aiBid(currentPlayer, bid-1)
         return true
-      if @aiBid(currentPlayer, bestBid+1)
+      if @aiBid(currentPlayer, bid+1)
         return true
-      if @aiBid(currentPlayer, bestBid-2)
+      if @aiBid(currentPlayer, bid-2)
         return true
-      if @aiBid(currentPlayer, bestBid+2)
+      if @aiBid(currentPlayer, bid+2)
         return true
 
       # Give up and bid whatever is allowed
@@ -661,105 +628,177 @@ class Blackout
     # Playing
 
     if @state == State.TRICK
-      tricksNeeded = currentPlayer.bid - currentPlayer.tricks
-      wantToWin = (tricksNeeded > 0)
-      bestPlay = -1
-      currentSuit = @currentSuit()
-      winningIndex = @bestInPile()
-
-      if @pile.length == @players.length
-        currentSuit = Suit.NONE
-        winningIndex = -1
-
-      winningCard = false
-      if winningIndex != -1
-        winningCard = new Card(@pile[winningIndex])
-
-      if wantToWin
-        if currentSuit == Suit.NONE # Are you leading?
-          # Lead with your highest non-spade
-          bestPlay = highestValueNonSpadeIndex(currentPlayer.hand, Suit.NONE)
-          @aiLogPlay(bestPlay, 'highest non-spade (trying to win)')
-
-          if bestPlay == -1
-            # Only spades left! Time to bleed the table.
-            bestPlay = 0
-            @aiLogPlay(bestPlay, 'lowest spade (trying to win bleeding the table for a future win)')
-        else
-          if @playerHasSuit(currentPlayer, currentSuit) # Are you stuck with forced play?
-            if @playerCanWinInSuit(currentPlayer, winningCard) # Can you win?
-              bestPlay = highestIndexInSuit(currentPlayer.hand, winningCard.suit)
-              @aiLogPlay(bestPlay, 'highest in suit (trying to win forced in suit)')
-              if bestPlay != -1
-                return @aiPlayHigh(currentPlayer, bestPlay)
-            else
-              bestPlay = lowestIndexInSuit(currentPlayer.hand, winningCard.suit)
-              @aiLogPlay(bestPlay, 'lowest in suit (trying to win forced in suit, cant win)')
-              if bestPlay != -1
-                return @aiPlayLow(currentPlayer, bestPlay)
-
-          if bestPlay == -1
-            lastCard = new Card(currentPlayer.hand[currentPlayer.hand.length - 1])
-            if lastCard.suit == Suit.SPADES
-              # Try to trump, hard
-              bestPlay = currentPlayer.hand.length - 1
-              @aiLogPlay(bestPlay, 'trump (trying to win)')
-            else
-              # No more spades left and none of this suit. Dump your lowest card.
-              bestPlay = lowestValueIndex(currentPlayer.hand, Suit.NONE)
-              @aiLogPlay(bestPlay, 'dump (trying to win, throwing lowest)')
-      else
-        # Plan: Try to dump something awesome
-
-        if currentSuit == Suit.NONE # Are you leading?
-          # Lead with your lowest value (try to not throw a spade if you can help it)
-          bestPlay = lowestValueIndex(currentPlayer.hand, Suit.SPADES)
-          @aiLogPlay(bestPlay, 'lowest value (trying to lose avoiding spades)')
-        else
-          if @playerHasSuit(currentPlayer, currentSuit) # Are you stuck with forced play?
-            if @playerCanWinInSuit(currentPlayer, winningCard) # Are you stuck winning?
-              bestPlay = lowestIndexInSuit(currentPlayer.hand, winningCard.suit)
-              @aiLogPlay(bestPlay, 'lowest in suit (trying to lose forced to win)')
-              if bestPlay != -1
-                return @aiPlayLow(currentPlayer, bestPlay)
-            else
-              bestPlay = highestIndexInSuit(currentPlayer.hand, winningCard.suit)
-              @aiLogPlay(bestPlay, 'highest in suit (trying to lose forced in suit, but cant win)')
-              if bestPlay != -1
-                return @aiPlayHigh(currentPlayer, bestPlay)
-
-          if bestPlay == -1
-            # Try to dump your highest spade, if you can throw anything
-            if (currentSuit != Suit.SPADES) && (winningCard.suit == Suit.SPADES)
-              # Current winner is trumping the suit. Throw your highest spade lower than the winner
-              bestPlay = highestValueIndexInSuitLowerThan(currentPlayer.hand, winningCard)
-              @aiLogPlay(bestPlay, 'trying to lose highest dumpable spade')
-
-          if bestPlay == -1
-            # Try to dump your highest non-spade
-            bestPlay = highestValueNonSpadeIndex(currentPlayer.hand, winningCard.suit)
-            @aiLogPlay(bestPlay, 'trying to lose highest dumpable non-spade')
-
-      if bestPlay != -1
-        if(@aiPlay(currentPlayer, bestPlay))
-          return true
-        else
-          @aiLog('not allowed to play my best play')
-
-      @aiLog('picking random card to play')
-      startingPoint = Math.floor(Math.random() * currentPlayer.hand.length)
-      return @aiPlayLow(currentPlayer, startingPoint)
+      @aiLog("about to call brain.play")
+      character = aiCharacters[currentPlayer.charID]
+      playedCard = @brains[character.brain].play.apply(this, [currentPlayer])
+      if not playedCard
+        @aiLog('brain failed to play card: picking random card to play')
+        startingPoint = Math.floor(Math.random() * currentPlayer.hand.length)
+        return @aiPlayLow(currentPlayer, startingPoint)
 
     return false
 
 # ---------------------------------------------------------------------------------------------------------------------------
-# Exports
+# AI Brains
 
-module.exports =
-  Card: Card
-  Blackout: Blackout
-  State: State
-  OK: OK
+  # Brains must have:
+  # * id: internal identifier for the brain
+  # * name: pretty name
+  # * bid(currentPlayer) returns the bid value between [0 - handSize].
+  # * play(currentPlayer) attempts to play a card by calling aiPlay(). Should return true if it successfully played a card (aiPlay() returned true)
+  brains:
+
+    # ------------------------------------------------------------
+    # Normal: Intended to be used by most characters.
+    #         Not too dumb, not too smart.
+    normal:
+      id:   "normal"
+      name: "Normal"
+
+      # normal
+      bid: (currentPlayer) ->
+        # Cards Represented (how many out of the deck are in play?)
+        handSize = currentPlayer.hand.length
+        cr = @players.length * handSize
+        #crp = Math.floor((cr * 100) / 52)
+
+        bid = 0
+        partialSpades = 0
+        partialFaces = 0 # non spade face cards
+        for v, i in currentPlayer.hand
+          card = new Card(v)
+          if card.suit == Suit.SPADES
+            if cr > 40 # Almost all cards in play
+              if card.value >= 6 # 8S or higher
+                bid++
+                @aiLogBid(i, '8S or bigger')
+                continue
+              else
+                partialSpades++
+                if partialSpades > 1
+                  bid++
+                  @aiLogBid(i, 'a couple of low spades')
+                  partialSpades = 0
+                  continue
+            else
+              bid++
+              @aiLogBid(i, 'spade')
+              continue
+          else
+            if (card.value >= 9) && (card.value <= 11) # JQK of non spade
+              partialFaces++
+              if partialFaces > 2
+                partialFaces = 0
+                @aiLogBid(i, 'a couple JQK non-spades')
+                continue
+
+          if cr > 40
+            # * Aces and Kings are probably winners
+            if((card.value >= 11) &&   # Ace or King
+            (card.suit != Suit.CLUBS)) # Not a club
+              bid++
+              @aiLogBid(i, 'non-club ace or king')
+              continue
+
+        if handSize >= 6
+          # * The Ace of clubs is a winner unless you also have a low club
+          clubValues = valuesOfSuit(currentPlayer.hand, Suit.CLUBS)
+          if clubValues.length > 0 # has clubs
+            if clubValues[clubValues.length - 1] == 12 # has AC
+              if clubValues[0] > 0 # 2C not in hand
+                bid++
+                @aiLogBid(0, 'AC with no 2C')
+
+        return bid
+
+      # normal
+      play: (currentPlayer) ->
+        tricksNeeded = currentPlayer.bid - currentPlayer.tricks
+        wantToWin = (tricksNeeded > 0)
+        bestPlay = -1
+        currentSuit = @currentSuit()
+        winningIndex = @bestInPile()
+
+        if @pile.length == @players.length
+          currentSuit = Suit.NONE
+          winningIndex = -1
+
+        winningCard = false
+        if winningIndex != -1
+          winningCard = new Card(@pile[winningIndex])
+
+        if wantToWin
+          if currentSuit == Suit.NONE # Are you leading?
+            # Lead with your highest non-spade
+            play = highestValueNonSpadeIndex(currentPlayer.hand, Suit.NONE)
+            @aiLogPlay(play, 'highest non-spade (trying to win)')
+
+            if bestPlay == -1
+              # Only spades left! Time to bleed the table.
+              bestPlay = 0
+              @aiLogPlay(bestPlay, 'lowest spade (trying to win bleeding the table for a future win)')
+          else
+            if @playerHasSuit(currentPlayer, currentSuit) # Are you stuck with forced play?
+              if @playerCanWinInSuit(currentPlayer, winningCard) # Can you win?
+                bestPlay = highestIndexInSuit(currentPlayer.hand, winningCard.suit)
+                @aiLogPlay(bestPlay, 'highest in suit (trying to win forced in suit)')
+                if bestPlay != -1
+                  return @aiPlayHigh(currentPlayer, bestPlay)
+              else
+                bestPlay = lowestIndexInSuit(currentPlayer.hand, winningCard.suit)
+                @aiLogPlay(bestPlay, 'lowest in suit (trying to win forced in suit, cant win)')
+                if bestPlay != -1
+                  return @aiPlayLow(currentPlayer, bestPlay)
+
+            if bestPlay == -1
+              lastCard = new Card(currentPlayer.hand[currentPlayer.hand.length - 1])
+              if lastCard.suit == Suit.SPADES
+                # Try to trump, hard
+                bestPlay = currentPlayer.hand.length - 1
+                @aiLogPlay(bestPlay, 'trump (trying to win)')
+              else
+                # No more spades left and none of this suit. Dump your lowest card.
+                bestPlay = lowestValueIndex(currentPlayer.hand, Suit.NONE)
+                @aiLogPlay(bestPlay, 'dump (trying to win, throwing lowest)')
+        else
+          # Plan: Try to dump something awesome
+
+          if currentSuit == Suit.NONE # Are you leading?
+            # Lead with your lowest value (try to not throw a spade if you can help it)
+            bestPlay = lowestValueIndex(currentPlayer.hand, Suit.SPADES)
+            @aiLogPlay(bestPlay, 'lowest value (trying to lose avoiding spades)')
+          else
+            if @playerHasSuit(currentPlayer, currentSuit) # Are you stuck with forced play?
+              if @playerCanWinInSuit(currentPlayer, winningCard) # Are you stuck winning?
+                bestPlay = lowestIndexInSuit(currentPlayer.hand, winningCard.suit)
+                @aiLogPlay(bestPlay, 'lowest in suit (trying to lose forced to win)')
+                if bestPlay != -1
+                  return @aiPlayLow(currentPlayer, bestPlay)
+              else
+                bestPlay = highestIndexInSuit(currentPlayer.hand, winningCard.suit)
+                @aiLogPlay(bestPlay, 'highest in suit (trying to lose forced in suit, but cant win)')
+                if bestPlay != -1
+                  return @aiPlayHigh(currentPlayer, bestPlay)
+
+            if bestPlay == -1
+              # Try to dump your highest spade, if you can throw anything
+              if (currentSuit != Suit.SPADES) && (winningCard.suit == Suit.SPADES)
+                # Current winner is trumping the suit. Throw your highest spade lower than the winner
+                bestPlay = highestValueIndexInSuitLowerThan(currentPlayer.hand, winningCard)
+                @aiLogPlay(bestPlay, 'trying to lose highest dumpable spade')
+
+            if bestPlay == -1
+              # Try to dump your highest non-spade
+              bestPlay = highestValueNonSpadeIndex(currentPlayer.hand, winningCard.suit)
+              @aiLogPlay(bestPlay, 'trying to lose highest dumpable non-spade')
+
+        if bestPlay != -1
+          if(@aiPlay(currentPlayer, bestPlay))
+            return true
+          else
+            @aiLog('not allowed to play my best play')
+
+        return false
 
 # ---------------------------------------------------------------------------------------------------------------------------
 # AI card helpers
@@ -825,3 +864,14 @@ highestValueIndexInSuitLowerThan = (hand, winningCard) ->
     if (card.suit == winningCard.suit) && (card.value < winningCard.value)
       return i
   return -1
+
+# ---------------------------------------------------------------------------------------------------------------------------
+# Exports
+
+module.exports =
+  Card: Card
+  Blackout: Blackout
+  State: State
+  OK: OK
+  aiCharacters: aiCharacters
+

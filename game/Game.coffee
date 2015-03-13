@@ -5,7 +5,7 @@ SpriteRenderer = require 'SpriteRenderer'
 Menu = require 'Menu'
 Hand = require 'Hand'
 Pile = require 'Pile'
-{Blackout, State, OK} = require 'Blackout'
+{Blackout, State, OK, aiCharacters} = require 'Blackout'
 
 class Game
   constructor: (@native, @width, @height) ->
@@ -194,7 +194,7 @@ class Game
   # input handling
 
   touchDown: (x, y) ->
-    @log("touchDown #{x},#{y}")
+    # @log("touchDown #{x},#{y}")
     @checkZones(x, y)
 
   touchMove: (x, y) ->
@@ -390,17 +390,20 @@ class Game
 
     # left side
     if aiPlayers[0] != null
-      characterWidth = @spriteRenderer.calcWidth(aiPlayers[0].character.sprite, characterHeight)
-      @spriteRenderer.render aiPlayers[0].character.sprite, characterMargin, @hand.playCeiling, 0, characterHeight, 0, 0, 1, @colors.white
+      character = aiCharacters[aiPlayers[0].charID]
+      characterWidth = @spriteRenderer.calcWidth(character.sprite, characterHeight)
+      @spriteRenderer.render character.sprite, characterMargin, @hand.playCeiling, 0, characterHeight, 0, 0, 1, @colors.white
       @renderScore aiPlayers[0], aiPlayers[0].index == @blackout.turn, scoreHeight, characterMargin + (characterWidth / 2), @hand.playCeiling - textPadding, 0.5, 0
     # top side
     if aiPlayers[1] != null
-      @spriteRenderer.render aiPlayers[1].character.sprite, @center.x, 0, 0, characterHeight, 0, 0.5, 0, @colors.white
+      character = aiCharacters[aiPlayers[1].charID]
+      @spriteRenderer.render character.sprite, @center.x, 0, 0, characterHeight, 0, 0.5, 0, @colors.white
       @renderScore aiPlayers[1], aiPlayers[1].index == @blackout.turn, scoreHeight, @center.x, characterHeight, 0.5, 0
     # right side
     if aiPlayers[2] != null
-      characterWidth = @spriteRenderer.calcWidth(aiPlayers[0].character.sprite, characterHeight)
-      @spriteRenderer.render aiPlayers[2].character.sprite, @width - characterMargin, @hand.playCeiling, 0, characterHeight, 0, 1, 1, @colors.white
+      character = aiCharacters[aiPlayers[2].charID]
+      characterWidth = @spriteRenderer.calcWidth(character.sprite, characterHeight)
+      @spriteRenderer.render character.sprite, @width - characterMargin, @hand.playCeiling, 0, characterHeight, 0, 1, 1, @colors.white
       @renderScore aiPlayers[2], aiPlayers[2].index == @blackout.turn, scoreHeight, @width - (characterMargin + (characterWidth / 2)), @hand.playCeiling - textPadding, 0.5, 0
 
     @pile.render()
