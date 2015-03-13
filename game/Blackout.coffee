@@ -221,7 +221,7 @@ class Blackout
     if @marathonMode()
       if @players[0].score > 0
         return 'gameOver'
-      @tricks = 1
+      @tricks = 13
     else
       if(@nextRound >= @rounds.length)
         return 'gameOver'

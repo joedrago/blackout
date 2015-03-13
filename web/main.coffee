@@ -20,26 +20,30 @@ class NativeApp
     window.addEventListener 'mousemove', @onMouseMove.bind(this), false
     window.addEventListener 'mouseup',   @onMouseUp.bind(this), false
     @context = @screen.getContext("2d")
-    @textures =
+    @textures = [
       # all card art
-      cards: "../res/raw/cards.png"
+      "../res/raw/cards.png"
       # fonts
-      darkforest: "../res/raw/darkforest.png"
-      # backgrounds
-      mainmenu: "../res/raw/mainmenu.png"
-      pausemenu: "../res/raw/pausemenu.png"
+      "../res/raw/darkforest.png"
       # characters / other
-      chars: "../res/raw/chars.png"
+      "../res/raw/chars.png"
+      # backgrounds
+      "../res/raw/mainmenu.png"
+      "../res/raw/pausemenu.png"
+    ]
 
     @game = new Game(this, @width, @height)
 
     @pendingImages = 0
-    for imageName, imageUrl of @textures
+    loadedTextures = []
+    for imageUrl in @textures
       @pendingImages++
-      console.log "loading image #{@pendingImages} '#{imageName}': #{imageUrl}"
-      @textures[imageName] = new Image()
-      @textures[imageName].onload = @onImageLoaded.bind(this)
-      @textures[imageName].src = imageUrl
+      console.log "loading image #{@pendingImages}: #{imageUrl}"
+      img = new Image()
+      img.onload = @onImageLoaded.bind(this)
+      img.src = imageUrl
+      loadedTextures.push img
+    @textures = loadedTextures
 
   onImageLoaded: (info) ->
     @pendingImages--
@@ -92,13 +96,13 @@ class NativeApp
 
     return rgbks
 
-  generateTintImage: (textureName, red, green, blue) ->
-    img = @textures[textureName]
-    rgbks = @rgbkCache[textureName]
+  generateTintImage: (textureIndex, red, green, blue) ->
+    img = @textures[textureIndex]
+    rgbks = @rgbkCache[textureIndex]
     if not rgbks
       rgbks = @generateRGBKs(img)
-      @rgbkCache[textureName] = rgbks
-      # console.log "generated RGBKs for #{textureName}"
+      @rgbkCache[textureIndex] = rgbks
+      # console.log "generated RGBKs for #{textureIndex}"
 
     buff = document.createElement "canvas"
     buff.width  = img.width
@@ -124,13 +128,13 @@ class NativeApp
     imgComp.src = buff.toDataURL()
     return imgComp
 
-  drawImage: (textureName, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY, r, g, b, a) ->
-    texture = @textures[textureName]
+  drawImage: (textureIndex, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY, r, g, b, a) ->
+    texture = @textures[textureIndex]
     if (r != 1) or (g != 1) or (b != 1)
-      tintedTextureKey = "#{textureName}-#{r}-#{g}-#{b}"
+      tintedTextureKey = "#{textureIndex}-#{r}-#{g}-#{b}"
       tintedTexture = @tintedTextureCache[tintedTextureKey]
       if not tintedTexture
-        tintedTexture = @generateTintImage textureName, r, g, b
+        tintedTexture = @generateTintImage textureIndex, r, g, b
         @tintedTextureCache[tintedTextureKey] = tintedTexture
         # console.log "generated cached texture #{tintedTextureKey}"
       texture = tintedTexture
@@ -153,8 +157,12 @@ class NativeApp
     @context.clearRect(0, 0, @width, @height)
     @game.update(dt)
     renderCommands = @game.render()
-    for cmd in renderCommands
-      @drawImage.apply(this, cmd)
+
+    i = 0
+    n = renderCommands.length
+    while (i < n)
+      drawCall = renderCommands.slice(i, i += 16)
+      @drawImage.apply(this, drawCall)
 
     requestAnimationFrame => @update()
 
