@@ -21,8 +21,10 @@ class Game
     @pauseButtonSize = @height / 15
     @colors =
       white:      { r:   1, g:   1, b:   1, a:   1 }
+      black:      { r:   0, g:   0, b:   0, a:   1 }
       red:        { r:   1, g:   0, b:   0, a:   1 }
       orange:     { r:   1, g: 0.5, b:   0, a:   1 }
+      gold:       { r:   1, g:   1, b:   0, a:   1 }
       buttontext: { r:   1, g:   1, b:   1, a:   1 }
       lightgray:  { r: 0.5, g: 0.5, b: 0.5, a:   1 }
       background: { r:   0, g: 0.2, b:   0, a:   1 }
@@ -60,7 +62,7 @@ class Game
 
     @optionMenus =
       rounds: [
-        { text: "8 rounds of 13", data: "13|13|13|13|13|13|13|13" }
+        { text: "8 rounds of 13", data: "1"}#3|13|13|13|13|13|13|13" }
         { text: "4 rounds of 13", data: "13|13|13|13" }
         { text: "3 to 13", data: "3|4|5|6|7|8|9|10|11|12|13" }
         { text: "3 to 13 by odds", data: "3|5|7|9|11|13" }
@@ -418,6 +420,15 @@ class Game
       if lines.length > 1
         gameOverY += gameOverSize
         @fontRenderer.render @font, gameOverSize, lines[1], @center.x, gameOverY, 0.5, 0.5, @colors.orange
+
+      restartQuitSize = @height / 12
+      shadowDistance = restartQuitSize / 8
+      @fontRenderer.render @font, restartQuitSize, "Restart", shadowDistance + @center.x / 2, shadowDistance + @height - restartQuitSize, 0.5, 1, @colors.black, =>
+      @fontRenderer.render @font, restartQuitSize, "Restart", @center.x / 2, @height - restartQuitSize, 0.5, 1, @colors.gold, =>
+        @newGame()
+      @fontRenderer.render @font, restartQuitSize, "Quit", shadowDistance + @center.x + (@center.x / 2), shadowDistance + @height - restartQuitSize, 0.5, 1, @colors.black, =>
+      @fontRenderer.render @font, restartQuitSize, "Quit", @center.x + (@center.x / 2), @height - restartQuitSize, 0.5, 1, @colors.gold, =>
+        @blackout = null
 
     if (@blackout.state == State.ROUNDSUMMARY) and @pile.resting()
       @fontRenderer.render @font, @height / 8, "Tap for next round ...", @center.x, @center.y, 0.5, 0.5, @colors.orange, =>
