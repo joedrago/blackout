@@ -420,7 +420,7 @@ class Blackout
     @game.log("added AI player")
     return OK
 
-  play: (params) ->
+  canPlay: (params) ->
     if @state != State.TRICK
       return 'notInTrick'
 
@@ -474,6 +474,31 @@ class Blackout
       else
         # Current player doesn't have that suit, don't bother
         forcedSuit = Suit.NONE
+
+    return OK
+
+  play: (params) ->
+    canPlayCard = @canPlay(params)
+    if canPlayCard != OK
+      return canPlayCard
+
+    currentPlayer = @currentPlayer()
+
+    if params.hasOwnProperty('which')
+      params.which = Number(params.which)
+      params.index = -1
+      for card, i in currentPlayer.hand
+        if card == params.which
+          params.index = i
+          break
+
+      if params.index == -1
+        return 'doNotHave'
+    else
+      params.index = Number(params.index)
+
+    chosenCardX = currentPlayer.hand[params.index]
+    chosenCard = new Card(chosenCardX)
 
     # If you get here, you can throw whatever you want, and it
     # will either put you in the lead, trump, or dump.
