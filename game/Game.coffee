@@ -408,26 +408,27 @@ class Game
 
     @pile.render()
 
-    if (@blackout != null)
-      if @blackout.state == State.POSTGAMESUMMARY
-        lines = @gameOverText()
-        gameOverSize = @height / 8
-        gameOverY = @center.y
-        if lines.length > 1
-          gameOverY -= (gameOverSize >> 1)
-        @fontRenderer.render @font, gameOverSize, lines[0], @center.x, gameOverY, 0.5, 0.5, @colors.orange
-        if lines.length > 1
-          gameOverY += gameOverSize
-          @fontRenderer.render @font, gameOverSize, lines[1], @center.x, gameOverY, 0.5, 0.5, @colors.orange
-      if @blackout.state == State.ROUNDSUMMARY
-        @fontRenderer.render @font, @height / 8, "Tap for next round ...", @center.x, @center.y, 0.5, 0.5, @colors.orange, =>
-          if @blackout.next() == OK
-            @hand.set @blackout.players[0].hand
-      if (@blackout.state == State.BID) and (@blackout.turn == 0)
-        @bidUI.minus.render()
-        @bidUI.plus.render()
-        @fontRenderer.render @font, @bidTextSize, "#{@bid}", @center.x, @bidButtonY, 0.5, 0.5, @colors.white, =>
-          @attemptBid()
+    if (@blackout.state == State.POSTGAMESUMMARY) and @pile.resting()
+      lines = @gameOverText()
+      gameOverSize = @height / 8
+      gameOverY = @center.y
+      if lines.length > 1
+        gameOverY -= (gameOverSize >> 1)
+      @fontRenderer.render @font, gameOverSize, lines[0], @center.x, gameOverY, 0.5, 0.5, @colors.orange
+      if lines.length > 1
+        gameOverY += gameOverSize
+        @fontRenderer.render @font, gameOverSize, lines[1], @center.x, gameOverY, 0.5, 0.5, @colors.orange
+
+    if (@blackout.state == State.ROUNDSUMMARY) and @pile.resting()
+      @fontRenderer.render @font, @height / 8, "Tap for next round ...", @center.x, @center.y, 0.5, 0.5, @colors.orange, =>
+        if @blackout.next() == OK
+          @hand.set @blackout.players[0].hand
+
+    if (@blackout.state == State.BID) and (@blackout.turn == 0)
+      @bidUI.minus.render()
+      @bidUI.plus.render()
+      @fontRenderer.render @font, @bidTextSize, "#{@bid}", @center.x, @bidButtonY, 0.5, 0.5, @colors.white, =>
+        @attemptBid()
 
     # card area
     # @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea

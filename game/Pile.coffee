@@ -151,6 +151,15 @@ class Pile
 
     return updated
 
+  # used by the game over screen. It returns true when neither the pile nor the last trick are moving
+  resting: ->
+    for card,anim of @anims
+      if anim.animating()
+        return false
+    if @settleTimer > 0
+      return false
+    return true
+
   render: ->
     for v, index in @pile
       anim = @anims[v]
