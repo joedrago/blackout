@@ -62,7 +62,7 @@ class Game
 
     @optionMenus =
       rounds: [
-        { text: "8 rounds of 13", data: "1"}#3|13|13|13|13|13|13|13" }
+        { text: "8 rounds of 13", data: "13|13|13|13|13|13|13|13" }
         { text: "4 rounds of 13", data: "13|13|13|13" }
         { text: "3 to 13", data: "3|4|5|6|7|8|9|10|11|12|13" }
         { text: "3 to 13 by odds", data: "3|5|7|9|11|13" }
