@@ -252,7 +252,6 @@ class Game
       errText = "  ERROR: `ff0000`#{@lastErr}"
       headline += errText
 
-    # headline = "State: `ffff00`#{@blackout.state}``, Turn: `ffff00`#{@blackout.players[@blackout.turn].name}`` #{errText}"
     return headline
 
   # -----------------------------------------------------------------------------------------------------

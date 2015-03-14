@@ -134,7 +134,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     private int vertColorHandle_;
     private long frameCounter_;
     private long frameCounterLastTime_;
-    private boolean needsRender_;
+    private int fastRenderFrames_;
     private double[] renderData_;
     private int renderDataSize_;
 
@@ -162,7 +162,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         frameCounter_ = 0;
         frameCounterLastTime_ = FRAME_COUNTER_INTERVAL_MS;
         renderDataSize_ = 0;
-        needsRender_ = true;
+        fastRenderFrames_ = 1;
 
         Log.d(TAG, "Renderer MaxFPS: "+MAX_FPS+", MinMSPerFrame: "+MIN_MS_PER_FRAME);
     }
@@ -244,8 +244,6 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
     public void jsUpdate(double dt)
     {
-        needsRender_ = false;
-
         Touch touch;
         while((touch = inputQueue_.poll()) != null)
         {
@@ -265,20 +263,25 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             v8_.executeVoidFunction(functionName, parameters);
             } finally { Trace.endSection(); }
 
-            needsRender_ = true;
+            fastRenderFrames_ = 3;
         }
 
         V8Array parameters = new V8Array(v8_);
         parameters.push(dt);
         Trace.beginSection("update");
         if(v8_.executeBooleanFunction("update", parameters))
-            needsRender_ = true;
+            fastRenderFrames_ = 3;
         Trace.endSection();
     }
 
     public boolean needsRender()
     {
-        return needsRender_;
+        if(fastRenderFrames_ > 0)
+        {
+            fastRenderFrames_--;
+            return true;
+        }
+        return false;
     }
 
     public void jsStartup()
