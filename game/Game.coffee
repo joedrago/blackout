@@ -39,10 +39,13 @@ class Game
       "chars": 2
       "mainmenu": 3
       "pausemenu": 4
+      "howto1": 5
+      "howto2": 6
 
     @blackout = null # don't start in a game
     @lastErr = ''
     @paused = false
+    @howto = 0
     @renderCommands = []
 
     @bid = 0
@@ -83,6 +86,10 @@ class Game
     @mainMenu = new Menu this, "mainmenu", [
       (click) =>
         if click
+          @howto = 1
+        return "How To Play"
+      (click) =>
+        if click
           @options.roundIndex = (@options.roundIndex + 1) % @optionMenus.rounds.length
         return @optionMenus.rounds[@options.roundIndex].text
       (click) =>
@@ -110,6 +117,10 @@ class Game
         if click
           @paused = false
         return "Resume Game"
+      (click) =>
+        if click
+          @howto = 1
+        return "How To Play"
       (click) =>
         if click
           @options.speedIndex = (@options.speedIndex + 1) % @optionMenus.speeds.length
@@ -348,12 +359,21 @@ class Game
     # Reset render commands
     @renderCommands.length = 0
 
-    if @blackout == null
+    if @howto > 0
+      @renderHowto()
+    else if @blackout == null
       @renderMainMenu()
     else
       @renderGame()
 
     return @renderCommands
+
+  renderHowto: ->
+    howtoTexture = "howto#{@howto}"
+    @spriteRenderer.render howtoTexture, 0, 0, @width, @height, 0, 0, 0, @colors.white, =>
+      @howto++
+      if @howto > 2
+        @howto = 0
 
   renderMainMenu: ->
     @mainMenu.render()

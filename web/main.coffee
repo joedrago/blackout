@@ -32,6 +32,9 @@ class NativeApp
       # backgrounds
       "../res/raw/mainmenu.png"
       "../res/raw/pausemenu.png"
+      # help
+      "../res/raw/howto1.png"
+      "../res/raw/howto2.png"
     ]
 
     @game = new Game(this, @width, @height)
@@ -53,7 +56,7 @@ class NativeApp
       loadedTextures.push img
     @textures = loadedTextures
 
-    @saveTimer = SAVE_TIMER_MS 
+    @saveTimer = SAVE_TIMER_MS
 
   onImageLoaded: (info) ->
     @pendingImages--

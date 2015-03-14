@@ -8,6 +8,11 @@
   src: url(darkforest.ttf) format("truetype");
 }
 
+@font-face {
+  font-family: "Unispace";
+  src: url(unispace.ttf) format("truetype");
+}
+
 body {
   background-color: black;
 }
@@ -15,46 +20,168 @@ body {
 #page1, #page2 {
   width: 1280px;
   height: 720px;
-  background-color: #000033;
+  background-color: #222222;
+  margin: 10px;
+}
+
+.content {
   margin: 10px;
 }
 
 .title {
   font-family: DarkForest;
-  font-size: 2em;
+  font-size: 24pt;
   text-align: center;
   width: 100%;
   color: white;
+  margin-bottom: 10px;
+}
+
+blockquote {
+  margin-left: 0px;
+  margin-top: 10px;
 }
 
 .paragraph {
-  font-family: DarkForest;
+  font-family: Unispace;
+  font-size: 12pt;
+  font-weight: 300;
+  text-align: justify;
   width: 100%;
-  color: white;
+  color: #dddddd;
+  margin-bottom: 10px;
 }
+
+.tap {
+  text-align: right;
+}
+
+.tap1 {
+  margin-top: 120px;
+}
+.tap2 {
+  margin-top: 40px;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+.header { color: #ff8800; }
+.hl     { color: #88ff88; }
+.hlbad  { color: #ff8888; }
 
 </style>
 </head>
 <body>
+  <div id="page1">
+    <div class="content">
+      <div class="title">How to play Blackout [1/2]</div>
 
-<div id="page1">
-<div class="title">How to play Blackout</div>
-<div class="paragraph">
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus convallis metus quis quam bibendum tincidunt. Donec a augue et velit auctor tristique quis et nunc. Ut a lectus arcu. Sed ut nunc libero. Donec convallis gravida dolor. Curabitur eu lectus ullamcorper, efficitur ligula sed, tristique odio. Aenean id fringilla augue, eget ornare quam. Sed maximus tortor at metus rhoncus faucibus. Ut dolor massa, cursus non feugiat blandit, consequat a purus.
+        <table cellpadding="0" cellspacing="0" border="0"><tr><td valign="top" width="50%">
 
-Sed ut arcu luctus, porta turpis a, ultrices tortor. Donec vel sapien vel augue vestibulum laoreet. In vitae arcu commodo, semper leo vitae, luctus dolor. Integer varius, justo id malesuada tincidunt, nisl magna interdum ligula, vitae tempus mi lacus fringilla lacus. Cras id euismod est. Vivamus eget mauris eget tellus scelerisque varius. Nunc at tempus tellus, sed porta magna. Morbi risus elit, facilisis hendrerit condimentum ac, porttitor ac justo. Sed viverra purus nulla, vel convallis risus elementum sed. Cras sit amet ipsum dapibus, laoreet tellus nec, rhoncus leo. Integer finibus cursus nunc eget volutpat.
+          <div class="paragraph">
+            <span class="header">Summary / Objective:</span><br>
+            <blockquote>
+              Blackout is a trick-taking card game similar to Spades, played over a series of rounds, with each round having a series of tricks.
+              <br><br>
+              The objective of the regular game is to have the *lowest* score at the end of the rounds. The objective of Marathon mode is to see how many rounds you can last without ever scoring a point.
+              <br><br>
+              The amount of rounds and tricks per round is decided when the game is created, and each round can have a differing number of tricks. For example, "3 to 13" means to play 11 rounds, with the first round having 3 tricks, and the last round having 13 tricks. The preferred trick size is 13 in a 4 player game, as it uses all of the cards, which offers the most opportunity for strategy.
+            </blockquote>
+          </div>
 
-Nulla varius, lectus at vestibulum aliquam, lorem diam euismod felis, et tristique neque lectus eu odio. Ut at interdum est, sed tristique lorem. Nullam eget lacus varius, pharetra leo ac, porta leo. Cras aliquet, massa ac sagittis molestie, ante turpis posuere augue, et vehicula elit turpis non nibh. In tempus tellus metus, vitae bibendum nulla posuere vel. Quisque non interdum neque. Mauris id fermentum justo.
+          <div class="paragraph">
+            <span class="header">Setup and Game Flow:</span><br>
+            <blockquote>
+              When the game begins, a dealer is chosen at random. After cards are dealt, everyone must bid, starting to the left of the dealer. The <span class="hl">bid</span> is a guess of how many of the cards in your hand will earn you a trick. Once everyone has bid, the player holding the lowest club begins by throwing it to begin the first trick.
+              <br><br>
+              A <span class="hl">trick</span> is created when every player throws a single card into the pile. One of the cards will earn/"win" that trick for its owner, which is tallied until the end of the round. When the round ends, each player earns <span class="hlbad">penalty points</span> based on how far off their bid was from the number of tricks they actually won.
+            </blockquote>
+          </div>
 
-Mauris et tempus ex, eu imperdiet massa. Aliquam ac aliquet elit, non lobortis massa. Vivamus dignissim, lacus dapibus lobortis fringilla, quam urna vehicula mauris, id vestibulum neque nisi eget odio. Quisque malesuada purus ut risus accumsan pulvinar. Sed in diam ac libero consectetur fermentum vel tincidunt leo. Nunc quis imperdiet enim. Mauris in porttitor dolor, vel gravida metus. Nullam lacinia ut lorem ac tristique. Etiam velit sem, accumsan sed sem dignissim, finibus feugiat ligula. Nam eu nulla eget massa scelerisque bibendum. In enim felis, iaculis eget metus ut, condimentum vestibulum orci. Sed vel magna sit amet metus consequat commodo. Suspendisse non massa ex. Vestibulum vitae felis vel ipsum rutrum aliquam quis in dui. Vestibulum sagittis nunc non est tempor ultricies. Sed lacinia tincidunt sem et efficitur.
+        </td><td valign="top" width="50%">
 
-Phasellus blandit fringilla quam quis imperdiet. Pellentesque condimentum diam vitae finibus efficitur. Proin eu eleifend purus, nec fringilla justo. Maecenas vitae rutrum nunc. Quisque ut aliquet risus. Maecenas consequat ante sagittis mollis ornare. Integer commodo nisi leo, sit amet vulputate velit sodales in. Pellentesque vel volutpat ante. Maecenas urna orci, lacinia eget urna eu, finibus faucibus nunc. Sed euismod nisi semper, lacinia tellus et, dignissim nisi. Aliquam erat volutpat. Integer quam dui, molestie at pellentesque vel, ornare vel odio. Donec imperdiet eros in mauris accumsan, at malesuada nunc posuere. Etiam lobortis viverra ipsum in laoreet.
-</div>
-</div>
+          <div class="paragraph">
+            <blockquote>
+              The person that claimed the last trick for that round deals the next round.
+              <br><br>
+              At the end of the last round, the player with the lowest amount of penalty points wins. If more than one player has the same low score, they tie.
+            </blockquote>
+          </div>
 
-<div id="page2">
-<div class="title">How to play Blackout</div>
-</div>
+          <div class="paragraph">
+            <span class="header">Gameplay</span><br>
+            <blockquote>
+              The first card thrown for each trick sets the trick's <span class="hl">suit</span>, which is key to deciding which card wins the trick. The highest card (Ace high) matching the trick's suit will win the trick, unless a <span class="hl">trump card</span> (any spade) is played, which always beats the trick's suit. Any suit other than the trick's suit (suit that started the trick) or the trump suit (spades) is considered a <span class="hl">dump</span>. Dump cards are guaranteed losers regardless of value, which is often desirable to make sure you only win the amount of tricks that you bid.
+              <br><br>
+              For example, say the first card thrown was an 8 of diamonds. If the next card thrown was a 3 of spades, it would "claim" the trick (become the tentative winner). If the third card thrown was a 7 of spades, it'd claim the trick over the earlier, lower spade. And if the last card was a king of clubs, it would be considered a dump as it isn't a diamond or spade. The player who threw the 7 of spades would win the trick.
+            </blockquote>
+          </div>
+
+          <div class="paragraph tap tap1">
+            <blockquote>
+              Tap for Next Page
+            </blockquote>
+          </div>
+
+        </td></tr></table>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="page2">
+    <div class="content">
+      <div class="title">How to play Blackout [2/2]</div>
+
+        <table cellpadding="0" cellspacing="0" border="0"><tr><td valign="top" width="50%">
+
+          <div class="paragraph">
+            <span class="header">Rules and Strategy</span><br>
+            <blockquote>
+              Blackout relies on the concept of <span class="hl">forced play</span> for most of its strategy. In many situations, the rules will only allow you to choose from a couple of cards in your hand. The strategy comes from the fact that your opponents are bound by the same rules. Most of the time, the goal is to force your opponents to throw the card you've guessed they have (based on their bid, current number of tricks won, and remaining cards), in order to force a trick to go to a specific player.
+              <br><br>
+              For the <i>first</i> card in a trick (referred to as <span class="hl">leading the trick</span>), the only rule is that you cannot lead with a spade unless a spade has already trumped a previous trick this round ("<span class="hl">trump broken</span>"). Remember, the first card of a trick sets the <span class="hl">trick's suit</span>.
+              <br><br>
+              For all other cards, you must satisfy two rules:
+              <br>
+              <ol>
+                <li>You must play a card matching the trick's suit, if possible.</li>
+                <li>If are forced to throw the trick's suit (see rule #1) and card claiming the trick also matches the trick's suit, you must play a higher value than that card, if possible.</li>
+              </ol>
+              Note that these rules only apply if you have a card matching the trick's suit. If you don't have <i>any</i> of the trick's suit, every card in your hand is a legal play (no matter how poor of a play it might be).
+            </blockquote>
+          </div>
+
+        </td><td valign="top" width="50%">
+
+          <div class="paragraph">
+            <span class="header">Examples</span><br>
+            <blockquote>
+              <ul>
+                <li>Opponent leads with a 10D, and you have no diamonds. All cards in your hand are legal plays. All spades claim the trick, all others dump/lose.</li>
+                <li>Opponent leads with a 6S, and you don't have any spades. All plays are legal, and guaranteed to lose.</li>
+                <li>Opponent leads with a 7H, and you have two hearts: 4H and 10H. Based on Rule #1, you must throw one of these two. Based on Rule #2, you must throw the 10H, as the current claim is a heart, which matches the trick's suit.</li>
+                <li>Opponent leads with a 7H, next opponent trumps with a 4S. You have two hearts: 4H and 10H. Based on Rule #1, you must throw one of these two. However, since the current claim is by the 4S (which is not the trick's suit), you are not bound by Rule #2 and can throw either the 4H or the 10H.</li>
+                <li>Opponent leads with a 7 of hearts, next opponent trumps with a 4 of spades. You have two hearts: 4 and 10. Based on Rule #1, you must throw one of these two. However, since the current claim is by the 4 of spades (which is not the trick's suit), you are not bound by Rule #2 and can throw either the 4 or the 10.</li>
+                <li>You only have spades left, but nobody has broken trump by throwing a spade this round yet. Throw any card.</li>
+              </ul>
+              <br><br>
+            </blockquote>
+          </div>
+
+          <div class="paragraph tap tap2">
+            <blockquote>
+              Tap to Quit
+            </blockquote>
+          </div>
+
+        </td></tr></table>
+
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
