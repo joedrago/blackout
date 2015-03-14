@@ -109,7 +109,7 @@ class Pile
       if not seen.hasOwnProperty(card)
         toRemove.push card
     for card in toRemove
-      @game.log "removing anim for #{card}"
+      # @game.log "removing anim for #{card}"
       delete @anims[card]
 
     @updatePositions()
