@@ -23,12 +23,12 @@ ShortSuitName = ['C', 'D', 'H', 'S']
 
 aiCharacterList = [
   { id: "mario",    name: "Mario",      sprite: "mario",    brain: "normal" }
-  { id: "luigi",    name: "Luigi",      sprite: "luigi",    brain: "normal" }
+  { id: "luigi",    name: "Luigi",      sprite: "luigi",    brain: "chaos" }
   { id: "peach",    name: "Peach",      sprite: "peach",    brain: "normal" }
-  { id: "daisy",    name: "Daisy",      sprite: "daisy",    brain: "normal" }
+  { id: "daisy",    name: "Daisy",      sprite: "daisy",    brain: "conservativeMoron" }
   { id: "yoshi",    name: "Yoshi",      sprite: "yoshi",    brain: "normal" }
   { id: "toad",     name: "Toad",       sprite: "toad",     brain: "normal" }
-  { id: "bowser",   name: "Bowser",     sprite: "bowser",   brain: "normal" }
+  { id: "bowser",   name: "Bowser",     sprite: "bowser",   brain: "aggressiveMoron" }
   { id: "bowserjr", name: "Bowser Jr",  sprite: "bowserjr", brain: "normal" }
   { id: "koopa",    name: "Koopa",      sprite: "koopa",    brain: "normal" }
   { id: "rosalina", name: "Rosalina",   sprite: "rosalina", brain: "normal" }
@@ -574,7 +574,7 @@ class Blackout
     if i == undefined
       breakPlease()
     card = new Card(currentPlayer.hand[i])
-    @game.log "aiPlay: #{i}"
+    # @game.log "aiPlay: #{i}"
     reply = @play({'id':currentPlayer.id, 'index':i})
     if reply == OK
       @game.log("AI: " + currentPlayer.name + " plays " + card.name)
@@ -824,6 +824,70 @@ class Blackout
             @aiLog('not allowed to play my best play')
 
         return false
+
+    # ------------------------------------------------------------
+    # Chaos: Completely random. Probably awful to play against.
+    chaos:
+      id:   "chaos"
+      name: "Chaos"
+
+      # chaos
+      bid: (currentPlayer) ->
+        # pick a bid somewhere in the first 50%
+        return Math.floor(Math.random() * currentPlayer.hand.length * 0.5)
+
+      # chaos
+      play: (currentPlayer) ->
+        legalIndices = []
+        for v, i in currentPlayer.hand
+          canPlayCard = @canPlay({ id: currentPlayer.id, index: i })
+          if canPlayCard == OK
+            legalIndices.push i
+          # else
+          #   @aiLog "canPlayCard #{i} returned #{canPlayCard}"
+        randomIndex = Math.floor(Math.random() * legalIndices.length)
+        @aiLog "legal indices: #{JSON.stringify(legalIndices)}, choosing index #{legalIndices[randomIndex]}"
+        return @aiPlay(currentPlayer, legalIndices[randomIndex])
+
+    # ------------------------------------------------------------
+    # Conservative Moron: Bids spade count, and plays low cards.
+    conservativeMoron:
+      id:   "conservativeMoron"
+      name: "Conservative Moron"
+
+      # conservativeMoron
+      bid: (currentPlayer) ->
+        bid = 0
+        for v in currentPlayer.hand
+          card = new Card(v)
+          bid++ if card.suit == Suit.SPADES
+        @aiLog "I am a moron and I have #{bid} spades. Let's roll with it."
+        return bid
+
+      # conservativeMoron
+      play: (currentPlayer) ->
+        @aiLog "playing lowest possible card"
+        return @aiPlayLow(currentPlayer, 0)
+
+    # ------------------------------------------------------------
+    # Aggressive Moron: Bids spades and aces, and plays high cards.
+    aggressiveMoron:
+      id:   "aggressiveMoron"
+      name: "Aggressive Moron"
+
+      # aggressiveMoron
+      bid: (currentPlayer) ->
+        bid = 0
+        for v in currentPlayer.hand
+          card = new Card(v)
+          bid++ if (card.suit == Suit.SPADES) or (card.value == 12)
+        @aiLog "I am a moron and I have #{bid} spades and/or aces. Fart."
+        return bid
+
+      # aggressiveMoron
+      play: (currentPlayer) ->
+        @aiLog "playing highest possible card"
+        return @aiPlayHigh(currentPlayer, currentPlayer.hand.length - 1)
 
 # ---------------------------------------------------------------------------------------------------------------------------
 # AI card helpers
