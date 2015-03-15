@@ -35,6 +35,7 @@ class Game
       overlay:    { r:   0, g:   0, b:   0, a: 0.6 }
       mainmenu:   { r: 0.1, g: 0.1, b: 0.1, a:   1 }
       pausemenu:  { r: 0.1, g: 0.0, b: 0.1, a:   1 }
+      bid:        { r:   1, g: 0.5, b:   0, a: 0.5 }
 
     @textures =
       "cards": 0
@@ -53,7 +54,7 @@ class Game
     @bid = 0
     @bidButtonSize = @height / 8
     @bidTextSize = @height / 6
-    bidButtonDistance = @bidButtonSize * 3.5
+    bidButtonDistance = @bidButtonSize * 3
     @bidButtonY = @center.y - (@bidButtonSize)
     @bidUI = #(@game, @spriteNames, @font, @textHeight, @x, @y, @text, @cb)
       minus: new Button this, ['minus0', 'minus1'], @font, @bidButtonSize, @center.x - bidButtonDistance, @bidButtonY, (click) =>
@@ -491,8 +492,14 @@ class Game
     if (@blackout.state == State.BID) and (@blackout.turn == 0)
       @bidUI.minus.render()
       @bidUI.plus.render()
-      @fontRenderer.render @font, @bidTextSize, "#{@bid}", @center.x, @bidButtonY, 0.5, 0.5, @colors.white, =>
+      @fontRenderer.render @font, @bidTextSize, "#{@bid}", @center.x, @bidButtonY - (@bidTextSize * 0.1), 0.5, 0.5, @colors.white, =>
         @attemptBid()
+      bidButtonHeight = @height / 12
+      bidSize = @fontRenderer.size(@font, bidButtonHeight, "Bid")
+      console.log bidSize.x + " " + bidSize.y
+      @spriteRenderer.render "solid", @center.x, (@bidButtonY + @bidTextSize) + (bidSize.h * 0.2), bidSize.w * 3, bidSize.h * 1.5, 0, 0.5, 0.5, @colors.bid, =>
+        @attemptBid()
+      @fontRenderer.render @font, bidButtonHeight, "Bid", @center.x, @bidButtonY + @bidTextSize, 0.5, 0.5, @colors.white
 
     # card area
     # @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea
