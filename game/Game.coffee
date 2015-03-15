@@ -246,6 +246,29 @@ class Game
   # -----------------------------------------------------------------------------------------------------
   # headline (game state in top left)
 
+  prettyErrorTable: {
+    bidOutOfRange:      "You are somehow bidding an impossible value. The game must be broken."
+    dealerFucked:       "Dealer restriction: You may not make total bids match total tricks."
+    doNotHave:          "You are somehow attempting to play a card you don't own. The game must be broken."
+    forcedHigherInSuit: "You have a higher value in the lead suit. You must play it. (Rule 2)"
+    forcedInSuit:       "You have at least one of the lead suit. You must play it. (Rule 1)"
+    gameOver:           "The game is over.  The game must be broken."
+    indexOutOfRange:    "You don't have that index. The game must be broken."
+    lowestCardRequired: "You must start the round with the lowest card you have."
+    nextIsConfused:     "Interal error. The game must be broken."
+    noNext:             "Interal error. The game must be broken."
+    notBiddingNow:      "You are trying to bid during the wrong phase."
+    notEnoughPlayers:   "Cannot start the game without more players."
+    notInTrick:         "You are trying to play a card during the wrong phase."
+    notYourTurn:        "It isn't your turn."
+    trumpNotBroken:     "Trump isn't broken yet. Lead with a non-spade."
+  }
+
+  prettyError: ->
+    pretty = @prettyErrorTable[@lastErr]
+    return pretty if pretty
+    return @lastErr
+
   calcHeadline: ->
     return "" if @blackout == null
 
@@ -262,7 +285,7 @@ class Game
 
     errText = ""
     if (@lastErr.length > 0) and (@lastErr != OK)
-      errText = "  ERROR: `ff0000`#{@lastErr}"
+      errText = "  ERROR: `ff0000`#{@prettyError()}"
       headline += errText
 
     return headline
@@ -401,7 +424,6 @@ class Game
     scoreHeight = textHeight
 
     # Log
-    @fontRenderer.render @font, textHeight, @calcHeadline(), 0, 0, 0, 0, @colors.lightgray
     for line, i in @blackout.log
       @fontRenderer.render @font, textHeight, line, 0, (i+1) * (textHeight + textPadding), 0, 0, @colors.white
 
@@ -476,6 +498,9 @@ class Game
     # @spriteRenderer.render "solid", 0, @height, @width, @height - @hand.playCeiling, 0, 0, 1, @colors.handarea
     @hand.render()
     @renderScore @blackout.players[0], 0 == @blackout.turn, scoreHeight, @center.x, @height, 0.5, 1
+
+    # Headline (includes error)
+    @fontRenderer.render @font, textHeight, @calcHeadline(), 0, 0, 0, 0, @colors.lightgray
 
     @spriteRenderer.render "pause", @width, 0, 0, @pauseButtonSize, 0, 1, 0, @colors.white, =>
       @paused = true
