@@ -496,7 +496,6 @@ class Game
         @attemptBid()
       bidButtonHeight = @height / 12
       bidSize = @fontRenderer.size(@font, bidButtonHeight, "Bid")
-      console.log bidSize.x + " " + bidSize.y
       @spriteRenderer.render "solid", @center.x, (@bidButtonY + @bidTextSize) + (bidSize.h * 0.2), bidSize.w * 3, bidSize.h * 1.5, 0, 0.5, 0.5, @colors.bid, =>
         @attemptBid()
       @fontRenderer.render @font, bidButtonHeight, "Bid", @center.x, @bidButtonY + @bidTextSize, 0.5, 0.5, @colors.white
