@@ -216,6 +216,7 @@ class Blackout
     @pile = []
     @pileWho = []
     @prevWho = []
+    @prevTrickTaker = -1
 
     if @marathonMode()
       roundCount = "Marathon mode"
@@ -239,6 +240,13 @@ class Blackout
 
     @nextRound++
 
+    if @prevTrickTaker == -1
+      @dealer = Math.floor(Math.random() * @players.length)
+      @output "Randomly assigning dealer to #{@players[@dealer].name}"
+    else
+      @dealer = @prevTrickTaker
+      @output "#{@players[@dealer].name} claimed last trick, deals"
+
     deck = new ShuffledDeck()
     for player, i in @players
       player.bid = -1
@@ -251,8 +259,6 @@ class Blackout
         player.hand.push(deck.cards.shift())
 
       player.hand.sort (a,b) -> return a - b
-
-    @dealer = Math.floor(Math.random() * @players.length)
 
     @state = State.BID
     @turn = @playerAfter(@dealer)
@@ -394,7 +400,7 @@ class Blackout
 
     @players.push player
     player.index = @players.length - 1
-    @output(player.name + " joins game (" + @players.length + ")")
+    # @output(player.name + " joins game (" + @players.length + ")")
 
   namePresent: (name) ->
     for player in @players
