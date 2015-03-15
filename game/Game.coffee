@@ -29,18 +29,20 @@ class Game
       lightgray:  { r: 0.5, g: 0.5, b: 0.5, a:   1 }
       background: { r:   0, g: 0.2, b:   0, a:   1 }
       logbg:      { r: 0.1, g:   0, b:   0, a:   1 }
-      facebg:     { r:   0, g:   0, b:   0, a: 0.3 }
+      arrow:      { r:   1, g:   1, b:   1, a:   1 }
+      arrowclose: { r:   1, g: 0.5, b:   0, a: 0.3 }
       handarea:   { r:   0, g: 0.1, b:   0, a: 1.0 }
       overlay:    { r:   0, g:   0, b:   0, a: 0.6 }
+      mainmenu:   { r: 0.1, g: 0.1, b: 0.1, a:   1 }
+      pausemenu:  { r: 0.1, g: 0.0, b: 0.1, a:   1 }
 
     @textures =
       "cards": 0
       "darkforest": 1
       "chars": 2
-      "mainmenu": 3
-      "pausemenu": 4
-      "howto1": 5
-      "howto2": 6
+      "howto1": 3
+      "howto2": 4
+      "howto3": 5
 
     @blackout = null # don't start in a game
     @lastErr = ''
@@ -83,7 +85,7 @@ class Game
       speedIndex: 1
       sound: true
 
-    @mainMenu = new Menu this, "mainmenu", [
+    @mainMenu = new Menu this, "Blackout!", "solid", @colors.mainmenu, [
       (click) =>
         if click
           @howto = 1
@@ -112,7 +114,7 @@ class Game
         return "Start"
     ]
 
-    @pauseMenu = new Menu this, "pausemenu", [
+    @pauseMenu = new Menu this, "Paused", "solid", @colors.pausemenu, [
       (click) =>
         if click
           @paused = false
@@ -370,9 +372,19 @@ class Game
 
   renderHowto: ->
     howtoTexture = "howto#{@howto}"
-    @spriteRenderer.render howtoTexture, 0, 0, @width, @height, 0, 0, 0, @colors.white, =>
+    @log "rendering #{howtoTexture}"
+    @spriteRenderer.render howtoTexture, 0, 0, @width, @height, 0, 0, 0, @colors.white
+    arrowWidth = @width / 20
+    arrowOffset = arrowWidth * 4
+    color = if @howto == 1 then @colors.arrowclose else @colors.arrow
+    @spriteRenderer.render "arrowL", @center.x - arrowOffset, @height, arrowWidth, 0, 0, 0.5, 1, color, =>
+      @howto--
+      if @howto < 0
+        @howto = 0
+    color = if @howto == 3 then @colors.arrowclose else @colors.arrow
+    @spriteRenderer.render "arrowR", @center.x + arrowOffset, @height, arrowWidth, 0, 0, 0.5, 1, color, =>
       @howto++
-      if @howto > 2
+      if @howto > 3
         @howto = 0
 
   renderMainMenu: ->

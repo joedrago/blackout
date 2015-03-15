@@ -1,7 +1,7 @@
 Button = require 'Button'
 
 class Menu
-  constructor: (@game, @background, @actions) ->
+  constructor: (@game, @title, @background, @color, @actions) ->
     @buttons = []
     @buttonNames = ["button0", "button1"]
 
@@ -23,7 +23,10 @@ class Menu
     return updated
 
   render: ->
-    @game.spriteRenderer.render @background, 0, 0, @game.width, @game.height, 0, 0, 0, @game.colors.white
+    @game.spriteRenderer.render @background, 0, 0, @game.width, @game.height, 0, 0, 0, @color
+    titleHeight = @game.height / 8
+    titleOffset = titleHeight
+    @game.fontRenderer.render @game.font, titleHeight, @title, @game.center.x, titleOffset, 0.5, 0, @game.colors.white
     for button in @buttons
       button.render()
 

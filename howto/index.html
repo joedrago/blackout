@@ -17,7 +17,7 @@ body {
   background-color: black;
 }
 
-#page1, #page2 {
+.page {
   width: 1280px;
   height: 720px;
   background-color: #222222;
@@ -52,15 +52,23 @@ blockquote {
   margin-bottom: 10px;
 }
 
+table {
+  margin-left: 30px;
+}
+
 .tap {
   text-align: right;
 }
 
 .tap1 {
-  margin-top: 120px;
+  margin-top: 10px;
 }
 .tap2 {
-  margin-top: 40px;
+  margin-top: 10px;
+}
+
+.card {
+  color: #ffffbb;
 }
 
 li {
@@ -74,9 +82,9 @@ li {
 </style>
 </head>
 <body>
-  <div id="page1">
+  <div class="page" id="page1">
     <div class="content">
-      <div class="title">How to play Blackout [1/2]</div>
+      <div class="title">How to play Blackout [1/3]</div>
 
         <table cellpadding="0" cellspacing="0" border="0"><tr><td valign="top" width="50%">
 
@@ -85,7 +93,7 @@ li {
             <blockquote>
               Blackout is a trick-taking card game similar to Spades, played over a series of rounds, with each round having a series of tricks.
               <br><br>
-              The objective of the regular game is to have the *lowest* score at the end of the rounds. The objective of Marathon mode is to see how many rounds you can last without ever scoring a point.
+              The objective of the regular game is to have the <span class="hl">lowest score</span> at the end of the rounds. The objective of Marathon mode is to see how many rounds you can last without ever scoring a point.
               <br><br>
               The amount of rounds and tricks per round is decided when the game is created, and each round can have a differing number of tricks. For example, "3 to 13" means to play 11 rounds, with the first round having 3 tricks, and the last round having 13 tricks. The preferred trick size is 13 in a 4 player game, as it uses all of the cards, which offers the most opportunity for strategy.
             </blockquote>
@@ -115,15 +123,24 @@ li {
             <blockquote>
               The first card thrown for each trick sets the trick's <span class="hl">suit</span>, which is key to deciding which card wins the trick. The highest card (Ace high) matching the trick's suit will win the trick, unless a <span class="hl">trump card</span> (any spade) is played, which always beats the trick's suit. Any suit other than the trick's suit (suit that started the trick) or the trump suit (spades) is considered a <span class="hl">dump</span>. Dump cards are guaranteed losers regardless of value, which is often desirable to make sure you only win the amount of tricks that you bid.
               <br><br>
-              For example, say the first card thrown was an 8 of diamonds. If the next card thrown was a 3 of spades, it would "claim" the trick (become the tentative winner). If the third card thrown was a 7 of spades, it'd claim the trick over the earlier, lower spade. And if the last card was a king of clubs, it would be considered a dump as it isn't a diamond or spade. The player who threw the 7 of spades would win the trick.
+              For example, say the first card thrown was <span class="card">8D</span>. If the next card thrown was <span class="card">3D</span>, it would "claim" the trick (become the tentative winner). If the third card thrown was a <span class="card">7S</span>, it'd claim the trick over the earlier, lower spade. And if the last card was a king of clubs, it would be considered a dump as it isn't a diamond or spade. The player who threw <span class="card">7S</span> would win the trick.
             </blockquote>
           </div>
 
+          <div class="paragraph">
+            <span class="header">Scoring</span><br>
+            <blockquote>
+              You earn <span class="hlbad">penalty points</span> for each undertrick/overtrick you bid. You earn 1 for being off by 1, 3 (1+2) for being off by 2, 6 (1+2+3) for being off by 3, etc.
+            </blockquote>
+          </div>
+
+          <!--
           <div class="paragraph tap tap1">
             <blockquote>
               Tap for Next Page
             </blockquote>
           </div>
+          -->
 
         </td></tr></table>
 
@@ -131,14 +148,14 @@ li {
     </div>
   </div>
 
-  <div id="page2">
+  <div class="page" id="page2">
     <div class="content">
-      <div class="title">How to play Blackout [2/2]</div>
+      <div class="title">How to play Blackout [2/3]</div>
 
         <table cellpadding="0" cellspacing="0" border="0"><tr><td valign="top" width="50%">
 
           <div class="paragraph">
-            <span class="header">Rules and Strategy</span><br>
+            <span class="header">Rules</span><br>
             <blockquote>
               Blackout relies on the concept of <span class="hl">forced play</span> for most of its strategy. In many situations, the rules will only allow you to choose from a couple of cards in your hand. The strategy comes from the fact that your opponents are bound by the same rules. Most of the time, the goal is to force your opponents to throw the card you've guessed they have (based on their bid, current number of tricks won, and remaining cards), in order to force a trick to go to a specific player.
               <br><br>
@@ -157,26 +174,76 @@ li {
         </td><td valign="top" width="50%">
 
           <div class="paragraph">
+            <blockquote>
+              There is one <span class="hl">special restriction for dealers</span>: a dealer is not allowed to bid an amount that would make the number of total bids for that round match the number of tricks for that round. If the bid count matches the trick count (both are 13, say), it  encourages players to cooperate. By having this rule in place, it ensures that someone gets a point every round, which keeps the scores interesting.
+            </blockquote>
+          </div>
+
+          <div class="paragraph">
+            <span class="header">Tips</span><br>
+            <blockquote>
+              <ul>
+                <li>Remember, it isn't about having good or high cards, it is about bidding right. 0 is a perfectly valid bid.</li>
+                <li>Don't bid too high. It is easier to dump a high non-trump than it is to win with garbage.</li>
+                <li>A handful of AI characters are abnormal. They will purposefully make awful decisions. Be careful!</li>
+                <li>Pay attention to the red error text at the top of the screen, if any. It is typically pretty helpful.</li>
+                <li>Turn up the AI speed if you don't like waiting for the AI to take turns.</li>
+                <li>Try Marathon mode. It is awesome.</li>
+              </ul>
+            </blockquote>
+          </div>
+
+          <!--
+          <div class="paragraph tap tap2">
+            <blockquote>
+              Tap to Quit
+            </blockquote>
+          </div>
+          -->
+        </td></tr></table>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page3">
+    <div class="content">
+      <div class="title">How to play Blackout [3/3]</div>
+
+        <table cellpadding="0" cellspacing="0" border="0"><tr><td valign="top" width="50%">
+          <div class="paragraph">
             <span class="header">Examples</span><br>
             <blockquote>
               <ul>
-                <li>Opponent leads with a 10D, and you have no diamonds. All cards in your hand are legal plays. All spades claim the trick, all others dump/lose.</li>
-                <li>Opponent leads with a 6S, and you don't have any spades. All plays are legal, and guaranteed to lose.</li>
-                <li>Opponent leads with a 7H, and you have two hearts: 4H and 10H. Based on Rule #1, you must throw one of these two. Based on Rule #2, you must throw the 10H, as the current claim is a heart, which matches the trick's suit.</li>
-                <li>Opponent leads with a 7H, next opponent trumps with a 4S. You have two hearts: 4H and 10H. Based on Rule #1, you must throw one of these two. However, since the current claim is by the 4S (which is not the trick's suit), you are not bound by Rule #2 and can throw either the 4H or the 10H.</li>
-                <li>Opponent leads with a 7 of hearts, next opponent trumps with a 4 of spades. You have two hearts: 4 and 10. Based on Rule #1, you must throw one of these two. However, since the current claim is by the 4 of spades (which is not the trick's suit), you are not bound by Rule #2 and can throw either the 4 or the 10.</li>
+                <li>Opponent leads with <span class="card">10D</span>, and you have no diamonds. All cards in your hand are legal plays. All spades claim the trick, all others dump/lose.</li>
+                <li>Opponent leads with <span class="card">6S</span>, and you don't have any spades. All plays are legal, and guaranteed to lose.</li>
+                <li>Opponent leads with <span class="card">7H</span>, and you have two hearts: <span class="card">4H</span> and <span class="card">10H</span>. Based on Rule #1, you must throw one of these two. Based on Rule #2, you must throw the <span class="card">10H</span>, as the current claim is a heart, which matches the trick's suit.</li>
+                <li>Opponent leads with <span class="card">7H</span>, next opponent trumps with a <span class="card">4S</span>. You have two hearts: <span class="card">4H</span> and <span class="card">10H</span>. Based on Rule #1, you must throw one of these two. However, since the current claim is by the <span class="card">4S</span> (which is not the trick's suit), you are not bound by Rule #2 and can throw either the <span class="card">4H</span> or the <span class="card">10H</span>.</li>
+                <li>Opponent leads with <span class="card">7H</span>, next opponent trumps with <span class="card">4S</span>. You have two hearts: <span class="card">4H</span> and <span class="card">10H</span>. Based on Rule #1, you must throw one of these two. However, since the current claim is by the <span class="card">4S</span> (which is not the trick's suit), you are not bound by Rule #2 and can throw either the <span class="card">4H</span> or the <span class="card">10H</span>.</li>
                 <li>You only have spades left, but nobody has broken trump by throwing a spade this round yet. Throw any card.</li>
               </ul>
               <br><br>
             </blockquote>
           </div>
 
+        </td><td valign="top" width="50%">
+
+          <div class="paragraph">
+            <span class="header">Author / Disclaimer</span><br>
+            <blockquote>
+              Created by Joe Drago (<span class="hl">joedrago@gmail.com</span>), 2015
+              <br><br>
+              I apologize in advance if any art in this slopped together pile is yours. I'm not trying to sell this for anything and it is completely open source. If you see something in here you that is yours and you want me to remove it, just email me.
+            </blockquote>
+          </div>
+
+          <!--
           <div class="paragraph tap tap2">
             <blockquote>
               Tap to Quit
             </blockquote>
           </div>
-
+          -->
         </td></tr></table>
 
       </div>

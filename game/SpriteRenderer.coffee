@@ -10,6 +10,8 @@ class SpriteRenderer
       plus1:     { texture: "chars", x: 745, y: 820, w: 116, h: 118 }
       minus0:    { texture: "chars", x: 895, y: 664, w: 116, h: 118 }
       minus1:    { texture: "chars", x: 895, y: 820, w: 116, h: 118 }
+      arrowL:    { texture: "chars", x:  33, y: 858, w: 204, h: 156 }
+      arrowR:    { texture: "chars", x: 239, y: 852, w: 208, h: 155 }
 
       # menu backgrounds
       mainmenu:  { texture: "mainmenu",  x: 0, y: 0, w: 1280, h: 720 }
@@ -18,6 +20,7 @@ class SpriteRenderer
       # howto
       howto1:    { texture: "howto1",  x: 0, y:  0, w: 1280, h: 720 }
       howto2:    { texture: "howto2",  x: 0, y:  0, w: 1280, h: 720 }
+      howto3:    { texture: "howto3",  x: 0, y:  0, w: 1280, h: 720 }
 
       # characters
       mario:     { texture: "chars", x:  20, y:   0, w: 151, h: 308 }

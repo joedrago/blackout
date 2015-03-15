@@ -29,12 +29,10 @@ class NativeApp
       "../res/raw/darkforest.png"
       # characters / other
       "../res/raw/chars.png"
-      # backgrounds
-      "../res/raw/mainmenu.png"
-      "../res/raw/pausemenu.png"
       # help
       "../res/raw/howto1.png"
       "../res/raw/howto2.png"
+      "../res/raw/howto3.png"
     ]
 
     @game = new Game(this, @width, @height)
