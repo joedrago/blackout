@@ -4,37 +4,6 @@ import QuartzCore
 import JavaScriptCore
 
 let MaxBuffers = 3
-let ConstantBufferSize = 1024*1024
-
-let vertexData:[Float] =
-[
-    -1.0, -1.0, 0.0, 1.0,
-    -1.0,  1.0, 0.0, 1.0,
-    1.0, -1.0, 0.0, 1.0,
-
-    1.0, -1.0, 0.0, 1.0,
-    -1.0,  1.0, 0.0, 1.0,
-    1.0,  1.0, 0.0, 1.0,
-
-    -0.0, 0.25, 0.0, 1.0,
-    -0.25, -0.25, 0.0, 1.0,
-    0.25, -0.25, 0.0, 1.0
-]
-
-let vertexColorData:[Float] =
-[
-    0.0, 0.0, 1.0, 1.0,
-    0.0, 0.0, 1.0, 1.0,
-    0.0, 0.0, 1.0, 1.0,
-
-    0.0, 0.0, 1.0, 1.0,
-    0.0, 0.0, 1.0, 1.0,
-    0.0, 0.0, 1.0, 1.0,
-
-    0.0, 0.0, 1.0, 1.0,
-    0.0, 1.0, 0.0, 1.0,
-    1.0, 0.0, 0.0, 1.0
-]
 
 class GameViewController: UIViewController
 {
@@ -45,15 +14,16 @@ class GameViewController: UIViewController
 
     // --------------------------------------------------------------------------------------------
     // Render internals
-    let device = { MTLCreateSystemDefaultDevice() }()
+    let device_ = { MTLCreateSystemDefaultDevice() }()
     let metalLayer = { CAMetalLayer() }()
-    var commandQueue: MTLCommandQueue! = nil
-    var timer: CADisplayLink! = nil
-    var pipelineState: MTLRenderPipelineState! = nil
-    var vertexBuffer: MTLBuffer! = nil
-    var vertexColorBuffer: MTLBuffer! = nil
-    let inflightSemaphore = dispatch_semaphore_create(MaxBuffers)
-    var bufferIndex = 0
+    var commandQueue_: MTLCommandQueue! = nil
+    var timer_: CADisplayLink! = nil
+    var pipelineState_: MTLRenderPipelineState! = nil
+    let frameSignal_ = dispatch_semaphore_create(MaxBuffers)
+    var bufferIndex_ = 0
+
+    var texture_: MetalTexture! = nil
+    lazy var samplerState_: MTLSamplerState? = GameViewController.defaultSampler(self.device_)
 
     // offsets used in animation
     var xOffset:[Float] = [ -1.0, 1.0, -1.0 ]
@@ -166,9 +136,6 @@ class GameViewController: UIViewController
 
                 index += 16
             }
-
-            // var d:Double = doubles[0].doubleValue
-            // println("render: \(doubles.count) \(d)")
         }
     }
 
@@ -179,7 +146,7 @@ class GameViewController: UIViewController
     {
         super.viewDidLoad()
 
-        metalLayer.device = device
+        metalLayer.device = device_
         metalLayer.pixelFormat = .BGRA8Unorm
         metalLayer.framebufferOnly = true
 
@@ -189,12 +156,12 @@ class GameViewController: UIViewController
         view.opaque = true
         view.backgroundColor = nil
 
-        commandQueue = device.newCommandQueue()
-        commandQueue.label = "main command queue"
+        commandQueue_ = device_.newCommandQueue()
+        commandQueue_.label = "main command queue"
 
-        let defaultLibrary = device.newDefaultLibrary()
-        let fragmentProgram = defaultLibrary?.newFunctionWithName("passThroughFragment")
-        let vertexProgram = defaultLibrary?.newFunctionWithName("passThroughVertex")
+        let defaultLibrary = device_.newDefaultLibrary()
+        let fragmentProgram = defaultLibrary?.newFunctionWithName("posTextureUColorFragment")
+        let vertexProgram = defaultLibrary?.newFunctionWithName("posTextureUColorVertex")
 
         let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
         pipelineStateDescriptor.vertexFunction = vertexProgram
@@ -202,21 +169,24 @@ class GameViewController: UIViewController
         pipelineStateDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
 
         var pipelineError : NSError?
-        pipelineState = device.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor, error: &pipelineError)
-        if (pipelineState == nil) {
+        pipelineState_ = device_.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor, error: &pipelineError)
+        if (pipelineState_ == nil) {
             println("Failed to create pipeline state, error \(pipelineError)")
         }
 
-        // generate a large enough buffer to allow streaming vertices for 3 semaphore controlled frames
-        vertexBuffer = device.newBufferWithLength(ConstantBufferSize, options: nil)
-        vertexBuffer.label = "vertices"
+        texture_ = MetalTexture(resourceName: "cards", ext: "png", mipmapped: true)
+        texture_.loadTexture(device: device_, commandQ: commandQueue_, flip: false)
 
-        let vertexColorSize = vertexData.count * sizeofValue(vertexColorData[0])
-        vertexColorBuffer = device.newBufferWithBytes(vertexColorData, length: vertexColorSize, options: nil)
-        vertexColorBuffer.label = "colors"
+        // // generate a large enough buffer to allow streaming vertices for 3 semaphore controlled frames
+        // vertexBuffer = device_.newBufferWithLength(ConstantBufferSize, options: nil)
+        // vertexBuffer.label = "vertices"
 
-        timer = CADisplayLink(target: self, selector: Selector("renderLoop"))
-        timer.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+        // let vertexColorSize = vertexData.count * sizeofValue(vertexColorData[0])
+        // vertexColorBuffer = device_.newBufferWithBytes(vertexColorData, length: vertexColorSize, options: nil)
+        // vertexColorBuffer.label = "colors"
+
+        timer_ = CADisplayLink(target: self, selector: Selector("renderLoop"))
+        timer_.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
     }
 
     override func viewDidLayoutSubviews() {
@@ -252,7 +222,7 @@ class GameViewController: UIViewController
     }
 
     deinit {
-        timer.invalidate()
+        timer_.invalidate()
     }
 
     func renderLoop() {
@@ -264,14 +234,12 @@ class GameViewController: UIViewController
     func render() {
 
         // use semaphore to encode 3 frames ahead
-        dispatch_semaphore_wait(inflightSemaphore, DISPATCH_TIME_FOREVER)
-
-        // self.update()
+        dispatch_semaphore_wait(frameSignal_, DISPATCH_TIME_FOREVER)
 
         jsUpdate()
         jsRender()
 
-        let commandBuffer = commandQueue.commandBuffer()
+        let commandBuffer = commandQueue_.commandBuffer()
         commandBuffer.label = "Frame command buffer"
 
         let drawable = metalLayer.nextDrawable()
@@ -283,64 +251,95 @@ class GameViewController: UIViewController
 
         let renderEncoder = commandBuffer.renderCommandEncoderWithDescriptor(renderPassDescriptor)!
         renderEncoder.label = "render encoder"
+        renderEncoder.setRenderPipelineState(pipelineState_)
+        renderEncoder.setCullMode(MTLCullMode.None)
 
-        renderEncoder.pushDebugGroup("draw morphing triangle")
-        renderEncoder.setRenderPipelineState(pipelineState)
-        renderEncoder.setVertexBuffer(vertexBuffer, offset: 256*bufferIndex, atIndex: 0)
-        renderEncoder.setVertexBuffer(vertexColorBuffer, offset:0 , atIndex: 1)
-        renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: 9, instanceCount: 1)
 
-        renderEncoder.popDebugGroup()
+        // everything between these markers needs to happen multiple times
+        // ---
+
+        renderEncoder.setFragmentTexture(texture_.texture, atIndex: 0)
+        if let samplerState = samplerState_ {
+            renderEncoder.setFragmentSamplerState(samplerState, atIndex: 0)
+        }
+
+        let uvL: Float = 0;
+        let uvT: Float = 0;
+        let uvR: Float = 1;
+        let uvB: Float = 1;
+
+        var vertexData = Array<Float>()
+        vertexData += [
+            0, 0, 1, uvL, uvT,
+            1, 0, 1, uvR, uvT,
+            1, 1, 1, uvR, uvB,
+
+            1, 1, 1, uvR, uvB,
+            0, 1, 1, uvL, uvB,
+            0, 0, 1, uvL, uvT
+        ]
+
+        let dataSize = vertexData.count * sizeofValue(vertexData[0])
+        var vertexBuffer = device_.newBufferWithBytes(vertexData, length: dataSize, options: nil)
+        renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, atIndex: 0)
+
+        // var projectionMatrix = Matrix4.makeOrthoLeft(0, right: 2048, bottom: 1536, top: 0, nearZ: 0.0, farZ: 20.0)
+        var projectionMatrix = Matrix4.makeOrthoLeft(-100, right: 100, bottom: 100, top: -100, nearZ: 0.01, farZ: 20.0)
+
+        var modelMatrix = Matrix4()
+        modelMatrix.translate(-1, y: -1, z: 0)
+        modelMatrix.scale(2, y: 2, z: 1)
+
+        var uniformBuffer = device_.newBufferWithLength(sizeof(Float) * ((Matrix4.numberOfElements() * 2) + 4), options: nil)
+        var bufferPointer = uniformBuffer?.contents()
+        memcpy(bufferPointer!, modelMatrix.raw(), UInt(sizeof(Float)*Matrix4.numberOfElements()))
+        memcpy(bufferPointer! + sizeof(Float)*Matrix4.numberOfElements(), projectionMatrix.raw(), UInt(sizeof(Float)*Matrix4.numberOfElements()))
+        renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, atIndex: 1)
+        renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: 6, instanceCount: 2)
+
+        // ---
+
+
+
         renderEncoder.endEncoding()
 
         // use completion handler to signal the semaphore when this frame is completed allowing the encoding of the next frame to proceed
         // use capture list to avoid any retain cycles if the command buffer gets retained anywhere besides this stack frame
         commandBuffer.addCompletedHandler{ [weak self] commandBuffer in
             if let strongSelf = self {
-                dispatch_semaphore_signal(strongSelf.inflightSemaphore)
+                dispatch_semaphore_signal(strongSelf.frameSignal_)
             }
             return
         }
 
-        // bufferIndex matches the current semaphore controled frame index to ensure writing occurs at the correct region in the vertex buffer
-        bufferIndex = (bufferIndex + 1) % MaxBuffers
+        // bufferIndex_ matches the current semaphore controled frame index to ensure writing occurs at the correct region in the vertex buffer
+        bufferIndex_ = (bufferIndex_ + 1) % MaxBuffers
 
         commandBuffer.presentDrawable(drawable)
         commandBuffer.commit()
     }
 
-    func update() {
+    class func defaultSampler(device: MTLDevice) -> MTLSamplerState
+    {
+        var pSamplerDescriptor:MTLSamplerDescriptor? = MTLSamplerDescriptor();
 
-        // vData is pointer to the MTLBuffer's Float data contents
-        let pData = vertexBuffer.contents()
-        let vData = UnsafeMutablePointer<Float>(pData + 256*bufferIndex)
-
-        // reset the vertices to default before adding animated offsets
-        vData.initializeFrom(vertexData)
-
-        // Animate triangle offsets
-        let lastTriVertex = 24
-        let vertexSize = 4
-        for j in 0..<MaxBuffers {
-            // update the animation offsets
-            xOffset[j] += xDelta[j]
-
-            if(xOffset[j] >= 1.0 || xOffset[j] <= -1.0) {
-                xDelta[j] = -xDelta[j]
-                xOffset[j] += xDelta[j]
-            }
-
-            yOffset[j] += yDelta[j]
-
-            if(yOffset[j] >= 1.0 || yOffset[j] <= -1.0) {
-                yDelta[j] = -yDelta[j]
-                yOffset[j] += yDelta[j]
-            }
-
-            // Update last triangle position with updated animated offsets
-            let pos = lastTriVertex + j*vertexSize
-            vData[pos] = xOffset[j]
-            vData[pos+1] = yOffset[j]
+        if let sampler = pSamplerDescriptor
+        {
+            sampler.minFilter             = MTLSamplerMinMagFilter.Nearest
+            sampler.magFilter             = MTLSamplerMinMagFilter.Nearest
+            sampler.mipFilter             = MTLSamplerMipFilter.Nearest
+            sampler.maxAnisotropy         = 1
+            sampler.sAddressMode          = MTLSamplerAddressMode.ClampToEdge
+            sampler.tAddressMode          = MTLSamplerAddressMode.ClampToEdge
+            sampler.rAddressMode          = MTLSamplerAddressMode.ClampToEdge
+            sampler.normalizedCoordinates = true
+            sampler.lodMinClamp           = 0
+            sampler.lodMaxClamp           = FLT_MAX
         }
+        else
+        {
+            println(">> ERROR: Failed creating a sampler descriptor!")
+        }
+        return device.newSamplerStateWithDescriptor(pSamplerDescriptor!)
     }
 }

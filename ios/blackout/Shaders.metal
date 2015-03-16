@@ -10,25 +10,43 @@
 
 using namespace metal;
 
-struct VertexInOut
+struct PackedVertex
 {
-    float4  position [[position]];
-    float4  color;
+    packed_float3 pos;
+    packed_float2 tex;
 };
 
-vertex VertexInOut passThroughVertex(uint vid [[ vertex_id ]],
-                                     constant packed_float4* position  [[ buffer(0) ]],
-                                     constant packed_float4* color    [[ buffer(1) ]])
+struct PosTextureVertex
 {
-    VertexInOut outVertex;
-    
-    outVertex.position = position[vid];
-    outVertex.color    = color[vid];
-    
+    float4 pos [[position]];
+    float2 tex [[user(texturecoord)]];
+};
+
+struct Uniforms
+{
+    float4x4 modelMatrix;
+    float4x4 projectionMatrix;
+    float4 color;
+};
+
+vertex PosTextureVertex posTextureUColorVertex(const device PackedVertex* vertices [[ buffer(0) ]],
+                                               const device Uniforms&     uniforms [[ buffer(1) ]],
+                                               uint                       vid      [[ vertex_id ]])
+{
+    PackedVertex inVertex = vertices[vid];
+
+    PosTextureVertex outVertex;
+    //outVertex.pos = uniforms.projectionMatrix * uniforms.modelMatrix * float4(inVertex.pos, 1);
+    outVertex.pos = uniforms.modelMatrix * float4(inVertex.pos, 1);
+    //outVertex.pos = float4(inVertex.pos, 1);
+    outVertex.tex = float2(inVertex.tex);
     return outVertex;
 };
 
-fragment half4 passThroughFragment(VertexInOut inFrag [[stage_in]])
+fragment half4 posTextureUColorFragment(PosTextureVertex vert    [[ stage_in ]],
+                                        texture2d<half>  texture [[ texture(0) ]],
+                                        sampler          samp    [[ sampler(0) ]])
 {
-    return half4(inFrag.color);
+    half4 color = texture.sample(samp, vert.tex);
+    return color;
 };

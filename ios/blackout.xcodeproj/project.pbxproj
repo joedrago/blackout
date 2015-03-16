@@ -14,6 +14,13 @@
 		51186F031AB68BE6003CE949 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 51186F021AB68BE6003CE949 /* Images.xcassets */; };
 		51186F061AB68BE6003CE949 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 51186F041AB68BE6003CE949 /* LaunchScreen.xib */; };
 		51186F121AB68BE6003CE949 /* blackoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51186F111AB68BE6003CE949 /* blackoutTests.swift */; };
+		5177C4841AB77AC800763D6C /* MetalTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5177C4831AB77AC800763D6C /* MetalTexture.swift */; };
+		5177C48C1AB77B2700763D6C /* cards.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C4861AB77B2700763D6C /* cards.png */; };
+		5177C48D1AB77B2700763D6C /* chars.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C4871AB77B2700763D6C /* chars.png */; };
+		5177C48E1AB77B2700763D6C /* darkforest.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C4881AB77B2700763D6C /* darkforest.png */; };
+		5177C48F1AB77B2700763D6C /* howto1.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C4891AB77B2700763D6C /* howto1.png */; };
+		5177C4901AB77B2700763D6C /* howto2.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C48A1AB77B2700763D6C /* howto2.png */; };
+		5177C4911AB77B2700763D6C /* howto3.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C48B1AB77B2700763D6C /* howto3.png */; };
 		51B8FB491AB6C0A0006E30F7 /* Matrix4.m in Sources */ = {isa = PBXBuildFile; fileRef = 51B8FB481AB6C0A0006E30F7 /* Matrix4.m */; };
 		51E646331AB6AEF9003C8DFF /* script.js in Resources */ = {isa = PBXBuildFile; fileRef = 51E646321AB6AEF9003C8DFF /* script.js */; };
 /* End PBXBuildFile section */
@@ -40,6 +47,13 @@
 		51186F0B1AB68BE6003CE949 /* blackoutTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = blackoutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		51186F101AB68BE6003CE949 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		51186F111AB68BE6003CE949 /* blackoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = blackoutTests.swift; sourceTree = "<group>"; };
+		5177C4831AB77AC800763D6C /* MetalTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalTexture.swift; sourceTree = "<group>"; };
+		5177C4861AB77B2700763D6C /* cards.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = cards.png; path = ../../res/raw/cards.png; sourceTree = "<group>"; };
+		5177C4871AB77B2700763D6C /* chars.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = chars.png; path = ../../res/raw/chars.png; sourceTree = "<group>"; };
+		5177C4881AB77B2700763D6C /* darkforest.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = darkforest.png; path = ../../res/raw/darkforest.png; sourceTree = "<group>"; };
+		5177C4891AB77B2700763D6C /* howto1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = howto1.png; path = ../../res/raw/howto1.png; sourceTree = "<group>"; };
+		5177C48A1AB77B2700763D6C /* howto2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = howto2.png; path = ../../res/raw/howto2.png; sourceTree = "<group>"; };
+		5177C48B1AB77B2700763D6C /* howto3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = howto3.png; path = ../../res/raw/howto3.png; sourceTree = "<group>"; };
 		51B8FB461AB6C09F006E30F7 /* blackout-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "blackout-Bridging-Header.h"; sourceTree = "<group>"; };
 		51B8FB471AB6C0A0006E30F7 /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix4.h; sourceTree = "<group>"; };
 		51B8FB481AB6C0A0006E30F7 /* Matrix4.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Matrix4.m; sourceTree = "<group>"; };
@@ -85,6 +99,8 @@
 		51186EF61AB68BE6003CE949 /* blackout */ = {
 			isa = PBXGroup;
 			children = (
+				5177C4851AB77B1800763D6C /* textures */,
+				5177C4831AB77AC800763D6C /* MetalTexture.swift */,
 				51B8FB471AB6C0A0006E30F7 /* Matrix4.h */,
 				51B8FB481AB6C0A0006E30F7 /* Matrix4.m */,
 				51E646321AB6AEF9003C8DFF /* script.js */,
@@ -123,6 +139,19 @@
 				51186F101AB68BE6003CE949 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		5177C4851AB77B1800763D6C /* textures */ = {
+			isa = PBXGroup;
+			children = (
+				5177C4861AB77B2700763D6C /* cards.png */,
+				5177C4871AB77B2700763D6C /* chars.png */,
+				5177C4881AB77B2700763D6C /* darkforest.png */,
+				5177C4891AB77B2700763D6C /* howto1.png */,
+				5177C48A1AB77B2700763D6C /* howto2.png */,
+				5177C48B1AB77B2700763D6C /* howto3.png */,
+			);
+			name = textures;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -206,9 +235,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				51186F011AB68BE6003CE949 /* Main.storyboard in Resources */,
+				5177C48E1AB77B2700763D6C /* darkforest.png in Resources */,
+				5177C48C1AB77B2700763D6C /* cards.png in Resources */,
 				51E646331AB6AEF9003C8DFF /* script.js in Resources */,
+				5177C48D1AB77B2700763D6C /* chars.png in Resources */,
 				51186F061AB68BE6003CE949 /* LaunchScreen.xib in Resources */,
 				51186F031AB68BE6003CE949 /* Images.xcassets in Resources */,
+				5177C4911AB77B2700763D6C /* howto3.png in Resources */,
+				5177C4901AB77B2700763D6C /* howto2.png in Resources */,
+				5177C48F1AB77B2700763D6C /* howto1.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +261,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5177C4841AB77AC800763D6C /* MetalTexture.swift in Sources */,
 				51186EFE1AB68BE6003CE949 /* Shaders.metal in Sources */,
 				51B8FB491AB6C0A0006E30F7 /* Matrix4.m in Sources */,
 				51186EFC1AB68BE6003CE949 /* GameViewController.swift in Sources */,

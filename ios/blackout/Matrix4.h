@@ -22,6 +22,13 @@
                                 nearZ:(float)nearZ
                                  farZ:(float)farZ;
 
++ (Matrix4 *)makeOrthoLeft:(float)left
+                 right:(float)right
+                bottom:(float)bottom
+                   top:(float)top
+                 nearZ:(float)nearZ
+                  farZ:(float)farZ;
+
 - (instancetype)init;
 - (instancetype)copy;
 
