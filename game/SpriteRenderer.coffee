@@ -18,9 +18,9 @@ class SpriteRenderer
       pausemenu: { texture: "pausemenu", x: 0, y: 0, w: 1280, h: 720 }
 
       # howto
-      howto1:    { texture: "howto1",  x: 0, y:  0, w: 1280, h: 720 }
-      howto2:    { texture: "howto2",  x: 0, y:  0, w: 1280, h: 720 }
-      howto3:    { texture: "howto3",  x: 0, y:  0, w: 1280, h: 720 }
+      howto1:    { texture: "howto1",  x: 0, y:  0, w: 1920, h: 1080 }
+      howto2:    { texture: "howto2",  x: 0, y:  0, w: 1920, h: 1080 }
+      howto3:    { texture: "howto3",  x: 0, y:  0, w: 1920, h: 1080 }
 
       # characters
       mario:     { texture: "chars", x:  20, y:   0, w: 151, h: 308 }
