@@ -577,8 +577,6 @@ class Blackout
 
   # Attempts to play card index i
   aiPlay: (currentPlayer, i) ->
-    if i == undefined
-      breakPlease()
     card = new Card(currentPlayer.hand[i])
     # @game.log "aiPlay: #{i}"
     reply = @play({'id':currentPlayer.id, 'index':i})
@@ -662,7 +660,9 @@ class Blackout
       @aiLog("about to call brain.play")
       character = aiCharacters[currentPlayer.charID]
       playedCard = @brains[character.brain].play.apply(this, [currentPlayer])
-      if not playedCard
+      if playedCard
+        return true
+      else
         @aiLog('brain failed to play card: picking random card to play')
         startingPoint = Math.floor(Math.random() * currentPlayer.hand.length)
         return @aiPlayLow(currentPlayer, startingPoint)
