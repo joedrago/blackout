@@ -22,7 +22,6 @@
 		5177C4911AB77B2700763D6C /* howto3.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C48B1AB77B2700763D6C /* howto3.png */; };
 		51B8FB491AB6C0A0006E30F7 /* Matrix4.m in Sources */ = {isa = PBXBuildFile; fileRef = 51B8FB481AB6C0A0006E30F7 /* Matrix4.m */; };
 		51E646331AB6AEF9003C8DFF /* script.js in Resources */ = {isa = PBXBuildFile; fileRef = 51E646321AB6AEF9003C8DFF /* script.js */; };
-		51F2DA831AB7FFAE00AFBD28 /* BlackoutSave.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51F2DA821AB7FFAE00AFBD28 /* BlackoutSave.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,7 +56,6 @@
 		51B8FB471AB6C0A0006E30F7 /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix4.h; sourceTree = "<group>"; };
 		51B8FB481AB6C0A0006E30F7 /* Matrix4.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Matrix4.m; sourceTree = "<group>"; };
 		51E646321AB6AEF9003C8DFF /* script.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = script.js; path = ../../res/raw/script.js; sourceTree = "<group>"; };
-		51F2DA821AB7FFAE00AFBD28 /* BlackoutSave.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BlackoutSave.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,7 +98,6 @@
 			isa = PBXGroup;
 			children = (
 				5177C4851AB77B1800763D6C /* textures */,
-				51F2DA821AB7FFAE00AFBD28 /* BlackoutSave.swift */,
 				5177C4831AB77AC800763D6C /* MetalTexture.swift */,
 				51B8FB471AB6C0A0006E30F7 /* Matrix4.h */,
 				51B8FB481AB6C0A0006E30F7 /* Matrix4.m */,
@@ -261,7 +258,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				5177C4841AB77AC800763D6C /* MetalTexture.swift in Sources */,
-				51F2DA831AB7FFAE00AFBD28 /* BlackoutSave.swift in Sources */,
 				51186EFE1AB68BE6003CE949 /* Shaders.metal in Sources */,
 				51B8FB491AB6C0A0006E30F7 /* Matrix4.m in Sources */,
 				51186EFC1AB68BE6003CE949 /* BlackoutGame.swift in Sources */,
