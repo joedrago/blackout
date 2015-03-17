@@ -6,7 +6,7 @@ import JavaScriptCore
 let MaxBuffers = 3
 let FastFramesOnUpdate = 6
 
-class GameViewController: UIViewController
+class BlackoutGame: UIViewController
 {
     // --------------------------------------------------------------------------------------------
     // Javascript guts
@@ -27,10 +27,10 @@ class GameViewController: UIViewController
     var lastRender_: NSDate?
     var textures_: [MetalTexture]! = nil
     var fastFrames_ = 0
-    lazy var samplerState_: MTLSamplerState? = GameViewController.defaultSampler(self.device_)
+    lazy var samplerState_: MTLSamplerState? = BlackoutGame.defaultSampler(self.device_)
 
     // --------------------------------------------------------------------------------------------
-    // GameViewController init mumbojumbo
+    // BlackoutGame init mumbojumbo
 
     // I think this just happens once on startup.
     override func viewDidLoad()
