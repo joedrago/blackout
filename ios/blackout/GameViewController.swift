@@ -4,6 +4,7 @@ import QuartzCore
 import JavaScriptCore
 
 let MaxBuffers = 3
+let FastFramesOnUpdate = 6
 
 class GameViewController: UIViewController
 {
@@ -22,8 +23,10 @@ class GameViewController: UIViewController
     let frameSignal_ = dispatch_semaphore_create(MaxBuffers)
     var bufferIndex_ = 0
     var viewMatrix_: Matrix4! = nil
-    var lastTick_: NSDate?
+    var lastUpdate_: NSDate?
+    var lastRender_: NSDate?
     var textures_: [MetalTexture]! = nil
+    var fastFrames_ = 0
     lazy var samplerState_: MTLSamplerState? = GameViewController.defaultSampler(self.device_)
 
     // --------------------------------------------------------------------------------------------
@@ -103,7 +106,8 @@ class GameViewController: UIViewController
         viewMatrix_.scale(1.0 / halfX, y: -1.0 / halfY, z: 1)
         viewMatrix_.translate(-1.0 * halfX, y: -1.0 * halfY, z: 0)
 
-        lastTick_ = NSDate()
+        lastUpdate_ = NSDate()
+        lastRender_ = NSDate()
     }
 
     func resize() {
@@ -143,12 +147,37 @@ class GameViewController: UIViewController
         }
     }
 
+    func kick()
+    {
+        println("KICK!")
+        fastFrames_ = FastFramesOnUpdate
+    }
+
     func render()
     {
+        var dtUpdate = lastUpdate_!.timeIntervalSinceNow * -1000.0
+        if (dtUpdate < 1000) && (fastFrames_ == 0)
+        {
+            return
+        }
+        lastUpdate_ = NSDate()
+        if fastFrames_ > 0
+        {
+            fastFrames_--
+        }
+
+        println("jsUpdate(\(dtUpdate))")
+        jsUpdate(dtUpdate)
+
+        // var dtRender = lastRender_!.timeIntervalSinceNow * -1000.0
+        // if(dtRender < 50) // 20 fps
+        // {
+        //     return
+        // }
+        // lastRender_ = NSDate()
+
         // use semaphore to encode 3 frames ahead
         dispatch_semaphore_wait(frameSignal_, DISPATCH_TIME_FOREVER)
-
-        jsUpdate()
 
         let commandBuffer = commandQueue_.commandBuffer()
         commandBuffer.label = "Frame command buffer"
@@ -225,6 +254,7 @@ class GameViewController: UIViewController
 
         let touchDownFunction = jsContext_.objectForKeyedSubscript("touchDown")
         let result = touchDownFunction.callWithArguments([x, y])
+        kick()
     }
 
     override func touchesMoved(touches: NSSet, withEvent event: UIEvent)
@@ -239,6 +269,7 @@ class GameViewController: UIViewController
 
         let touchMoveFunction = jsContext_.objectForKeyedSubscript("touchMove")
         let result = touchMoveFunction.callWithArguments([x, y])
+        kick()
     }
 
     override func touchesEnded(touches: NSSet, withEvent event: UIEvent)
@@ -253,6 +284,7 @@ class GameViewController: UIViewController
 
         let touchUpFunction = jsContext_.objectForKeyedSubscript("touchUp")
         let result = touchUpFunction.callWithArguments([x, y])
+        kick()
     }
 
     // --------------------------------------------------------------------------------------------
@@ -301,20 +333,20 @@ class GameViewController: UIViewController
         let result = startupFunction.callWithArguments([width, height])
     }
 
-    func jsUpdate()
+    func jsUpdate(dt: Double)
     {
-        var dt = lastTick_!.timeIntervalSinceNow * -1000.0
-        lastTick_ = NSDate()
-
         let updateFunction = jsContext_.objectForKeyedSubscript("update")
         let result = updateFunction.callWithArguments([dt])
-        // var updated: Bool = result.toBool()
-        // println("updated: \(updated)")
+        var updated: Bool = result.toBool()
+        if updated
+        {
+            kick()
+        }
     }
 
     func jsRender(renderEncoder: MTLRenderCommandEncoder)
     {
-        if lastTick_ == nil
+        if lastUpdate_ == nil
         {
             return
         }
