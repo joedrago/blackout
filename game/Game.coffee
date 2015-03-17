@@ -35,7 +35,7 @@ class Game
       overlay:    { r:   0, g:   0, b:   0, a: 0.6 }
       mainmenu:   { r: 0.1, g: 0.1, b: 0.1, a:   1 }
       pausemenu:  { r: 0.1, g: 0.0, b: 0.1, a:   1 }
-      bid:        { r:   1, g: 0.5, b:   0, a: 0.5 }
+      bid:        { r:   0, g: 0.6, b:   0, a:   1 }
 
     @textures =
       "cards": 0
