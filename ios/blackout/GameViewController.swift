@@ -3,7 +3,7 @@ import Metal
 import QuartzCore
 import JavaScriptCore
 
-let MaxBuffers = 3
+let MaxBuffers = 1
 
 class GameViewController: UIViewController
 {
@@ -21,8 +21,9 @@ class GameViewController: UIViewController
     var pipelineState_: MTLRenderPipelineState! = nil
     let frameSignal_ = dispatch_semaphore_create(MaxBuffers)
     var bufferIndex_ = 0
+    var viewMatrix_: Matrix4! = nil
 
-    var texture_: MetalTexture! = nil
+    var textures_: [MetalTexture]! = nil
     lazy var samplerState_: MTLSamplerState? = GameViewController.defaultSampler(self.device_)
 
     // offsets used in animation
@@ -85,7 +86,7 @@ class GameViewController: UIViewController
         // println("updated: \(updated)")
     }
 
-    func jsRender()
+    func jsRender(renderEncoder: MTLRenderCommandEncoder)
     {
         let renderFunction = jsContext_.objectForKeyedSubscript("render")
         let result = renderFunction.callWithArguments([])
@@ -115,24 +116,65 @@ class GameViewController: UIViewController
 
             for quadIndex in 0 ... quadCount - 1
             {
-                let textureID: Int32 = doubles[index+0].intValue
-                let srcX:    Double = doubles[index +  1].doubleValue
-                let srcY:    Double = doubles[index +  2].doubleValue
-                let srcW:    Double = doubles[index +  3].doubleValue
-                let srcH:    Double = doubles[index +  4].doubleValue
-                let dstX:    Double = doubles[index +  5].doubleValue
-                let dstY:    Double = doubles[index +  6].doubleValue
-                let dstW:    Double = doubles[index +  7].doubleValue
-                let dstH:    Double = doubles[index +  8].doubleValue
-                let rot:     Double = doubles[index +  9].doubleValue
-                let anchorX: Double = doubles[index + 10].doubleValue
-                let anchorY: Double = doubles[index + 11].doubleValue
-                let red:     Double = doubles[index + 12].doubleValue
-                let green:   Double = doubles[index + 13].doubleValue
-                let blue:    Double = doubles[index + 14].doubleValue
-                let alpha:   Double = doubles[index + 15].doubleValue
+                let textureID: Int = Int(doubles[index+0].intValue)
+                let srcX:    Float  = Float(doubles[index +  1].doubleValue)
+                let srcY:    Float  = Float(doubles[index +  2].doubleValue)
+                let srcW:    Float  = Float(doubles[index +  3].doubleValue)
+                let srcH:    Float  = Float(doubles[index +  4].doubleValue)
+                let dstX:    Float  = Float(doubles[index +  5].doubleValue)
+                let dstY:    Float  = Float(doubles[index +  6].doubleValue)
+                let dstW:    Float  = Float(doubles[index +  7].doubleValue)
+                let dstH:    Float  = Float(doubles[index +  8].doubleValue)
+                let rot:     Float  = Float(doubles[index +  9].doubleValue)
+                let anchorX: Float  = Float(doubles[index + 10].doubleValue)
+                let anchorY: Float  = Float(doubles[index + 11].doubleValue)
+                let red:     Float  = Float(doubles[index + 12].doubleValue)
+                let green:   Float  = Float(doubles[index + 13].doubleValue)
+                let blue:    Float  = Float(doubles[index + 14].doubleValue)
+                let alpha:   Float  = Float(doubles[index + 15].doubleValue)
 
-                // println("rendering with textureID \(textureID) [\(srcX), \(srcY), \(srcW), \(srcH)] -> [\(dstX), \(dstY), \(dstW), \(dstH)]")
+                let texture = textures_[textureID]
+                renderEncoder.setFragmentTexture(texture.texture, atIndex: 0)
+                if let samplerState = samplerState_ {
+                    renderEncoder.setFragmentSamplerState(samplerState, atIndex: 0)
+                }
+
+                let tw: Float = Float(texture.width);
+                let th: Float = Float(texture.height);
+                let uvL = srcX / tw;
+                let uvT = srcY / th;
+                let uvR = (srcX + srcW) / tw;
+                let uvB = (srcY + srcH) / th;
+
+                let anchorOffsetX: Float = anchorX * dstW * -1.0;
+                let anchorOffsetY: Float = anchorY * dstH * -1.0;
+
+                var vertexData = [
+                    0, 0, 1, uvL, uvT,
+                    1, 0, 1, uvR, uvT,
+                    1, 1, 1, uvR, uvB,
+                    1, 1, 1, uvR, uvB,
+                    0, 1, 1, uvL, uvB,
+                    0, 0, 1, uvL, uvT
+                ]
+
+                let dataSize = vertexData.count * sizeofValue(vertexData[0])
+                var vertexBuffer = device_.newBufferWithBytes(vertexData, length: dataSize, options: nil)
+                renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, atIndex: 0)
+
+                var modelMatrix = viewMatrix_.copy()
+                modelMatrix.translate(dstX, y: dstY, z: 0)
+                modelMatrix.rotateAroundX(0, y: 0, z: rot)
+                modelMatrix.translate(anchorOffsetX, y: anchorOffsetY, z: 0)
+                modelMatrix.scale(dstW, y: dstH, z: 1)
+
+                var uniformBuffer = device_.newBufferWithLength(sizeof(Float) * ((Matrix4.numberOfElements() * 2) + 4), options: nil)
+                var bufferPointer = uniformBuffer?.contents()
+                memcpy(bufferPointer!, modelMatrix.raw(), UInt(sizeof(Float)*Matrix4.numberOfElements()))
+                let floats: [Float] = [red, green, blue, alpha]
+                memcpy(bufferPointer! + sizeof(Float)*Matrix4.numberOfElements(), floats, UInt(sizeof(Float)*4)) // uniform color
+                renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, atIndex: 1)
+                renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: 6, instanceCount: 2)
 
                 index += 16
             }
@@ -167,6 +209,13 @@ class GameViewController: UIViewController
         pipelineStateDescriptor.vertexFunction = vertexProgram
         pipelineStateDescriptor.fragmentFunction = fragmentProgram
         pipelineStateDescriptor.colorAttachments[0].pixelFormat = .BGRA8Unorm
+        pipelineStateDescriptor.colorAttachments[0].blendingEnabled = true
+        pipelineStateDescriptor.colorAttachments[0].rgbBlendOperation = MTLBlendOperation.Add;
+        pipelineStateDescriptor.colorAttachments[0].alphaBlendOperation = MTLBlendOperation.Add;
+        pipelineStateDescriptor.colorAttachments[0].sourceRGBBlendFactor = MTLBlendFactor.SourceAlpha;
+        pipelineStateDescriptor.colorAttachments[0].sourceAlphaBlendFactor = MTLBlendFactor.SourceAlpha;
+        pipelineStateDescriptor.colorAttachments[0].destinationRGBBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
+        pipelineStateDescriptor.colorAttachments[0].destinationAlphaBlendFactor = MTLBlendFactor.OneMinusSourceAlpha;
 
         var pipelineError : NSError?
         pipelineState_ = device_.newRenderPipelineStateWithDescriptor(pipelineStateDescriptor, error: &pipelineError)
@@ -174,8 +223,17 @@ class GameViewController: UIViewController
             println("Failed to create pipeline state, error \(pipelineError)")
         }
 
-        texture_ = MetalTexture(resourceName: "cards", ext: "png", mipmapped: true)
-        texture_.loadTexture(device: device_, commandQ: commandQueue_, flip: false)
+        textures_ = []
+        textures_.append(MetalTexture(resourceName: "cards", ext: "png", mipmapped: true))
+        textures_.append(MetalTexture(resourceName: "darkforest", ext: "png", mipmapped: true))
+        textures_.append(MetalTexture(resourceName: "chars", ext: "png", mipmapped: true))
+        textures_.append(MetalTexture(resourceName: "howto1", ext: "png", mipmapped: true))
+        textures_.append(MetalTexture(resourceName: "howto2", ext: "png", mipmapped: true))
+        textures_.append(MetalTexture(resourceName: "howto3", ext: "png", mipmapped: true))
+        for texture in textures_
+        {
+            texture.loadTexture(device: device_, commandQ: commandQueue_, flip: true)
+        }
 
         // // generate a large enough buffer to allow streaming vertices for 3 semaphore controlled frames
         // vertexBuffer = device_.newBufferWithLength(ConstantBufferSize, options: nil)
@@ -197,7 +255,11 @@ class GameViewController: UIViewController
         println("size: \(w), \(h)")
         jsStartup(w, h)
 
-        var modelTransformationMatrix = Matrix4()
+        viewMatrix_ = Matrix4()
+        let halfX: Float = 2048.0 / 2.0
+        let halfY: Float = 1536.0 / 2.0
+        viewMatrix_.scale(1.0 / halfX, y: -1.0 / halfY, z: 1)
+        viewMatrix_.translate(-1.0 * halfX, y: -1.0 * halfY, z: 0)
     }
 
     func resize() {
@@ -237,7 +299,6 @@ class GameViewController: UIViewController
         dispatch_semaphore_wait(frameSignal_, DISPATCH_TIME_FOREVER)
 
         jsUpdate()
-        jsRender()
 
         let commandBuffer = commandQueue_.commandBuffer()
         commandBuffer.label = "Frame command buffer"
@@ -258,48 +319,46 @@ class GameViewController: UIViewController
         // everything between these markers needs to happen multiple times
         // ---
 
-        renderEncoder.setFragmentTexture(texture_.texture, atIndex: 0)
-        if let samplerState = samplerState_ {
-            renderEncoder.setFragmentSamplerState(samplerState, atIndex: 0)
-        }
+        jsRender(renderEncoder)
 
-        let uvL: Float = 0;
-        let uvT: Float = 0;
-        let uvR: Float = 1;
-        let uvB: Float = 1;
+        // renderEncoder.setFragmentTexture(textures_[1].texture, atIndex: 0)
+        // if let samplerState = samplerState_ {
+        //     renderEncoder.setFragmentSamplerState(samplerState, atIndex: 0)
+        // }
 
-        var vertexData = Array<Float>()
-        vertexData += [
-            0, 0, 1, uvL, uvT,
-            1, 0, 1, uvR, uvT,
-            1, 1, 1, uvR, uvB,
+        // let uvL: Float = 0;
+        // let uvT: Float = 0;
+        // let uvR: Float = 1;
+        // let uvB: Float = 1;
 
-            1, 1, 1, uvR, uvB,
-            0, 1, 1, uvL, uvB,
-            0, 0, 1, uvL, uvT
-        ]
+        // var vertexData = Array<Float>()
+        // vertexData += [
+        //     0, 0, 1, uvL, uvT,
+        //     1, 0, 1, uvR, uvT,
+        //     1, 1, 1, uvR, uvB,
 
-        let dataSize = vertexData.count * sizeofValue(vertexData[0])
-        var vertexBuffer = device_.newBufferWithBytes(vertexData, length: dataSize, options: nil)
-        renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, atIndex: 0)
+        //     1, 1, 1, uvR, uvB,
+        //     0, 1, 1, uvL, uvB,
+        //     0, 0, 1, uvL, uvT
+        // ]
 
-        // var projectionMatrix = Matrix4.makeOrthoLeft(0, right: 2048, bottom: 1536, top: 0, nearZ: 0.0, farZ: 20.0)
-        var projectionMatrix = Matrix4.makeOrthoLeft(-100, right: 100, bottom: 100, top: -100, nearZ: 0.01, farZ: 20.0)
+        // let dataSize = vertexData.count * sizeofValue(vertexData[0])
+        // var vertexBuffer = device_.newBufferWithBytes(vertexData, length: dataSize, options: nil)
+        // renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, atIndex: 0)
 
-        var modelMatrix = Matrix4()
-        modelMatrix.translate(-1, y: -1, z: 0)
-        modelMatrix.scale(2, y: 2, z: 1)
+        // var modelMatrix = viewMatrix_.copy()
+        // modelMatrix.translate(100, y: 100, z: 0)
+        // modelMatrix.rotateAroundX(0, y: 0, z: 3.14 / 3.0)
+        // modelMatrix.translate(-100, y: -100, z: 0)
+        // modelMatrix.scale(200, y: 200, z: 1)
 
-        var uniformBuffer = device_.newBufferWithLength(sizeof(Float) * ((Matrix4.numberOfElements() * 2) + 4), options: nil)
-        var bufferPointer = uniformBuffer?.contents()
-        memcpy(bufferPointer!, modelMatrix.raw(), UInt(sizeof(Float)*Matrix4.numberOfElements()))
-        memcpy(bufferPointer! + sizeof(Float)*Matrix4.numberOfElements(), projectionMatrix.raw(), UInt(sizeof(Float)*Matrix4.numberOfElements()))
-        renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, atIndex: 1)
-        renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: 6, instanceCount: 2)
-
-        // ---
-
-
+        // var uniformBuffer = device_.newBufferWithLength(sizeof(Float) * ((Matrix4.numberOfElements() * 2) + 4), options: nil)
+        // var bufferPointer = uniformBuffer?.contents()
+        // memcpy(bufferPointer!, modelMatrix.raw(), UInt(sizeof(Float)*Matrix4.numberOfElements()))
+        // let floats: [Float] = [1,1,1,1]
+        // memcpy(bufferPointer! + sizeof(Float)*Matrix4.numberOfElements(), floats, UInt(sizeof(Float)*4)) // uniform color
+        // renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, atIndex: 1)
+        // renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: 6, instanceCount: 2)
 
         renderEncoder.endEncoding()
 
