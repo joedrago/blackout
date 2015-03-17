@@ -5,6 +5,7 @@ import JavaScriptCore
 
 let MaxBuffers = 3
 let FastFramesOnUpdate = 6
+let SaveIntervalMs = 5000.0
 
 class BlackoutGame: UIViewController
 {
@@ -24,7 +25,7 @@ class BlackoutGame: UIViewController
     var bufferIndex_ = 0
     var viewMatrix_: Matrix4! = nil
     var lastUpdate_: NSDate?
-    var lastRender_: NSDate?
+    var lastSave_: NSDate?
     var textures_: [MetalTexture]! = nil
     var fastFrames_ = 0
     lazy var samplerState_: MTLSamplerState? = BlackoutGame.defaultSampler(self.device_)
@@ -107,7 +108,7 @@ class BlackoutGame: UIViewController
         viewMatrix_.translate(-1.0 * halfX, y: -1.0 * halfY, z: 0)
 
         lastUpdate_ = NSDate()
-        lastRender_ = NSDate()
+        lastSave_ = NSDate()
     }
 
     func resize() {
@@ -149,7 +150,7 @@ class BlackoutGame: UIViewController
 
     func kick()
     {
-        println("KICK!")
+        // println("KICK!")
         fastFrames_ = FastFramesOnUpdate
     }
 
@@ -166,15 +167,22 @@ class BlackoutGame: UIViewController
             fastFrames_--
         }
 
-        println("jsUpdate(\(dtUpdate))")
+        // println("jsUpdate(\(dtUpdate))")
         jsUpdate(dtUpdate)
 
-        // var dtRender = lastRender_!.timeIntervalSinceNow * -1000.0
-        // if(dtRender < 50) // 20 fps
-        // {
-        //     return
-        // }
-        // lastRender_ = NSDate()
+        var dtSave = lastSave_!.timeIntervalSinceNow * -1000.0
+        if(dtSave > SaveIntervalMs)
+        {
+            let saveFunction = jsContext_.objectForKeyedSubscript("save")
+            let result = saveFunction.callWithArguments([])
+            let state = result.toString()
+            if !state.isEmpty
+            {
+                // println("saving state: \(state)")
+                NSUserDefaults.standardUserDefaults().setObject(state, forKey: "state")
+            }
+            lastSave_ = NSDate()
+        }
 
         // use semaphore to encode 3 frames ahead
         dispatch_semaphore_wait(frameSignal_, DISPATCH_TIME_FOREVER)
@@ -331,6 +339,17 @@ class BlackoutGame: UIViewController
         println("about to call startup(\(width), \(height))")
         let startupFunction = jsContext_.objectForKeyedSubscript("startup")
         let result = startupFunction.callWithArguments([width, height])
+
+        if let state = NSUserDefaults.standardUserDefaults().objectForKey("state") as? String
+        {
+            println("Loaded state: \(state)")
+            let loadFunction = jsContext_.objectForKeyedSubscript("load")
+            let result = loadFunction.callWithArguments([state])
+        }
+        else
+        {
+            println("no state to load")
+        }
     }
 
     func jsUpdate(dt: Double)

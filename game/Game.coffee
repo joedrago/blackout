@@ -169,7 +169,7 @@ class Game
       @prepareGame()
 
   save: ->
-    @log "(CS) saving state"
+    # @log "(CS) saving state"
     state = {
       options: @options
     }
