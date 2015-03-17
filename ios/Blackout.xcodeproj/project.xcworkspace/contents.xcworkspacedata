@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:blackout.xcodeproj">
+      location = "self:Blackout.xcodeproj">
    </FileRef>
 </Workspace>

@@ -24,7 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		51186EF41AB68BE6003CE949 /* blackout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = blackout.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		51186EF41AB68BE6003CE949 /* Blackout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51186EF81AB68BE6003CE949 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		51186EF91AB68BE6003CE949 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		51186EFB1AB68BE6003CE949 /* BlackoutGame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackoutGame.swift; sourceTree = "<group>"; };
@@ -66,7 +66,7 @@
 		51186EF51AB68BE6003CE949 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				51186EF41AB68BE6003CE949 /* blackout.app */,
+				51186EF41AB68BE6003CE949 /* Blackout.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -114,9 +114,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		51186EF31AB68BE6003CE949 /* blackout */ = {
+		51186EF31AB68BE6003CE949 /* Blackout */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 51186F151AB68BE6003CE949 /* Build configuration list for PBXNativeTarget "blackout" */;
+			buildConfigurationList = 51186F151AB68BE6003CE949 /* Build configuration list for PBXNativeTarget "Blackout" */;
 			buildPhases = (
 				51186EF01AB68BE6003CE949 /* Sources */,
 				51186EF11AB68BE6003CE949 /* Frameworks */,
@@ -126,9 +126,9 @@
 			);
 			dependencies = (
 			);
-			name = blackout;
+			name = Blackout;
 			productName = blackout;
-			productReference = 51186EF41AB68BE6003CE949 /* blackout.app */;
+			productReference = 51186EF41AB68BE6003CE949 /* Blackout.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -145,7 +145,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 51186EEF1AB68BE6003CE949 /* Build configuration list for PBXProject "blackout" */;
+			buildConfigurationList = 51186EEF1AB68BE6003CE949 /* Build configuration list for PBXProject "Blackout" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -158,7 +158,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				51186EF31AB68BE6003CE949 /* blackout */,
+				51186EF31AB68BE6003CE949 /* Blackout */,
 			);
 		};
 /* End PBXProject section */
@@ -296,7 +296,7 @@
 				INFOPLIST_FILE = blackout/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Blackout;
 				SWIFT_OBJC_BRIDGING_HEADER = "blackout/blackout-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -310,7 +310,7 @@
 				INFOPLIST_FILE = blackout/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Blackout;
 				SWIFT_OBJC_BRIDGING_HEADER = "blackout/blackout-Bridging-Header.h";
 			};
 			name = Release;
@@ -318,7 +318,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		51186EEF1AB68BE6003CE949 /* Build configuration list for PBXProject "blackout" */ = {
+		51186EEF1AB68BE6003CE949 /* Build configuration list for PBXProject "Blackout" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				51186F131AB68BE6003CE949 /* Debug */,
@@ -327,7 +327,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		51186F151AB68BE6003CE949 /* Build configuration list for PBXNativeTarget "blackout" */ = {
+		51186F151AB68BE6003CE949 /* Build configuration list for PBXNativeTarget "Blackout" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				51186F161AB68BE6003CE949 /* Debug */,
