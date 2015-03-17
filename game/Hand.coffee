@@ -6,8 +6,8 @@ CARD_IMAGE_OFF_X = 4
 CARD_IMAGE_OFF_Y = 4
 CARD_IMAGE_ADV_X = CARD_IMAGE_W
 CARD_IMAGE_ADV_Y = CARD_IMAGE_H
-CARD_RENDER_SCALE = 0.3                   # card height coefficient from the screen's height
-CARD_HAND_CURVE_DIST_FACTOR = 1.5         # factor with screen height to figure out center of arc. bigger number is less arc
+CARD_RENDER_SCALE = 0.4                   # card height coefficient from the screen's height
+CARD_HAND_CURVE_DIST_FACTOR = 3.5         # factor with screen height to figure out center of arc. bigger number is less arc
 CARD_HOLDING_ROT_ORDER = Math.PI / 12     # desired rotation of the card when being dragged around for ordering's sake
 CARD_HOLDING_ROT_PLAY = -1 * Math.PI / 12 # desired rotation of the card when being dragged around with intent to play
 CARD_PLAY_CEILING = 0.65                  # how much of the top of the screen represents "I want to play this" vs "I want to reorder"
@@ -49,14 +49,14 @@ class Hand
     @cardWidth  = Math.floor(@cardHeight * CARD_IMAGE_W / CARD_IMAGE_H)
     @cardHalfHeight = @cardHeight >> 1
     @cardHalfWidth  = @cardWidth >> 1
-    arcMargin = @cardWidth / 1.5
+    arcMargin = @cardWidth / 2
     arcVerticalBias = @cardHeight / 50
     bottomLeft  = { x: arcMargin,                y: arcVerticalBias + @game.height }
     bottomRight = { x: @game.width - arcMargin, y: arcVerticalBias + @game.height }
     @handCenter = { x: @game.width / 2,         y: arcVerticalBias + @game.height + (CARD_HAND_CURVE_DIST_FACTOR * @game.height) }
     @handAngle = findAngle(bottomLeft, @handCenter, bottomRight)
     @handDistance = calcDistance(bottomLeft, @handCenter)
-    @handAngleAdvance = @handAngle / 13
+    @handAngleAdvanceMax = @handAngle / 7 # never space the cards more than what they'd look like with this handsize
     @game.log "Hand distance #{@handDistance}, angle #{@handAngle} (screen height #{@game.height})"
 
   set: (cards) ->
@@ -205,22 +205,26 @@ class Hand
   calcPositions: (handSize) ->
     if @positionCache.hasOwnProperty(handSize)
       return @positionCache[handSize]
+    return [] if handSize == 0
 
-    angleSpread = @handAngleAdvance * handSize      # how much of the angle we plan on using
+    advance = @handAngle / handSize 
+    if advance > @handAngleAdvanceMax
+      advance = @handAngleAdvanceMax
+    angleSpread = advance * handSize                # how much of the angle we plan on using
     angleLeftover = @handAngle - angleSpread        # amount of angle we're not using, and need to pad sides with evenly
     currentAngle = -1 * (@handAngle / 2)            # move to the left side of our angle
     currentAngle += angleLeftover / 2               # ... and advance past half of the padding
-    currentAngle += @handAngleAdvance / 2           # ... and center the cards in the angle
+    currentAngle += advance / 2                     # ... and center the cards in the angle
 
     positions = []
     for i in [0...handSize]
       x = @handCenter.x - Math.cos((Math.PI / 2) + currentAngle) * @handDistance
       y = @handCenter.y - Math.sin((Math.PI / 2) + currentAngle) * @handDistance
-      currentAngle += @handAngleAdvance
+      currentAngle += advance
       positions.push {
         x: x
         y: y
-        r: currentAngle - @handAngleAdvance
+        r: currentAngle - advance
       }
 
     @positionCache[handSize] = positions
