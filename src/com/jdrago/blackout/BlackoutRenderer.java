@@ -39,6 +39,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     static private final int MAX_FPS = 30;
     static public  final int MIN_MS_PER_FRAME = 1000 / MAX_FPS;
     static private final int FRAME_COUNTER_INTERVAL_MS = 10 * 1000;
+    static private final int FAST_FRAMES_AFTER_UPDATED = 6;
 
     private static final int FLOAT_SIZE_BYTES = 4;
     private static final int INT_SIZE_BYTES = 4;
@@ -264,14 +265,14 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             v8_.executeVoidFunction(functionName, parameters);
             } finally { Trace.endSection(); }
 
-            fastRenderFrames_ = 3;
+            fastRenderFrames_ = FAST_FRAMES_AFTER_UPDATED;
         }
 
         V8Array parameters = new V8Array(v8_);
         parameters.push(dt);
         Trace.beginSection("update");
         if(v8_.executeBooleanFunction("update", parameters))
-            fastRenderFrames_ = 3;
+            fastRenderFrames_ = FAST_FRAMES_AFTER_UPDATED;
         Trace.endSection();
     }
 
