@@ -22,6 +22,7 @@ class GameViewController: UIViewController
     let frameSignal_ = dispatch_semaphore_create(MaxBuffers)
     var bufferIndex_ = 0
     var viewMatrix_: Matrix4! = nil
+    var lastTick_: NSDate?
 
     var textures_: [MetalTexture]! = nil
     lazy var samplerState_: MTLSamplerState? = GameViewController.defaultSampler(self.device_)
@@ -80,14 +81,22 @@ class GameViewController: UIViewController
 
     func jsUpdate()
     {
+        var dt = lastTick_!.timeIntervalSinceNow * -1000.0
+        lastTick_ = NSDate()
+
         let updateFunction = jsContext_.objectForKeyedSubscript("update")
-        let result = updateFunction.callWithArguments([16])
+        let result = updateFunction.callWithArguments([dt])
         // var updated: Bool = result.toBool()
         // println("updated: \(updated)")
     }
 
     func jsRender(renderEncoder: MTLRenderCommandEncoder)
     {
+        if lastTick_ == nil
+        {
+            return
+        }
+
         let renderFunction = jsContext_.objectForKeyedSubscript("render")
         let result = renderFunction.callWithArguments([])
         var doubles: NSArray = result.toArray()
@@ -260,6 +269,8 @@ class GameViewController: UIViewController
         let halfY: Float = 1536.0 / 2.0
         viewMatrix_.scale(1.0 / halfX, y: -1.0 / halfY, z: 1)
         viewMatrix_.translate(-1.0 * halfX, y: -1.0 * halfY, z: 0)
+
+        lastTick_ = NSDate()
     }
 
     func resize() {
