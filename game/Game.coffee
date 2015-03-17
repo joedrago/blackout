@@ -399,7 +399,8 @@ class Game
   renderHowto: ->
     howtoTexture = "howto#{@howto}"
     @log "rendering #{howtoTexture}"
-    @spriteRenderer.render howtoTexture, 0, 0, @width, @height, 0, 0, 0, @colors.white
+    @spriteRenderer.render "solid", 0, 0, @width, @height, 0, 0, 0, @colors.black
+    @spriteRenderer.render howtoTexture, 0, 0, @width, @aaHeight, 0, 0, 0, @colors.white
     arrowWidth = @width / 20
     arrowOffset = arrowWidth * 4
     color = if @howto == 1 then @colors.arrowclose else @colors.arrow
