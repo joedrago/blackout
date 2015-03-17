@@ -18,7 +18,9 @@ class Game
     @center =
       x: @width / 2
       y: @height / 2
-    @pauseButtonSize = @height / 15
+    @aaHeight = @width * 9 / 16
+    console.log "height: #{@height}. height if screen was 16:9 (aspect adjusted): #{@aaHeight}"
+    @pauseButtonSize = @aaHeight / 15
     @colors =
       white:      { r:   1, g:   1, b:   1, a:   1 }
       black:      { r:   0, g:   0, b:   0, a:   1 }
@@ -52,8 +54,8 @@ class Game
     @renderCommands = []
 
     @bid = 0
-    @bidButtonSize = @height / 8
-    @bidTextSize = @height / 6
+    @bidButtonSize = @aaHeight / 8
+    @bidTextSize = @aaHeight / 6
     bidButtonDistance = @bidButtonSize * 3
     @bidButtonY = @center.y - (@bidButtonSize)
     @bidUI = #(@game, @spriteNames, @font, @textHeight, @x, @y, @text, @cb)
@@ -195,8 +197,8 @@ class Game
     @prepareGame()
 
   prepareGame: ->
-    @hand = new Hand this, @width, @height
-    @pile = new Pile this, @width, @height, @hand
+    @hand = new Hand this
+    @pile = new Pile this, @hand
     @hand.set @blackout.players[0].hand
 
   makeHand: (index) ->
@@ -419,9 +421,9 @@ class Game
     # background
     @spriteRenderer.render "solid", 0, 0, @width, @height, 0, 0, 0, @colors.background
 
-    textHeight = @height / 30
+    textHeight = @aaHeight / 30
     textPadding = textHeight / 5
-    characterHeight = @height / 5
+    characterHeight = @aaHeight / 5
     scoreHeight = textHeight
 
     # Log
@@ -466,7 +468,7 @@ class Game
 
     if (@blackout.state == State.POSTGAMESUMMARY) and @pile.resting()
       lines = @gameOverText()
-      gameOverSize = @height / 8
+      gameOverSize = @aaHeight / 8
       gameOverY = @center.y
       if lines.length > 1
         gameOverY -= (gameOverSize >> 1)
@@ -475,7 +477,7 @@ class Game
         gameOverY += gameOverSize
         @fontRenderer.render @font, gameOverSize, lines[1], @center.x, gameOverY, 0.5, 0.5, @colors.orange
 
-      restartQuitSize = @height / 12
+      restartQuitSize = @aaHeight / 12
       shadowDistance = restartQuitSize / 8
       @fontRenderer.render @font, restartQuitSize, "Restart", shadowDistance + @center.x / 2, shadowDistance + @height - restartQuitSize, 0.5, 1, @colors.black, =>
       @fontRenderer.render @font, restartQuitSize, "Restart", @center.x / 2, @height - restartQuitSize, 0.5, 1, @colors.gold, =>
@@ -485,7 +487,7 @@ class Game
         @blackout = null
 
     if (@blackout.state == State.ROUNDSUMMARY) and @pile.resting()
-      @fontRenderer.render @font, @height / 8, "Tap for next round ...", @center.x, @center.y, 0.5, 0.5, @colors.orange, =>
+      @fontRenderer.render @font, @aaHeight / 8, "Tap for next round ...", @center.x, @center.y, 0.5, 0.5, @colors.orange, =>
         if @blackout.next() == OK
           @hand.set @blackout.players[0].hand
 
@@ -494,7 +496,7 @@ class Game
       @bidUI.plus.render()
       @fontRenderer.render @font, @bidTextSize, "#{@bid}", @center.x, @bidButtonY - (@bidTextSize * 0.1), 0.5, 0.5, @colors.white, =>
         @attemptBid()
-      bidButtonHeight = @height / 12
+      bidButtonHeight = @aaHeight / 12
       bidSize = @fontRenderer.size(@font, bidButtonHeight, "Bid")
       @spriteRenderer.render "solid", @center.x, (@bidButtonY + @bidTextSize) + (bidSize.h * 0.2), bidSize.w * 3, bidSize.h * 1.5, 0, 0.5, 0.5, @colors.bid, =>
         @attemptBid()

@@ -29,7 +29,7 @@ calcDistanceSquared = (x0, y0, x1, y1) ->
   return Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2)
 
 class Hand
-  constructor: (@game, @screenWidth, @screenHeight) ->
+  constructor: (@game) ->
     @cards = []
     @anims = {}
     @positionCache = {}
@@ -43,21 +43,21 @@ class Hand
     @cardSpeed =
       r: Math.PI * 2
       s: 2.5
-      t: 2 * @screenWidth
-    @playCeiling = CARD_PLAY_CEILING * @screenHeight
-    @cardHeight = Math.floor(@screenHeight * CARD_RENDER_SCALE)
+      t: 2 * @game.width
+    @playCeiling = CARD_PLAY_CEILING * @game.height
+    @cardHeight = Math.floor(@game.height * CARD_RENDER_SCALE)
     @cardWidth  = Math.floor(@cardHeight * CARD_IMAGE_W / CARD_IMAGE_H)
     @cardHalfHeight = @cardHeight >> 1
     @cardHalfWidth  = @cardWidth >> 1
     arcMargin = @cardWidth / 1.5
     arcVerticalBias = @cardHeight / 50
-    bottomLeft  = { x: arcMargin,                y: arcVerticalBias + @screenHeight }
-    bottomRight = { x: @screenWidth - arcMargin, y: arcVerticalBias + @screenHeight }
-    @handCenter = { x: @screenWidth / 2,         y: arcVerticalBias + @screenHeight + (CARD_HAND_CURVE_DIST_FACTOR * @screenHeight) }
+    bottomLeft  = { x: arcMargin,                y: arcVerticalBias + @game.height }
+    bottomRight = { x: @game.width - arcMargin, y: arcVerticalBias + @game.height }
+    @handCenter = { x: @game.width / 2,         y: arcVerticalBias + @game.height + (CARD_HAND_CURVE_DIST_FACTOR * @game.height) }
     @handAngle = findAngle(bottomLeft, @handCenter, bottomRight)
     @handDistance = calcDistance(bottomLeft, @handCenter)
     @handAngleAdvance = @handAngle / 13
-    @game.log "Hand distance #{@handDistance}, angle #{@handAngle} (screen height #{@screenHeight})"
+    @game.log "Hand distance #{@handDistance}, angle #{@handAngle} (screen height #{@game.height})"
 
   set: (cards) ->
     @cards = cards.slice(0)
@@ -135,7 +135,7 @@ class Hand
     return if @cards.length < 2 # nothing to reorder
     positions = @calcPositions(@cards.length)
     closestIndex = 0
-    closestDist = @screenWidth * @screenHeight # something impossibly large
+    closestDist = @game.width * @game.height # something impossibly large
     for pos, index in positions
       dist = calcDistanceSquared(pos.x, pos.y, @dragX, @dragY)
       if closestDist > dist

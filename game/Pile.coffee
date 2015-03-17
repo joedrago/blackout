@@ -3,7 +3,7 @@ Animation = require 'Animation'
 SETTLE_MS = 1000
 
 class Pile
-  constructor: (@game, @width, @height, @hand) ->
+  constructor: (@game, @hand) ->
     @pile = []
     @pileWho = []
     @trick = []
@@ -38,19 +38,19 @@ class Pile
       ]
     @throwLocations =
       2: [
-        { x: centerX, y: @height } # bottom
+        { x: centerX, y: @game.height } # bottom
         { x: centerX, y: 0 } # top
       ]
       3: [
-        { x: centerX, y: @height } # bottom
+        { x: centerX, y: @game.height } # bottom
         { x: 0, y: centerY + offsetY } # left
-        { x: @width, y: centerY + offsetY } # right
+        { x: @game.width, y: centerY + offsetY } # right
       ]
       4: [
-        { x: centerX, y: @height } # bottom
+        { x: centerX, y: @game.height } # bottom
         { x: 0, y: centerY + offsetY } # left
         { x: centerX, y: 0 } # top
-        { x: @width, y: centerY + offsetY } # right
+        { x: @game.width, y: centerY + offsetY } # right
       ]
 
   set: (pileID, pile, pileWho, trick, trickWho, trickTaker, @playerCount, firstThrow) ->
@@ -128,7 +128,7 @@ class Pile
       i = @trick.length - index - 1
       v = @trick[i]
       anim = @anims[v]
-      anim.req.x = (@width + @hand.cardHalfWidth) - ((index+1) * (@hand.cardWidth / 5))
+      anim.req.x = (@game.width + @hand.cardHalfWidth) - ((index+1) * (@hand.cardWidth / 5))
       anim.req.y = (@game.pauseButtonSize * 1.5) + @hand.cardHalfHeight
       anim.req.r = 0
       anim.req.s = 1
@@ -172,6 +172,6 @@ class Pile
     if (@trick.length > 0) and (@trickTaker.length > 0)
       anim = @anims[@trick[0]]
       if anim?
-        @game.fontRenderer.render @game.font, @height / 30, @trickTaker, @width, anim.cur.y + @hand.cardHalfHeight, 1, 0, @trickColor
+        @game.fontRenderer.render @game.font, @game.aaHeight / 30, @trickTaker, @game.width, anim.cur.y + @hand.cardHalfHeight, 1, 0, @trickColor
 
 module.exports = Pile
