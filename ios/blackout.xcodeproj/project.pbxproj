@@ -12,7 +12,6 @@
 		51186EFE1AB68BE6003CE949 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 51186EFD1AB68BE6003CE949 /* Shaders.metal */; };
 		51186F011AB68BE6003CE949 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51186EFF1AB68BE6003CE949 /* Main.storyboard */; };
 		51186F031AB68BE6003CE949 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 51186F021AB68BE6003CE949 /* Images.xcassets */; };
-		51186F121AB68BE6003CE949 /* blackoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51186F111AB68BE6003CE949 /* blackoutTests.swift */; };
 		5177C4841AB77AC800763D6C /* MetalTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5177C4831AB77AC800763D6C /* MetalTexture.swift */; };
 		5177C48C1AB77B2700763D6C /* cards.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C4861AB77B2700763D6C /* cards.png */; };
 		5177C48D1AB77B2700763D6C /* chars.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C4871AB77B2700763D6C /* chars.png */; };
@@ -24,16 +23,6 @@
 		51E646331AB6AEF9003C8DFF /* script.js in Resources */ = {isa = PBXBuildFile; fileRef = 51E646321AB6AEF9003C8DFF /* script.js */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		51186F0C1AB68BE6003CE949 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 51186EEC1AB68BE6003CE949 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 51186EF31AB68BE6003CE949;
-			remoteInfo = blackout;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
 		51186EF41AB68BE6003CE949 /* blackout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = blackout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51186EF81AB68BE6003CE949 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -42,9 +31,6 @@
 		51186EFD1AB68BE6003CE949 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		51186F001AB68BE6003CE949 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		51186F021AB68BE6003CE949 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		51186F0B1AB68BE6003CE949 /* blackoutTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = blackoutTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		51186F101AB68BE6003CE949 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		51186F111AB68BE6003CE949 /* blackoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = blackoutTests.swift; sourceTree = "<group>"; };
 		5177C4831AB77AC800763D6C /* MetalTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalTexture.swift; sourceTree = "<group>"; };
 		5177C4861AB77B2700763D6C /* cards.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = cards.png; path = ../../res/raw/cards.png; sourceTree = "<group>"; };
 		5177C4871AB77B2700763D6C /* chars.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = chars.png; path = ../../res/raw/chars.png; sourceTree = "<group>"; };
@@ -66,13 +52,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		51186F081AB68BE6003CE949 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -80,7 +59,6 @@
 			isa = PBXGroup;
 			children = (
 				51186EF61AB68BE6003CE949 /* blackout */,
-				51186F0E1AB68BE6003CE949 /* blackoutTests */,
 				51186EF51AB68BE6003CE949 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -89,7 +67,6 @@
 			isa = PBXGroup;
 			children = (
 				51186EF41AB68BE6003CE949 /* blackout.app */,
-				51186F0B1AB68BE6003CE949 /* blackoutTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -117,23 +94,6 @@
 			isa = PBXGroup;
 			children = (
 				51186EF81AB68BE6003CE949 /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		51186F0E1AB68BE6003CE949 /* blackoutTests */ = {
-			isa = PBXGroup;
-			children = (
-				51186F111AB68BE6003CE949 /* blackoutTests.swift */,
-				51186F0F1AB68BE6003CE949 /* Supporting Files */,
-			);
-			path = blackoutTests;
-			sourceTree = "<group>";
-		};
-		51186F0F1AB68BE6003CE949 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				51186F101AB68BE6003CE949 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -171,24 +131,6 @@
 			productReference = 51186EF41AB68BE6003CE949 /* blackout.app */;
 			productType = "com.apple.product-type.application";
 		};
-		51186F0A1AB68BE6003CE949 /* blackoutTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 51186F181AB68BE6003CE949 /* Build configuration list for PBXNativeTarget "blackoutTests" */;
-			buildPhases = (
-				51186F071AB68BE6003CE949 /* Sources */,
-				51186F081AB68BE6003CE949 /* Frameworks */,
-				51186F091AB68BE6003CE949 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				51186F0D1AB68BE6003CE949 /* PBXTargetDependency */,
-			);
-			name = blackoutTests;
-			productName = blackoutTests;
-			productReference = 51186F0B1AB68BE6003CE949 /* blackoutTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -200,10 +142,6 @@
 				TargetAttributes = {
 					51186EF31AB68BE6003CE949 = {
 						CreatedOnToolsVersion = 6.2;
-					};
-					51186F0A1AB68BE6003CE949 = {
-						CreatedOnToolsVersion = 6.2;
-						TestTargetID = 51186EF31AB68BE6003CE949;
 					};
 				};
 			};
@@ -221,7 +159,6 @@
 			projectRoot = "";
 			targets = (
 				51186EF31AB68BE6003CE949 /* blackout */,
-				51186F0A1AB68BE6003CE949 /* blackoutTests */,
 			);
 		};
 /* End PBXProject section */
@@ -243,13 +180,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		51186F091AB68BE6003CE949 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -265,23 +195,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		51186F071AB68BE6003CE949 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				51186F121AB68BE6003CE949 /* blackoutTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		51186F0D1AB68BE6003CE949 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 51186EF31AB68BE6003CE949 /* blackout */;
-			targetProxy = 51186F0C1AB68BE6003CE949 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		51186EFF1AB68BE6003CE949 /* Main.storyboard */ = {
@@ -401,40 +315,6 @@
 			};
 			name = Release;
 		};
-		51186F191AB68BE6003CE949 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = blackoutTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/blackout.app/blackout";
-			};
-			name = Debug;
-		};
-		51186F1A1AB68BE6003CE949 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = blackoutTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/blackout.app/blackout";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -452,15 +332,6 @@
 			buildConfigurations = (
 				51186F161AB68BE6003CE949 /* Debug */,
 				51186F171AB68BE6003CE949 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		51186F181AB68BE6003CE949 /* Build configuration list for PBXNativeTarget "blackoutTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				51186F191AB68BE6003CE949 /* Debug */,
-				51186F1A1AB68BE6003CE949 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
