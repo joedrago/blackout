@@ -68,11 +68,11 @@ class MetalTexture: NSObject {
 
     if (ismipmapped == true){
       generateMipMapLayersUsingSystemFunc(texture, device: device, commandQ: commandQ, block: { (buffer) -> Void in
-        println("mips generated")
+        // println("mips generated")
       })
     }
 
-    println("mipCount:\(texture.mipmapLevelCount)")
+    // println("mipCount:\(texture.mipmapLevelCount)")
   }
 
 
