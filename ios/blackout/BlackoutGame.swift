@@ -102,8 +102,8 @@ class BlackoutGame: UIViewController
 
         // Stash off my poor man's orthographic projection
         viewMatrix_ = Matrix4()
-        let halfX: Float = 2048.0 / 2.0
-        let halfY: Float = 1536.0 / 2.0
+        let halfX: Float = Float(w) / 2.0
+        let halfY: Float = Float(h) / 2.0
         viewMatrix_.scale(1.0 / halfX, y: -1.0 / halfY, z: 1)
         viewMatrix_.translate(-1.0 * halfX, y: -1.0 * halfY, z: 0)
 

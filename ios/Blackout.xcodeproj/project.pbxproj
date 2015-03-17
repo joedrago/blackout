@@ -12,6 +12,7 @@
 		51186EFE1AB68BE6003CE949 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 51186EFD1AB68BE6003CE949 /* Shaders.metal */; };
 		51186F011AB68BE6003CE949 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 51186EFF1AB68BE6003CE949 /* Main.storyboard */; };
 		51186F031AB68BE6003CE949 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 51186F021AB68BE6003CE949 /* Images.xcassets */; };
+		511EDD9C1AB892FC00F2949B /* black.png in Resources */ = {isa = PBXBuildFile; fileRef = 511EDD9B1AB892FC00F2949B /* black.png */; };
 		5177C4841AB77AC800763D6C /* MetalTexture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5177C4831AB77AC800763D6C /* MetalTexture.swift */; };
 		5177C48C1AB77B2700763D6C /* cards.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C4861AB77B2700763D6C /* cards.png */; };
 		5177C48D1AB77B2700763D6C /* chars.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C4871AB77B2700763D6C /* chars.png */; };
@@ -19,6 +20,7 @@
 		5177C48F1AB77B2700763D6C /* howto1.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C4891AB77B2700763D6C /* howto1.png */; };
 		5177C4901AB77B2700763D6C /* howto2.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C48A1AB77B2700763D6C /* howto2.png */; };
 		5177C4911AB77B2700763D6C /* howto3.png in Resources */ = {isa = PBXBuildFile; fileRef = 5177C48B1AB77B2700763D6C /* howto3.png */; };
+		517F31221AB897B4003DDE48 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 517F31201AB897B4003DDE48 /* LaunchScreen.xib */; };
 		51B8FB491AB6C0A0006E30F7 /* Matrix4.m in Sources */ = {isa = PBXBuildFile; fileRef = 51B8FB481AB6C0A0006E30F7 /* Matrix4.m */; };
 		51E646331AB6AEF9003C8DFF /* script.js in Resources */ = {isa = PBXBuildFile; fileRef = 51E646321AB6AEF9003C8DFF /* script.js */; };
 /* End PBXBuildFile section */
@@ -31,6 +33,7 @@
 		51186EFD1AB68BE6003CE949 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		51186F001AB68BE6003CE949 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		51186F021AB68BE6003CE949 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		511EDD9B1AB892FC00F2949B /* black.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = black.png; sourceTree = "<group>"; };
 		5177C4831AB77AC800763D6C /* MetalTexture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MetalTexture.swift; sourceTree = "<group>"; };
 		5177C4861AB77B2700763D6C /* cards.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = cards.png; path = ../../res/raw/cards.png; sourceTree = "<group>"; };
 		5177C4871AB77B2700763D6C /* chars.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = chars.png; path = ../../res/raw/chars.png; sourceTree = "<group>"; };
@@ -38,6 +41,7 @@
 		5177C4891AB77B2700763D6C /* howto1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = howto1.png; path = ../../res/raw/howto1.png; sourceTree = "<group>"; };
 		5177C48A1AB77B2700763D6C /* howto2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = howto2.png; path = ../../res/raw/howto2.png; sourceTree = "<group>"; };
 		5177C48B1AB77B2700763D6C /* howto3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = howto3.png; path = ../../res/raw/howto3.png; sourceTree = "<group>"; };
+		517F31211AB897B4003DDE48 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = blackout/Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		51B8FB461AB6C09F006E30F7 /* blackout-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "blackout-Bridging-Header.h"; sourceTree = "<group>"; };
 		51B8FB471AB6C0A0006E30F7 /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix4.h; sourceTree = "<group>"; };
 		51B8FB481AB6C0A0006E30F7 /* Matrix4.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Matrix4.m; sourceTree = "<group>"; };
@@ -58,6 +62,7 @@
 		51186EEB1AB68BE6003CE949 = {
 			isa = PBXGroup;
 			children = (
+				517F31201AB897B4003DDE48 /* LaunchScreen.xib */,
 				51186EF61AB68BE6003CE949 /* blackout */,
 				51186EF51AB68BE6003CE949 /* Products */,
 			);
@@ -74,6 +79,7 @@
 		51186EF61AB68BE6003CE949 /* blackout */ = {
 			isa = PBXGroup;
 			children = (
+				511EDD9B1AB892FC00F2949B /* black.png */,
 				5177C4851AB77B1800763D6C /* textures */,
 				5177C4831AB77AC800763D6C /* MetalTexture.swift */,
 				51B8FB471AB6C0A0006E30F7 /* Matrix4.h */,
@@ -177,6 +183,8 @@
 				5177C4911AB77B2700763D6C /* howto3.png in Resources */,
 				5177C4901AB77B2700763D6C /* howto2.png in Resources */,
 				5177C48F1AB77B2700763D6C /* howto1.png in Resources */,
+				517F31221AB897B4003DDE48 /* LaunchScreen.xib in Resources */,
+				511EDD9C1AB892FC00F2949B /* black.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,6 +212,14 @@
 				51186F001AB68BE6003CE949 /* Base */,
 			);
 			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		517F31201AB897B4003DDE48 /* LaunchScreen.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				517F31211AB897B4003DDE48 /* Base */,
+			);
+			name = LaunchScreen.xib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
