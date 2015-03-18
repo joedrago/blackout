@@ -6,7 +6,7 @@ CARD_IMAGE_OFF_X = 4
 CARD_IMAGE_OFF_Y = 4
 CARD_IMAGE_ADV_X = CARD_IMAGE_W
 CARD_IMAGE_ADV_Y = CARD_IMAGE_H
-CARD_RENDER_SCALE = 0.4                   # card height coefficient from the screen's height
+CARD_RENDER_SCALE = 0.35                  # card height coefficient from the screen's height
 CARD_HAND_CURVE_DIST_FACTOR = 3.5         # factor with screen height to figure out center of arc. bigger number is less arc
 CARD_HOLDING_ROT_ORDER = Math.PI / 12     # desired rotation of the card when being dragged around for ordering's sake
 CARD_HOLDING_ROT_PLAY = -1 * Math.PI / 12 # desired rotation of the card when being dragged around with intent to play
@@ -39,6 +39,14 @@ class Hand
     @dragX = 0
     @dragY = 0
 
+    textureIndex = @game.textures["cards"]
+    @textureSources = []
+    for v in [0...52]
+      rank = Math.floor(v % 13)
+      suit = Math.floor(v / 13)
+      @textureSources.push(@game.native.createTextureSource("card[#{v}]", textureIndex,
+        CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank), CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit), CARD_IMAGE_W, CARD_IMAGE_H))
+
     # render / anim metrics
     @cardSpeed =
       r: Math.PI * 2
@@ -56,7 +64,7 @@ class Hand
     @handCenter = { x: @game.width / 2,         y: arcVerticalBias + @game.height + (CARD_HAND_CURVE_DIST_FACTOR * @game.height) }
     @handAngle = findAngle(bottomLeft, @handCenter, bottomRight)
     @handDistance = calcDistance(bottomLeft, @handCenter)
-    @handAngleAdvanceMax = @handAngle / 7 # never space the cards more than what they'd look like with this handsize
+    @handAngleAdvanceMax = @handAngle / 9 # never space the cards more than what they'd look like with this handsize
     @game.log "Hand distance #{@handDistance}, angle #{@handAngle} (screen height #{@game.height})"
 
   set: (cards) ->
@@ -194,20 +202,16 @@ class Hand
 
   renderCard: (v, x, y, rot, scale, cb) ->
     rot = 0 if not rot
-    rank = Math.floor(v % 13)
-    suit = Math.floor(v / 13)
-
-    @game.drawImage "cards",
-    CARD_IMAGE_OFF_X + (CARD_IMAGE_ADV_X * rank), CARD_IMAGE_OFF_Y + (CARD_IMAGE_ADV_Y * suit), CARD_IMAGE_W, CARD_IMAGE_H,
-    x, y, @cardWidth * scale, @cardHeight * scale,
-    rot, 0.5, 0.5, 1,1,1,1, cb
+    @game.drawImage @textureSources[v],
+      x, y, @cardWidth * scale, @cardHeight * scale,
+      rot, 0.5, 0.5, 1,1,1,1, cb
 
   calcPositions: (handSize) ->
     if @positionCache.hasOwnProperty(handSize)
       return @positionCache[handSize]
     return [] if handSize == 0
 
-    advance = @handAngle / handSize 
+    advance = @handAngle / handSize
     if advance > @handAngleAdvanceMax
       advance = @handAngleAdvanceMax
     angleSpread = advance * handSize                # how much of the angle we plan on using

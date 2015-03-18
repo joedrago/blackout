@@ -10,6 +10,15 @@ Pile = require 'Pile'
 class Game
   constructor: (@native, @width, @height) ->
     @log("Game constructed: #{@width}x#{@height}")
+
+    @textures =
+      "cards": 0
+      "darkforest": 1
+      "chars": 2
+      "howto1": 3
+      "howto2": 4
+      "howto3": 5
+
     @fontRenderer = new FontRenderer this
     @spriteRenderer = new SpriteRenderer this
     @font = "darkforest"
@@ -38,14 +47,6 @@ class Game
       mainmenu:   { r: 0.1, g: 0.1, b: 0.1, a:   1 }
       pausemenu:  { r: 0.1, g: 0.0, b: 0.1, a:   1 }
       bid:        { r:   0, g: 0.6, b:   0, a:   1 }
-
-    @textures =
-      "cards": 0
-      "darkforest": 1
-      "chars": 2
-      "howto1": 3
-      "howto2": 4
-      "howto3": 5
 
     @blackout = null # don't start in a game
     @lastErr = ''
@@ -553,8 +554,8 @@ class Game
   # -----------------------------------------------------------------------------------------------------
   # rendering and zones
 
-  drawImage: (texture, sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a, cb) ->
-    @renderCommands.push @textures[texture], sx, sy, sw, sh, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a
+  drawImage: (textureSource, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a, cb) ->
+    @renderCommands.push textureSource, dx, dy, dw, dh, rot, anchorx, anchory, r, g, b, a
 
     if cb?
       # caller wants to remember where this was drawn, and wants to be called back if it is ever touched

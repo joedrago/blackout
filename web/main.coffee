@@ -34,14 +34,7 @@ class NativeApp
       "../res/raw/howto2.png"
       "../res/raw/howto3.png"
     ]
-
-    @game = new Game(this, @width, @height)
-
-    if typeof Storage != "undefined"
-      state = localStorage.getItem "state"
-      if state
-        # console.log "loading state: #{state}"
-        @game.load state
+    @textureSources = []
 
     @pendingImages = 0
     loadedTextures = []
@@ -56,14 +49,40 @@ class NativeApp
 
     @saveTimer = SAVE_TIMER_MS
 
+  runGame: ->
+    @game = new Game(this, @width, @height)
+
+    if typeof Storage != "undefined"
+      state = localStorage.getItem "state"
+      if state
+        # console.log "loading state: #{state}"
+        @game.load state
+
+    requestAnimationFrame => @update()
+
   onImageLoaded: (info) ->
     @pendingImages--
     if @pendingImages == 0
-      console.log 'All images loaded. Beginning render loop.'
-      requestAnimationFrame => @update()
+      console.log 'All images loaded. Creating game and starting render loop.'
+      @runGame()
 
   log: (s) ->
     console.log "NativeApp.log(): #{s}"
+
+  createTextureSource: (label, textureIndex, srcX, srcY, srcW, srcH) ->
+    texture = @textures[textureIndex]
+    src = {
+      label: label
+      textureIndex: textureIndex
+      srcX: srcX
+      srcY: srcY
+      srcW: srcW
+      srcH: srcH
+    }
+    @textureSources.push src
+    textureSource = @textureSources.length - 1
+    console.log "Created texture source #{textureSource}: #{JSON.stringify(src)}"
+    return textureSource
 
   updateSave: (dt) ->
     return if typeof Storage == "undefined"
@@ -148,7 +167,13 @@ class NativeApp
     imgComp.src = buff.toDataURL()
     return imgComp
 
-  drawImage: (textureIndex, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH, rot, anchorX, anchorY, r, g, b, a) ->
+  drawImage: (textureSource, dstX, dstY, dstW, dstH, rot, anchorX, anchorY, r, g, b, a) ->
+    src = @textureSources[textureSource]
+    srcX = src.srcX
+    srcY = src.srcY
+    srcW = src.srcW
+    srcH = src.srcH
+    textureIndex = src.textureIndex
     texture = @textures[textureIndex]
     if (r != 1) or (g != 1) or (b != 1)
       tintedTextureKey = "#{textureIndex}-#{r}-#{g}-#{b}"
@@ -181,7 +206,7 @@ class NativeApp
     i = 0
     n = renderCommands.length
     while (i < n)
-      drawCall = renderCommands.slice(i, i += 16)
+      drawCall = renderCommands.slice(i, i += 12)
       @drawImage.apply(this, drawCall)
 
     @updateSave(dt)

@@ -15,6 +15,10 @@ class FontRenderer
   constructor:  (@game) ->
     @white = { r: 1, g: 1, b: 1, a: 1 }
 
+    for fontName, font of fontmetrics
+      for glyphCode, glyph of font.glyphs
+        glyph.textureSource = @game.native.createTextureSource "#{fontName}[#{glyphCode}]", @game.textures[fontName], glyph.x, glyph.y, glyph.width, glyph.height
+
   size: (font, height, str) ->
     metrics = fontmetrics[font]
     return if not metrics
@@ -77,8 +81,7 @@ class FontRenderer
       code = ch.charCodeAt(0)
       glyph = metrics.glyphs[code]
       continue if not glyph
-      @game.drawImage font,
-      glyph.x, glyph.y, glyph.width, glyph.height,
+      @game.drawImage glyph.textureSource,
       currX + (glyph.xoffset * scale) + anchorOffsetX, y + (glyph.yoffset * scale) + anchorOffsetY, glyph.width * scale, glyph.height * scale,
       0, 0, 0,
       currentColor.r, currentColor.g, currentColor.b, currentColor.a, cb

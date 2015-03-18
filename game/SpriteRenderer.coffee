@@ -13,10 +13,6 @@ class SpriteRenderer
       arrowL:    { texture: "chars", x:  33, y: 858, w: 204, h: 156 }
       arrowR:    { texture: "chars", x: 239, y: 852, w: 208, h: 155 }
 
-      # menu backgrounds
-      mainmenu:  { texture: "mainmenu",  x: 0, y: 0, w: 1280, h: 720 }
-      pausemenu: { texture: "pausemenu", x: 0, y: 0, w: 1280, h: 720 }
-
       # howto
       howto1:    { texture: "howto1",  x: 0, y:  0, w: 1920, h: 1080 }
       howto2:    { texture: "howto2",  x: 0, y:  0, w: 1920, h: 1080 }
@@ -36,6 +32,10 @@ class SpriteRenderer
       shyguy:    { texture: "chars", x: 691, y: 322, w: 154, h: 308 }
       toadette:  { texture: "chars", x: 847, y: 322, w: 158, h: 308 }
 
+    for name, sprite of @sprites
+      @game.log "creating source for #{name}"
+      sprite.textureSource = @game.native.createTextureSource name, @game.textures[sprite.texture], sprite.x, sprite.y, sprite.w, sprite.h
+
   calcWidth: (spriteName, height) ->
     sprite = @sprites[spriteName]
     return 1 if not sprite
@@ -52,7 +52,7 @@ class SpriteRenderer
       dw = dh * sprite.w / sprite.h
     else if dh == 0
       dh = dw * sprite.h / sprite.w
-    @game.drawImage sprite.texture, sprite.x, sprite.y, sprite.w, sprite.h, dx, dy, dw, dh, rot, anchorx, anchory, color.r, color.g, color.b, color.a, cb
+    @game.drawImage sprite.textureSource, dx, dy, dw, dh, rot, anchorx, anchory, color.r, color.g, color.b, color.a, cb
     return
 
 module.exports = SpriteRenderer

@@ -8,6 +8,7 @@ game_ = null
 startup = (width, height) ->
   nativeApp =
     log: nativeLog
+    createTextureSource: nativeCreateTextureSource
   game_ = new Game(nativeApp, width, height)
   return
 
