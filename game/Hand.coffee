@@ -6,7 +6,7 @@ CARD_IMAGE_OFF_X = 4
 CARD_IMAGE_OFF_Y = 4
 CARD_IMAGE_ADV_X = CARD_IMAGE_W
 CARD_IMAGE_ADV_Y = CARD_IMAGE_H
-CARD_RENDER_SCALE = 0.4                   # card height coefficient from the screen's height
+CARD_RENDER_SCALE = 0.35                  # card height coefficient from the screen's height
 CARD_HAND_CURVE_DIST_FACTOR = 3.5         # factor with screen height to figure out center of arc. bigger number is less arc
 CARD_HOLDING_ROT_ORDER = Math.PI / 12     # desired rotation of the card when being dragged around for ordering's sake
 CARD_HOLDING_ROT_PLAY = -1 * Math.PI / 12 # desired rotation of the card when being dragged around with intent to play
@@ -207,7 +207,7 @@ class Hand
       return @positionCache[handSize]
     return [] if handSize == 0
 
-    advance = @handAngle / handSize 
+    advance = @handAngle / handSize
     if advance > @handAngleAdvanceMax
       advance = @handAngleAdvanceMax
     angleSpread = advance * handSize                # how much of the angle we plan on using

@@ -9,6 +9,7 @@ Pile = require 'Pile'
 
 class Game
   constructor: (@native, @width, @height) ->
+    @version = BUILD_TIMESTAMP
     @log("Game constructed: #{@width}x#{@height}")
     @fontRenderer = new FontRenderer this
     @spriteRenderer = new SpriteRenderer this
@@ -107,10 +108,10 @@ class Game
         if click
           @options.speedIndex = (@options.speedIndex + 1) % @optionMenus.speeds.length
         return @optionMenus.speeds[@options.speedIndex].text
-      (click) =>
-        if click
-          @options.sound = !@options.sound
-        return "Sound: #{if @options.sound then "Enabled" else "Disabled"}"
+      # (click) =>
+      #   if click
+      #     @options.sound = !@options.sound
+      #   return "Sound: #{if @options.sound then "Enabled" else "Disabled"}"
       (click) =>
         if click
           @newGame()
@@ -130,10 +131,10 @@ class Game
         if click
           @options.speedIndex = (@options.speedIndex + 1) % @optionMenus.speeds.length
         return @optionMenus.speeds[@options.speedIndex].text
-      (click) =>
-        if click
-          @options.sound = !@options.sound
-        return "Sound: #{if @options.sound then "Enabled" else "Disabled"}"
+      # (click) =>
+      #   if click
+      #     @options.sound = !@options.sound
+      #   return "Sound: #{if @options.sound then "Enabled" else "Disabled"}"
       (click) =>
         if click
           @blackout = null
@@ -422,7 +423,7 @@ class Game
     # background
     @spriteRenderer.render "solid", 0, 0, @width, @height, 0, 0, 0, @colors.background
 
-    textHeight = @aaHeight / 30
+    textHeight = @aaHeight / 25
     textPadding = textHeight / 5
     characterHeight = @aaHeight / 5
     scoreHeight = textHeight

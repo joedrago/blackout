@@ -45,6 +45,7 @@ buildGameBundle = (exitOnFailure, cb) ->
   shell exitOnFailure, """
     browserify -d -o #{outputResDir}/script.js -t coffeeify #{cmdline.sources}
     coffee -bcp ./#{gameSrcPath}/boot.coffee >> #{outputResDir}/script.js
+    echo BUILD_TIMESTAMP = \\"`date "+%Y/%m/%d %T"`\\" >> #{outputResDir}/script.js
   """, ->
     cb() if cb?
 
