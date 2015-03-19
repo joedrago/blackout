@@ -192,6 +192,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
 
         // Comment out this block to disable frame limiting
         {
+            Trace.beginSection("wait to limit FPS");
             if(dt < MIN_MS_PER_FRAME)
             {
                try
@@ -207,6 +208,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
             // post-sleep, update now and dt again
             now = System.currentTimeMillis();
             dt = now - lastTime_;
+            Trace.endSection();
         }
 
         lastTime_ = now;
@@ -258,12 +260,12 @@ public class BlackoutRenderer implements GLTextureView.Renderer
                 case MOVE: functionName = "touchMove"; break;
             };
 
-            Trace.beginSection("touch"); try {
+            Trace.beginSection("touch");
             V8Array parameters = new V8Array(v8_);
             parameters.push(touch.x);
             parameters.push(touch.y);
             v8_.executeVoidFunction(functionName, parameters);
-            } finally { Trace.endSection(); }
+            Trace.endSection();
 
             fastRenderFrames_ = FAST_FRAMES_AFTER_UPDATED;
         }
