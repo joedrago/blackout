@@ -250,49 +250,52 @@ class BlackoutGame: UIViewController
     // --------------------------------------------------------------------------------------------
     // Input handling
 
-    override func touchesBegan(touches: NSSet, withEvent event: UIEvent)
+    override func touchesBegan(touches: Set<NSObject>, withEvent event: UIEvent)
     {
-        let touch = touches.anyObject() as UITouch
-        let loc = touch.locationInView(self.view)
+        if let touch = touches.first as? UITouch {
+            let loc = touch.locationInView(self.view)
 
-        var w: Double = Double(metalLayer.drawableSize.width)
-        var h: Double = Double(metalLayer.drawableSize.height)
-        let x: Double = w * Double(loc.x) / Double(self.view.frame.width)
-        let y: Double = h * Double(loc.y) / Double(self.view.frame.height)
+            var w: Double = Double(metalLayer.drawableSize.width)
+            var h: Double = Double(metalLayer.drawableSize.height)
+            let x: Double = w * Double(loc.x) / Double(self.view.frame.width)
+            let y: Double = h * Double(loc.y) / Double(self.view.frame.height)
 
-        let touchDownFunction = jsContext_.objectForKeyedSubscript("touchDown")
-        let result = touchDownFunction.callWithArguments([x, y])
-        kick()
+            let touchDownFunction = jsContext_.objectForKeyedSubscript("touchDown")
+            let result = touchDownFunction.callWithArguments([x, y])
+            kick()
+        }
     }
 
-    override func touchesMoved(touches: NSSet, withEvent event: UIEvent)
+    override func touchesMoved(touches: Set<NSObject>, withEvent event: UIEvent)
     {
-        let touch = touches.anyObject() as UITouch
-        let loc = touch.locationInView(self.view)
+        if let touch = touches.first as? UITouch {
+            let loc = touch.locationInView(self.view)
 
-        var w: Double = Double(metalLayer.drawableSize.width)
-        var h: Double = Double(metalLayer.drawableSize.height)
-        let x: Double = w * Double(loc.x) / Double(self.view.frame.width)
-        let y: Double = h * Double(loc.y) / Double(self.view.frame.height)
+            var w: Double = Double(metalLayer.drawableSize.width)
+            var h: Double = Double(metalLayer.drawableSize.height)
+            let x: Double = w * Double(loc.x) / Double(self.view.frame.width)
+            let y: Double = h * Double(loc.y) / Double(self.view.frame.height)
 
-        let touchMoveFunction = jsContext_.objectForKeyedSubscript("touchMove")
-        let result = touchMoveFunction.callWithArguments([x, y])
-        kick()
+            let touchMoveFunction = jsContext_.objectForKeyedSubscript("touchMove")
+            let result = touchMoveFunction.callWithArguments([x, y])
+            kick()
+        }
     }
 
-    override func touchesEnded(touches: NSSet, withEvent event: UIEvent)
+    override func touchesEnded(touches: Set<NSObject>, withEvent event: UIEvent)
     {
-        let touch = touches.anyObject() as UITouch
-        let loc = touch.locationInView(self.view)
+        if let touch = touches.first as? UITouch {
+            let loc = touch.locationInView(self.view)
 
-        var w: Double = Double(metalLayer.drawableSize.width)
-        var h: Double = Double(metalLayer.drawableSize.height)
-        let x: Double = w * Double(loc.x) / Double(self.view.frame.width)
-        let y: Double = h * Double(loc.y) / Double(self.view.frame.height)
+            var w: Double = Double(metalLayer.drawableSize.width)
+            var h: Double = Double(metalLayer.drawableSize.height)
+            let x: Double = w * Double(loc.x) / Double(self.view.frame.width)
+            let y: Double = h * Double(loc.y) / Double(self.view.frame.height)
 
-        let touchUpFunction = jsContext_.objectForKeyedSubscript("touchUp")
-        let result = touchUpFunction.callWithArguments([x, y])
-        kick()
+            let touchUpFunction = jsContext_.objectForKeyedSubscript("touchUp")
+            let result = touchUpFunction.callWithArguments([x, y])
+            kick()
+        }
     }
 
     // --------------------------------------------------------------------------------------------
@@ -434,9 +437,9 @@ class BlackoutGame: UIViewController
 
                 var uniformBuffer = device_.newBufferWithLength(sizeof(Float) * ((Matrix4.numberOfElements() * 2) + 4), options: nil)
                 var bufferPointer = uniformBuffer?.contents()
-                memcpy(bufferPointer!, modelMatrix.raw(), UInt(sizeof(Float)*Matrix4.numberOfElements()))
+                memcpy(bufferPointer!, modelMatrix.raw(), Int(sizeof(Float)*Matrix4.numberOfElements()))
                 let floats: [Float] = [red, green, blue, alpha]
-                memcpy(bufferPointer! + sizeof(Float)*Matrix4.numberOfElements(), floats, UInt(sizeof(Float)*4)) // uniform color
+                memcpy(bufferPointer! + sizeof(Float)*Matrix4.numberOfElements(), floats, Int(sizeof(Float)*4)) // uniform color
                 renderEncoder.setVertexBuffer(uniformBuffer, offset: 0, atIndex: 1)
                 renderEncoder.drawPrimitives(.Triangle, vertexStart: 0, vertexCount: 6, instanceCount: 2)
 

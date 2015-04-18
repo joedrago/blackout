@@ -12,15 +12,15 @@ class MetalTexture: NSObject {
 
   var texture: MTLTexture!
   var target: MTLTextureType!
-  var width: UInt!
-  var height: UInt!
+  var width: Int
+  var height: Int
   var depth: UInt!
   var format: MTLPixelFormat!
   var hasAlpha: Bool!
   var path: String!
   var ismipmapped: Bool!
-  let bytesPerPixel:UInt! = 4
-  let bitsPerComponent:UInt! = 8
+  let bytesPerPixel:Int = 4
+  let bitsPerComponent:Int = 8
 
   //MARK: - Creation
   init(resourceName: String,ext: String, mipmapped:Bool){
@@ -48,6 +48,7 @@ class MetalTexture: NSObject {
     var rowBytes = width * bytesPerPixel
 
     var context = CGBitmapContextCreate(nil, width, height, bitsPerComponent, rowBytes, colorSpace, CGBitmapInfo(CGImageAlphaInfo.PremultipliedLast.rawValue))
+    
     var bounds = CGRect(x: 0, y: 0, width: Int(width), height: Int(height))
     CGContextClearRect(context, bounds)
 
@@ -83,7 +84,7 @@ class MetalTexture: NSObject {
 
 
     var region = MTLRegionMake2D(0, 0, Int(source.width), Int(source.height))
-    var pixelsData = malloc(UInt(source.width * source.height * 4))
+    var pixelsData = malloc(Int(source.width * source.height * 4))
     source.getBytes(pixelsData, bytesPerRow: Int(source.width) * 4, fromRegion: region, mipmapLevel: 0)
     copyTexture.replaceRegion(region, mipmapLevel: 0, withBytes: pixelsData, bytesPerRow: Int(source.width) * 4)
     return copyTexture
@@ -95,7 +96,7 @@ class MetalTexture: NSObject {
     var mipmappedHeight = max(Int(source.height)/q,1)
 
     var region = MTLRegionMake2D(0, 0, mipmappedWidth, mipmappedHeight)
-    var pixelsData = malloc(UInt(mipmappedHeight * mipmappedWidth * 4))
+    var pixelsData = malloc(Int(mipmappedHeight * mipmappedWidth * 4))
     source.getBytes(pixelsData, bytesPerRow: mipmappedWidth * 4, fromRegion: region, mipmapLevel: mipLvl)
     destination.replaceRegion(region, mipmapLevel: mipLvl, withBytes: pixelsData, bytesPerRow: mipmappedWidth * 4)
     free(pixelsData)
@@ -105,10 +106,10 @@ class MetalTexture: NSObject {
   func image(#mipLevel: Int) -> UIImage{
 
     var p = bytesForMipLevel(mipLevel: mipLevel)
-    var q = UInt(powf(2, Float(mipLevel)))
-    var mipmappedWidth = max(UInt(width) / q,1)
-    var mipmappedHeight = max(UInt(height) / q,1)
-    var rowBytes = UInt(mipmappedWidth * 4)
+    var q = Int(powf(2, Float(mipLevel)))
+    var mipmappedWidth = max(width / q,1)
+    var mipmappedHeight = max(height / q,1)
+    var rowBytes = mipmappedWidth * 4
 
     var colorSpace = CGColorSpaceCreateDeviceRGB()
 
@@ -131,7 +132,7 @@ class MetalTexture: NSObject {
     var rowBytes = Int(mipmappedWidth * 4)
 
     var region = MTLRegionMake2D(0, 0, mipmappedWidth, mipmappedHeight)
-    var pointer = malloc(UInt(rowBytes * mipmappedHeight))
+    var pointer = malloc(Int(rowBytes * mipmappedHeight))
     texture.getBytes(pointer, bytesPerRow: rowBytes, fromRegion: region, mipmapLevel: mipLevel)
     return pointer
   }
