@@ -383,7 +383,7 @@ class BlackoutGame: UIViewController
 
             for quadIndex in 0 ... quadCount - 1
             {
-                let textureID: Int = Int(doubles[index+0].intValue)
+                let textureID: Int = Int(doubles[index+0].doubleValue)
                 let srcX:    Float  = Float(doubles[index +  1].doubleValue)
                 let srcY:    Float  = Float(doubles[index +  2].doubleValue)
                 let srcW:    Float  = Float(doubles[index +  3].doubleValue)
