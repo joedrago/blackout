@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		510CEB371B0D090900BE300F /* faces.png in Resources */ = {isa = PBXBuildFile; fileRef = 510CEB361B0D090900BE300F /* faces.png */; };
 		51186EFA1AB68BE6003CE949 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51186EF91AB68BE6003CE949 /* AppDelegate.swift */; };
 		51186EFC1AB68BE6003CE949 /* BlackoutGame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51186EFB1AB68BE6003CE949 /* BlackoutGame.swift */; };
 		51186EFE1AB68BE6003CE949 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = 51186EFD1AB68BE6003CE949 /* Shaders.metal */; };
@@ -25,6 +26,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		510CEB361B0D090900BE300F /* faces.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = faces.png; path = ../../res/raw/faces.png; sourceTree = "<group>"; };
 		51186EF41AB68BE6003CE949 /* Blackout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blackout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		51186EF81AB68BE6003CE949 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		51186EF91AB68BE6003CE949 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -104,6 +106,7 @@
 		5177C4851AB77B1800763D6C /* textures */ = {
 			isa = PBXGroup;
 			children = (
+				510CEB361B0D090900BE300F /* faces.png */,
 				5177C4861AB77B2700763D6C /* cards.png */,
 				5177C4871AB77B2700763D6C /* chars.png */,
 				5177C4881AB77B2700763D6C /* darkforest.png */,
@@ -176,6 +179,7 @@
 				5177C48E1AB77B2700763D6C /* darkforest.png in Resources */,
 				5177C48C1AB77B2700763D6C /* cards.png in Resources */,
 				51E646331AB6AEF9003C8DFF /* script.js in Resources */,
+				510CEB371B0D090900BE300F /* faces.png in Resources */,
 				5177C48D1AB77B2700763D6C /* chars.png in Resources */,
 				51186F031AB68BE6003CE949 /* Images.xcassets in Resources */,
 				5177C4911AB77B2700763D6C /* howto3.png in Resources */,

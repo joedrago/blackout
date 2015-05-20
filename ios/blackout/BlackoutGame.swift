@@ -80,6 +80,7 @@ class BlackoutGame: UIViewController
         textures_.append(MetalTexture(resourceName: "howto1", ext: "png", mipmapped: true))
         textures_.append(MetalTexture(resourceName: "howto2", ext: "png", mipmapped: true))
         textures_.append(MetalTexture(resourceName: "howto3", ext: "png", mipmapped: true))
+        textures_.append(MetalTexture(resourceName: "faces",  ext: "png", mipmapped: true))
         for texture in textures_
         {
             texture.loadTexture(device: device_, commandQ: commandQueue_, flip: true)

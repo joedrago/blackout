@@ -47,6 +47,7 @@ class Game
       "howto1": 3
       "howto2": 4
       "howto3": 5
+      "faces": 6
 
     @blackout = null # don't start in a game
     @lastErr = ''

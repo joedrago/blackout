@@ -22,18 +22,16 @@ ShortSuitName = ['C', 'D', 'H', 'S']
 # AI Name Generator
 
 aiCharacterList = [
-  { id: "mario",    name: "Mario",      sprite: "mario",    brain: "normal" }
-  { id: "luigi",    name: "Luigi",      sprite: "luigi",    brain: "chaos" }
-  { id: "peach",    name: "Peach",      sprite: "peach",    brain: "normal" }
-  { id: "daisy",    name: "Daisy",      sprite: "daisy",    brain: "conservativeMoron" }
-  { id: "yoshi",    name: "Yoshi",      sprite: "yoshi",    brain: "normal" }
-  { id: "toad",     name: "Toad",       sprite: "toad",     brain: "normal" }
-  { id: "bowser",   name: "Bowser",     sprite: "bowser",   brain: "aggressiveMoron" }
-  { id: "bowserjr", name: "Bowser Jr",  sprite: "bowserjr", brain: "normal" }
-  { id: "koopa",    name: "Koopa",      sprite: "koopa",    brain: "normal" }
-  { id: "rosalina", name: "Rosalina",   sprite: "rosalina", brain: "normal" }
-  { id: "shyguy",   name: "Shyguy",     sprite: "shyguy",   brain: "normal" }
-  { id: "toadette", name: "Toadette",   sprite: "toadette", brain: "normal" }
+  { id: "joe",       name: "Joe",        sprite: "joe",      brain: "normal" }
+  { id: "chester",   name: "Chester",    sprite: "chester",  brain: "normal" }
+  { id: "vinnie",    name: "Vinnie",     sprite: "vinnie",   brain: "normal" }
+  { id: "sal",       name: "Sal",        sprite: "sal",      brain: "normal" }
+  { id: "jane",      name: "Jane",       sprite: "jane",     brain: "chaos"  }
+  { id: "patrick",   name: "Patrick",    sprite: "patrick",  brain: "normal" }
+  { id: "jimbo",     name: "Jimbo",      sprite: "jimbo",    brain: "normal" }
+  { id: "ryan",      name: "Ryan",       sprite: "ryan",     brain: "normal" }
+  { id: "brandon",   name: "Brandon",    sprite: "brandon",  brain: "normal" }
+  { id: "tori",      name: "Tori",       sprite: "tori",     brain: "normal" }
 ]
 
 aiCharacters = {}

@@ -47,7 +47,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
     private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
     private static final int[] QUAD_INDICES = {0, 1, 2, 2, 3, 0};
-    private static final int TEXTURE_COUNT = 6;
+    private static final int TEXTURE_COUNT = 7;
 
     private static final String VERTEX_SHADER =
             "uniform mat4 uMVPMatrix;\n" +
@@ -178,6 +178,7 @@ public class BlackoutRenderer implements GLTextureView.Renderer
         textures_[3] = loadPNG(R.raw.howto1);
         textures_[4] = loadPNG(R.raw.howto2);
         textures_[5] = loadPNG(R.raw.howto3);
+        textures_[6] = loadPNG(R.raw.faces);
     }
 
     // --------------------------------------------------------------------------------------------
