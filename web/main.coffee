@@ -33,6 +33,8 @@ class NativeApp
       "../res/raw/howto1.png"
       "../res/raw/howto2.png"
       "../res/raw/howto3.png"
+
+      "../res/raw/faces.png"
     ]
 
     @game = new Game(this, @width, @height)
